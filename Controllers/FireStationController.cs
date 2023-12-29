@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LSFD.Stations
+namespace LSFD.Controllers
 {
     internal class FireStationController
     {

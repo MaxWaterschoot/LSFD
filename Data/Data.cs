@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LSFD.MainClasses
+namespace LSFD.Data
 {
     internal class Data
     {

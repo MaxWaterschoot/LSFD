@@ -13,9 +13,4 @@
     <PackageReference Include="ScriptHookVDotNet3" Version="3.6.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Hose\" />
-    <Folder Include="Spawner\" />
-  </ItemGroup>
-
 </Project>
