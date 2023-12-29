@@ -1,0 +1,65 @@
+[
+  {
+    "StationName": "Rockford Hills Fire Station",
+    "Position": {
+      "X": -610.524,
+      "Y": -272.615,
+      "Z": 35.991
+    },
+    "Type": "LSFD Headquarters"
+  },
+  {
+    "StationName": "Davis Fire Station",
+    "Position": {
+      "X": 204.647,
+      "Y": -1654.986,
+      "Z": 29.803
+    },
+    "Type": "Fire Station"
+  },
+  {
+    "StationName": "El Burro Heights Fire Station",
+    "Position": {
+      "X": 1385.746,
+      "Y": 3614.220,
+      "Z": 38.957
+    },
+    "Type": "Fire Station"
+  },
+  {
+    "StationName": "Paleto Bay Fire Station",
+    "Position": {
+      "X": -366.312,
+      "Y": 6112.614,
+      "Z": 31.537
+    },
+    "Type": "Blaine County Fire Station 1"
+  },
+  {
+    "StationName": "Sandy Shores Fire Station",
+    "Position": {
+      "X": 1855.630,
+      "Y": 3683.206,
+      "Z": 34.267
+    },
+    "Type": "Fire Station"
+  },
+  {
+    "StationName": "Fort Zancudo Fire Station",
+    "Position": {
+      "X": -2356.651,
+      "Y": 3251.753,
+      "Z": 101.454
+    },
+    "Type": "Military Fire Station"
+  },
+  {
+    "StationName": "LSIA Fire Station",
+    "Position": {
+      "X": -1147.383,
+      "Y": -2833.938,
+      "Z": 13.945
+    },
+    "Type": "Airport Fire Station"
+  }
+]

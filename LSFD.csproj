@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="RAGENativeUI" Version="1.9.2" />
+    <PackageReference Include="RagePluginHook" Version="1.98.0" />
+    <PackageReference Include="ScriptHookVDotNet3" Version="3.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Hose\" />
+    <Folder Include="Spawner\" />
+  </ItemGroup>
+
+</Project>
