@@ -17,7 +17,6 @@ namespace LSFD
     public class EntryPoint
     {
         public static Player LocalPlayer = null;
-        public static List<Station> stations; 
         static void Main() 
         {
             Game.LogTrivialDebug("LSFD is loading");
