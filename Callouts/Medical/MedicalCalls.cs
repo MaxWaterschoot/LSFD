@@ -1,4 +1,5 @@
-﻿using LSFD.API;
+using LSFD.API;
+using LSFD.Core;
 using Rage;
 
 namespace LSFD.Callouts
@@ -35,10 +36,40 @@ namespace LSFD.Callouts
         {
             Vector3 position = CalloutPosition.Around2D(3f, 5f);
             patient = scene.Track(Patients.Spawn(position, condition, 0f, Injury));
-            scene.SpawnBystander(position.Around2D(1.5f, 2.5f));
+            scene.SpawnCaller(position.Around2D(1.5f, 2.5f), L.T("Caller"), CallerStatement());
             Game.DisplayHelp(condition == PatientCondition.CardiacArrest
-                ? "The patient has ~r~no pulse~s~: start ~r~CPR~s~ right away and use an ~y~AED~s~ if you have one."
-                : "Assess and treat the ~r~patient~s~.");
+                ? L.T("The patient has ~r~no pulse~s~: start ~r~CPR~s~ right away and use an ~y~AED~s~ if you have one.")
+                : L.T("Assess and treat the ~r~patient~s~."));
+        }
+
+        // What happened, from the person who called it in.
+        private string[] CallerStatement()
+        {
+            string he = CallerLines.He(patient), him = CallerLines.Him(patient), his = CallerLines.His(patient);
+            string He = CallerLines.Capital(he);
+            switch (condition)
+            {
+                case PatientCondition.CardiacArrest:
+                    return new[]
+                    {
+                        L.F($"{He} just grabbed {his} chest and went down! {He}'s not breathing!"),
+                        CallerLines.Pick(L.F($"I tried to wake {him} up, nothing."), L.F($"The dispatcher told me to push on {his} chest, I did, I don't know if I did it right.")),
+                        L.F($"Please, is {he} going to be okay?"),
+                    };
+                case PatientCondition.Unconscious:
+                    return new[]
+                    {
+                        L.F($"{He} said {he} felt dizzy, and then {he} just collapsed."),
+                        CallerLines.Pick(L.F($"I think {he}'s diabetic, {he} skipped lunch."), L.F($"{He} won't wake up, but {he}'s breathing."), L.F($"{He} hit {his} head on the way down.")),
+                    };
+                default:
+                    return new[]
+                    {
+                        CallerLines.Pick(L.F($"{He} tripped off the curb and fell hard."), L.F($"{He} fell off a ladder, it was about three meters."),
+                            L.F($"Some guy on a bike knocked {him} over and just rode off.")),
+                        CallerLines.Pick(L.F($"{He} says {his} leg really hurts."), L.F($"{He} was bleeding a lot, I gave {him} my jacket.")),
+                    };
+            }
         }
 
         public override void Process()
@@ -52,7 +83,7 @@ namespace LSFD.Callouts
                 if (deathReported)
                     return;
                 deathReported = true;
-                Functions.DisplayNotification("~r~Patient deceased", "The patient could not be saved. Clear the call when you are ready.");
+                Functions.DisplayNotification(L.T("~r~Patient deceased"), L.T("The patient could not be saved. Clear the call when you are ready."));
             }
             else if (Patients.AreAllHandled(patient))
             {
@@ -70,16 +101,16 @@ namespace LSFD.Callouts
     [CalloutInfo("Cardiac Arrest", CalloutProbability.Medium, Category = CalloutCategory.Medical, Priority = CalloutPriority.Priority1, AllowAmbient = true)]
     internal class CardiacArrest : MedicalCall
     {
-        protected override string Title => "Cardiac Arrest";
-        protected override string Advisory => "Person collapsed, ~r~not breathing~s~. Bystander is on the phone.";
+        protected override string Title => L.T("Cardiac Arrest");
+        protected override string Advisory => L.T("Person collapsed, ~r~not breathing~s~. Bystander is on the phone.");
         protected override PatientCondition InitialCondition => PatientCondition.CardiacArrest;
     }
 
     [CalloutInfo("Unconscious Person", CalloutProbability.Medium, Category = CalloutCategory.Medical, Priority = CalloutPriority.Priority2, AllowAmbient = true)]
     internal class UnconsciousPerson : MedicalCall
     {
-        protected override string Title => "Unconscious Person";
-        protected override string Advisory => "Person found unresponsive on the sidewalk, breathing status unknown.";
+        protected override string Title => L.T("Unconscious Person");
+        protected override string Advisory => L.T("Person found unresponsive on the sidewalk, breathing status unknown.");
         protected override PatientCondition InitialCondition =>
             MathHelper.GetRandomInteger(4) == 0 ? PatientCondition.CardiacArrest : PatientCondition.Unconscious;
     }
@@ -89,13 +120,13 @@ namespace LSFD.Callouts
     {
         private static readonly string[] Reasons =
         {
-            "Person fell from a ladder, possible leg fracture.",
-            "Cyclist fell, head injury reported.",
-            "Assault victim with lacerations, police are on scene.",
-            "Elderly person fell down the stairs.",
+            L.T("Person fell from a ladder, possible leg fracture."),
+            L.T("Cyclist fell, head injury reported."),
+            L.T("Assault victim with lacerations, police are on scene."),
+            L.T("Elderly person fell down the stairs."),
         };
 
-        protected override string Title => "Injured Person";
+        protected override string Title => L.T("Injured Person");
         protected override string Advisory => Reasons[MathHelper.GetRandomInteger(Reasons.Length)];
         protected override PatientCondition InitialCondition => PatientCondition.Injured;
         protected override InjuryType Injury => InjuryType.Trauma;

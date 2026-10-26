@@ -4,6 +4,7 @@ using LSFD.API;
 using LSFD.Apparatus;
 using LSFD.Core;
 using LSFD.Firefighting;
+using LSFD.Profiles;
 using LSFD.Safety;
 using LSFD.VehicleRescue;
 using LSFD.Water;
@@ -22,16 +23,16 @@ namespace LSFD.UI
         private readonly TimerBarPool timerBars = new TimerBarPool();
         private readonly List<TimerBarBase> shownBars = new List<TimerBarBase>();
 
-        private readonly BarTimerBar tankBar = new BarTimerBar("TANK") { BackgroundColor = Theme.BarBackground };
-        private readonly TextTimerBar supplyBar = new TextTimerBar("WATER", "");
-        private readonly TextTimerBar nozzleBar = new TextTimerBar("NOZZLE", "");
-        private readonly TextTimerBar foamBar = new TextTimerBar("FOAM", "");
-        private readonly BarTimerBar pressureBar = new BarTimerBar("PRESSURE") { ForegroundColor = Theme.Highlight, BackgroundColor = Theme.BarBackground };
-        private readonly TextTimerBar toolBar = new TextTimerBar("TOOL", "");
-        private readonly TextTimerBar fireBar = new TextTimerBar("FIRE", "");
-        private readonly BarTimerBar airBar = new BarTimerBar("AIR") { BackgroundColor = Theme.BarBackground };
-        private readonly TextTimerBar heatBar = new TextTimerBar("HEAT", "~r~DANGER");
-        private readonly TextTimerBar cameraBar = new TextTimerBar("TIC", "");
+        private readonly BarTimerBar tankBar = new BarTimerBar(L.T("TANK")) { BackgroundColor = Theme.BarBackground };
+        private readonly TextTimerBar supplyBar = new TextTimerBar(L.T("WATER"), "");
+        private readonly TextTimerBar nozzleBar = new TextTimerBar(L.T("NOZZLE"), "");
+        private readonly TextTimerBar foamBar = new TextTimerBar(L.T("FOAM"), "");
+        private readonly BarTimerBar pressureBar = new BarTimerBar(L.T("PRESSURE")) { ForegroundColor = Theme.Highlight, BackgroundColor = Theme.BarBackground };
+        private readonly TextTimerBar toolBar = new TextTimerBar(L.T("TOOL"), "");
+        private readonly TextTimerBar fireBar = new TextTimerBar(L.T("FIRE"), "");
+        private readonly BarTimerBar airBar = new BarTimerBar(L.T("AIR")) { BackgroundColor = Theme.BarBackground };
+        private readonly TextTimerBar heatBar = new TextTimerBar(L.T("HEAT"), L.T("~r~DANGER"));
+        private readonly TextTimerBar cameraBar = new TextTimerBar(L.T("TIC"), "");
         private readonly BarTimerBar progressBar = new BarTimerBar("") { ForegroundColor = Theme.Highlight, BackgroundColor = Theme.BarBackground };
 
         private readonly InstructionalButtons hoseButtons = new InstructionalButtons();
@@ -63,7 +64,7 @@ namespace LSFD.UI
             // The cylinder only matters once it is in use or no longer full.
             if (onDuty && (scba.IsMaskOn || scba.AirFraction < 0.999f || hazards.Smoke > 0f))
             {
-                airBar.Label = scba.IsMaskOn ? "AIR" : "AIR (MASK OFF)";
+                airBar.Label = scba.IsMaskOn ? L.T("AIR") : L.T("AIR (MASK OFF)");
                 airBar.Percentage = scba.AirFraction;
                 airBar.ForegroundColor = scba.IsLowOnAir ? Theme.WaterLow : Theme.Water;
                 bars.Add(airBar);
@@ -74,7 +75,8 @@ namespace LSFD.UI
 
             if (camera.IsActive)
             {
-                cameraBar.Text = $"{camera.VisibleVictims} victim{(camera.VisibleVictims == 1 ? "" : "s")} · {camera.VisibleHotspots} hotspot{(camera.VisibleHotspots == 1 ? "" : "s")}";
+                cameraBar.Text = (camera.VisibleVictims == 1 ? L.T("1 victim") : L.F($"{camera.VisibleVictims} victims")) + " · " +
+                    (camera.VisibleHotspots == 1 ? L.T("1 hotspot") : L.F($"{camera.VisibleHotspots} hotspots"));
                 bars.Add(cameraBar);
             }
 
@@ -83,14 +85,14 @@ namespace LSFD.UI
             {
                 tankBar.Percentage = focus.WaterFraction;
                 tankBar.ForegroundColor = focus.WaterFraction < LowWaterFraction && !focus.IsSupplied ? Theme.WaterLow : Theme.Water;
-                supplyBar.Text = focus.IsSupplied ? "~b~HYDRANT" : $"{focus.Water:N0} L";
+                supplyBar.Text = focus.IsSupplied ? L.T("~b~HYDRANT") : $"{focus.Water:N0} L";
                 bars.Add(supplyBar);
                 bars.Add(tankBar);
             }
 
             if (hose.IsHolding)
             {
-                nozzleBar.Text = (hose.Nozzle.IsStraight ? "STRAIGHT" : "FOG") + (hose.Nozzle.IsFoam ? " · ~w~FOAM" : "");
+                nozzleBar.Text = (hose.Nozzle.IsStraight ? L.T("STRAIGHT") : L.T("FOG")) + (hose.Nozzle.IsFoam ? L.T(" · ~w~FOAM") : "");
                 pressureBar.Percentage = hose.Nozzle.EffectivePressure;
                 bars.Add(nozzleBar);
                 if (hose.Source.Definition.FoamCapacity > 0f)
@@ -121,9 +123,16 @@ namespace LSFD.UI
                 hoseButtons.Draw();
         }
 
-        public void ShowCalloutCompleted(Callout callout)
+        /// <summary>The report after a call: a big message with the score and the details in a notification.</summary>
+        public void ShowCallReport(CallRecord report)
         {
-            bigMessage.MessageInstance.ShowColoredShard("CALL COMPLETED", callout.CalloutMessage ?? callout.FriendlyName, HudColor.Red, HudColor.Black, 5000);
+            string title = report.Completed ? L.T("CALL COMPLETED") : L.T("CALL ENDED");
+            bigMessage.MessageInstance.ShowColoredShard(title, L.F($"{report.Name} · Score {report.Score} ({CallScore.Grade(report.Score)})"),
+                report.Completed ? HudColor.Red : HudColor.Black, HudColor.Black, 5000);
+
+            int points = CallScore.Points(report);
+            Notify.Dispatch(L.F($"Call report: {report.Name}"),
+                L.F($"Response: {CallScore.Response(report)}~n~Water: ~b~{report.WaterUsed:N0} L~s~ · On the call {report.Minutes} min~n~Rescued ~g~{report.Rescued}~s~ · Treated {report.Treated}") + (report.Deceased > 0 ? L.F($" · Lost ~r~{report.Deceased}~s~") : "") + L.F($"~n~Score: {CallScore.Display(report.Score)}") + (points > 0 ? L.F($" · ~y~+{points}~s~ points") : ""));
         }
 
         public void ShowPromotion(string rank)
@@ -134,9 +143,9 @@ namespace LSFD.UI
         public void ShowDutyChanged(bool onDuty)
         {
             if (onDuty)
-                bigMessage.MessageInstance.ShowColoredShard("ON DUTY", "Los Santos Fire Department", HudColor.Red, HudColor.Black, 4000);
+                bigMessage.MessageInstance.ShowColoredShard(L.T("ON DUTY"), L.T("Los Santos Fire Department"), HudColor.Red, HudColor.Black, 4000);
             else
-                bigMessage.MessageInstance.ShowColoredShard("OFF DUTY", "Thanks for your service", HudColor.Black, HudColor.Red, 3000);
+                bigMessage.MessageInstance.ShowColoredShard(L.T("OFF DUTY"), L.T("Thanks for your service"), HudColor.Black, HudColor.Red, 3000);
         }
 
         private void ShowBars(List<TimerBarBase> bars)

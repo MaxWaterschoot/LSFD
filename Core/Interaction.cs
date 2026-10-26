@@ -32,7 +32,7 @@ namespace LSFD.Core
             Prompt = prompt;
             Execute = execute;
             HoldSeconds = holdSeconds;
-            ProgressLabel = progressLabel ?? "WORKING";
+            ProgressLabel = progressLabel ?? L.T("WORKING");
         }
 
         public static Interaction Hint(string text) => new Interaction(text, null);

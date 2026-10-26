@@ -1,3 +1,4 @@
+using LSFD.Core;
 using Rage;
 
 namespace LSFD.UI
@@ -9,17 +10,17 @@ namespace LSFD.UI
 
         public static void Info(string text)
         {
-            Game.DisplayNotification(Icon, Icon, "LSFD", "~r~Fire Department", text);
+            Game.DisplayNotification(Icon, Icon, "LSFD", L.T("~r~Fire Department"), text);
         }
 
         public static void Dispatch(string subtitle, string text)
         {
-            Game.DisplayNotification(Icon, Icon, "LSFD Dispatch", subtitle, text);
+            Game.DisplayNotification(Icon, Icon, L.T("LSFD Dispatch"), subtitle, text);
         }
 
         public static void Warning(string text)
         {
-            Game.DisplayNotification(Icon, Icon, "LSFD", "~o~Attention", text);
+            Game.DisplayNotification(Icon, Icon, "LSFD", L.T("~o~Attention"), text);
         }
     }
 }

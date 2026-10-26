@@ -175,11 +175,24 @@ How patients behave in the game:
 
 ## `<Bystander>`
 
-Witnesses standing around on the phone, as decoration.
+Witnesses standing around on the phone. Give them `<Line>`s and the first one becomes the caller: they are marked on
+the map, and when the player walks up and presses the interact key they tell their story, one line after the other.
 
 ```xml
-<Bystander Count="2" Distance="12" />
+<Bystander Count="2" Distance="12" Label="Neighbor">
+  <Line>My kid is still inside, second floor!</Line>
+  <Line>The fire started in the garage.</Line>
+</Bystander>
 ```
+
+| Attribute | | Default |
+| --- | --- | --- |
+| `Count` | How many | 1 |
+| `Distance` | Placed at random within this many meters of the location | 12 |
+| `Label` | Shown before every line and on the map | `Caller` |
+
+Every text in an XML callout (message, advisory, help, task texts and caller lines) can be translated in a language
+file, with the English text as the key; see [TRANSLATING.md](TRANSLATING.md).
 
 ## `<ToxicAtmosphere>`
 

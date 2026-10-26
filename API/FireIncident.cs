@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LSFD.Core;
 using LSFD.Firefighting;
 using Rage;
 
@@ -187,11 +188,11 @@ namespace LSFD.API
         {
             switch (status)
             {
-                case FireStatus.Growing: return "~r~Growing";
-                case FireStatus.Burning: return "~o~Burning";
-                case FireStatus.UnderControl: return "~y~Under control";
-                case FireStatus.Knockdown: return "~b~Knockdown";
-                case FireStatus.Out: return "~g~Fire out";
+                case FireStatus.Growing: return L.T("~r~Growing");
+                case FireStatus.Burning: return L.T("~o~Burning");
+                case FireStatus.UnderControl: return L.T("~y~Under control");
+                case FireStatus.Knockdown: return L.T("~b~Knockdown");
+                case FireStatus.Out: return L.T("~g~Fire out");
                 default: return status.ToString();
             }
         }

@@ -127,8 +127,8 @@ namespace LSFD.Safety
             {
                 pendingDamage += SmokeDamagePerSecond * Math.Max(Smoke, Toxic) * delta;
                 Warn(scba.IsMaskOn
-                    ? "~r~Your cylinder is empty!~s~ Get out of the smoke."
-                    : $"~r~You are breathing smoke!~s~ Put your face piece on with ~b~{Settings.MaskKey}~s~.");
+                    ? L.T("~r~Your cylinder is empty!~s~ Get out of the smoke.")
+                    : L.F($"~r~You are breathing smoke!~s~ Put your face piece on with ~b~{Settings.MaskKey}~s~."));
                 Cough(player);
             }
 
@@ -136,14 +136,14 @@ namespace LSFD.Safety
             if (hose.IsSpraying && Game.GameTime - fire.LastEnergizedHitAt < ShockWindow)
             {
                 pendingDamage += ShockDamagePerSecond * delta;
-                Warn("~r~Electric shock!~s~ Isolate the power first, or use an extinguisher.");
+                Warn(L.T("~r~Electric shock!~s~ Isolate the power first, or use an extinguisher."));
                 NativeFunction.CallByName<uint>("SHAKE_GAMEPLAY_CAM", "SMALL_EXPLOSION_SHAKE", 0.05f);
             }
 
             if (IsInDangerousHeat)
             {
                 pendingDamage += HeatDamagePerSecond * (Heat - HeatProtection) * delta;
-                Warn("~r~Too hot!~s~ Back off, or protect yourself with a ~b~fog~s~ pattern.");
+                Warn(L.T("~r~Too hot!~s~ Back off, or protect yourself with a ~b~fog~s~ pattern."));
             }
 
             if (pendingDamage < 1f)

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using LSFD.API;
+using LSFD.Core;
 using Rage;
 
 namespace LSFD.Callouts.Xml
@@ -53,8 +54,9 @@ namespace LSFD.Callouts.Xml
             else if (definition.Fire != null)
                 AlarmLevel = 1;
 
-            CalloutMessage = string.IsNullOrWhiteSpace(definition.Message) ? definition.Name : definition.Message;
-            CalloutAdvisory = definition.Advisory;
+            // Their texts can be translated in a language file too, with the English text as the key.
+            CalloutMessage = L.T(string.IsNullOrWhiteSpace(definition.Message) ? definition.Name : definition.Message);
+            CalloutAdvisory = L.T(definition.Advisory);
             CalloutAreaRadius = location.AreaRadius;
             return true;
         }
@@ -111,7 +113,13 @@ namespace LSFD.Callouts.Xml
             foreach (XmlBystander bystander in definition.Bystanders)
             {
                 for (int i = 0; i < bystander.Count; i++)
-                    scene.SpawnBystander(CalloutPosition.Around2D(bystander.Distance * 0.5f, bystander.Distance));
+                {
+                    Vector3 position = CalloutPosition.Around2D(bystander.Distance * 0.5f, bystander.Distance);
+                    if (i == 0 && bystander.Lines.Count > 0)
+                        scene.SpawnCaller(position, L.T(bystander.Label), bystander.Lines.Select(L.T).ToArray());
+                    else
+                        scene.SpawnBystander(position);
+                }
             }
 
             foreach (XmlToxicAtmosphere zone in definition.ToxicAtmospheres)
@@ -121,7 +129,7 @@ namespace LSFD.Callouts.Xml
                 AddTask(task);
 
             if (!string.IsNullOrWhiteSpace(definition.ArrivalHelp))
-                Game.DisplayHelp(definition.ArrivalHelp);
+                Game.DisplayHelp(L.T(definition.ArrivalHelp));
         }
 
         public override void Process()
@@ -135,8 +143,8 @@ namespace LSFD.Callouts.Xml
 
             if (fireOut && everyoneOut && Patients.AreAllHandled(patients.ToArray()) && tasks.All(t => t.IsDone))
             {
-                Functions.DisplayNotification("~g~Scene handled",
-                    string.IsNullOrWhiteSpace(definition.CompletedMessage) ? "Everything is taken care of. Good work." : definition.CompletedMessage);
+                Functions.DisplayNotification(L.T("~g~Scene handled"),
+                    string.IsNullOrWhiteSpace(definition.CompletedMessage) ? L.T("Everything is taken care of. Good work.") : L.T(definition.CompletedMessage));
                 Complete();
             }
         }
@@ -184,7 +192,7 @@ namespace LSFD.Callouts.Xml
         private void AddTask(XmlTask data)
         {
             Vector3 position = CalloutPosition + new Vector3(data.OffsetX, data.OffsetY, data.OffsetZ);
-            tasks.Add(AddSceneAction(new SceneAction(position, data.Text, () => OnTaskDone(data))
+            tasks.Add(AddSceneAction(new SceneAction(position, L.T(data.Text), () => OnTaskDone(data))
             {
                 HoldSeconds = data.Seconds,
                 RequiredEquipment = data.RequiredEquipment,
@@ -201,7 +209,7 @@ namespace LSFD.Callouts.Xml
             }
 
             if (!string.IsNullOrWhiteSpace(data.DoneMessage))
-                Game.DisplaySubtitle(data.DoneMessage, 4000);
+                Game.DisplaySubtitle(L.T(data.DoneMessage), 4000);
         }
     }
 }

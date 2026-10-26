@@ -160,7 +160,7 @@ namespace LSFD.LivingWorld
             unit.Blip = unit.Car.AttachBlip();
             unit.Blip.Color = Color.DodgerBlue;
             unit.Blip.Scale = 0.7f;
-            unit.Blip.Name = county ? "Sheriff" : "Police";
+            unit.Blip.Name = county ? L.T("Sheriff") : L.T("Police");
 
             unit.Driver.Tasks.DriveToPosition(unit.Car, unit.BlockPosition, 22f, VehicleDrivingFlags.Emergency, ParkDistance);
             units.Add(unit);

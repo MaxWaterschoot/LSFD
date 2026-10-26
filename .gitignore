@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 # RAGE Plugin Hook SDK may not be redistributed, every developer puts their own copy here
 lib/RagePluginHookSDK.dll
+tools/audio/raw/

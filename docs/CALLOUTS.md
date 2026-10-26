@@ -237,6 +237,44 @@ sends extra ambulances. The player and
 the AI crew treat, resuscitate and carry patients; `Patients.OnConditionChanged` tells you when something changes.
 Extricated vehicle occupants become `Injured` patients automatically.
 
+## Callers and witnesses
+
+A caller on scene gives the call a story, and can point the player to the victims. The ped is marked on the map; when
+the player walks up and presses the interact key, the lines are shown one after the other:
+
+```csharp
+Ped caller = new Ped(CalloutPosition.Around2D(5f)) { IsPersistent = true, BlockPermanentEvents = true };
+Witnesses.Add(caller, "Caller", () => victimBlip = new Blip(victim.Position, 5f),
+    "My kid is still inside, second floor!",
+    "He was in his bedroom, at the back.");
+```
+
+- **`AddCaller` and `AddWitness`:** shortcuts with the label `Caller` or `Witness` and no callback.
+- **The callback:** it runs once, after the player has heard every line. Use it to mark where the victims are, or to
+  start the next part of the call.
+- **`HasTalkedTo(ped)`:** whether the player has heard the whole statement.
+- **Cleaning up:** call `Witnesses.Remove(ped)` in `OnEnd` for peds you keep.
+
+The built-in building fires work like this: the caller knows who is still inside and on which floor, and after the talk
+those spots are marked on the map.
+
+## Translations
+
+Wrap the texts the player sees in `Language.T` (fixed text) or `Language.F` (text with values), and they can be
+translated just like LSFD's own:
+
+```csharp
+CalloutMessage = Language.T("Barn Fire");
+CalloutAdvisory = Language.F($"Barn on fire at {farm}, ~r~livestock~s~ inside.");
+```
+
+- **The key:** the English text. For `Language.F` it has `{0}`, `{1}` in place of the values: "Barn on fire at {0},
+  ~r~livestock~s~ inside."
+- **Missing translations:** a text without a translation is shown in English.
+- **Shipping translations:** ship them as `Plugins/LSFD/Languages/nl.YourPack.xml`. It has the same format as `nl.xml`
+  (see [TRANSLATING.md](TRANSLATING.md)), and LSFD loads it with the main file.
+- **The player's language:** `Language.Current` is the language code, e.g. `"nl"`.
+
 ## Buildings and Enable All Interiors
 
 Mark callouts that take place in interiors that are locked in the base game, so they are only dispatched when the
@@ -300,7 +338,7 @@ To check at runtime, `Functions.InstalledApiVersion` gives the version of the ru
 | Version | Added |
 |---|---|
 | 1 | The first public API. |
-| 2 | `Events`, `CalloutPack.ApiVersion`, XML callouts, `CalloutInfo.AllowAmbient` and `Callout.IsAmbient`. |
+| 2 | `Events`, `CalloutPack.ApiVersion`, XML callouts, `CalloutInfo.AllowAmbient`, `Callout.IsAmbient`, `Witnesses` and `Language`. |
 
 ### Events
 

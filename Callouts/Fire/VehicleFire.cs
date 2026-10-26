@@ -1,4 +1,5 @@
 ﻿using LSFD.API;
+using LSFD.Core;
 using Rage;
 
 namespace LSFD.Callouts
@@ -22,10 +23,10 @@ namespace LSFD.Callouts
             AlarmLevel = 1;
             driverBurned = MathHelper.GetRandomInteger(3) == 0;
 
-            CalloutMessage = "Vehicle Fire";
+            CalloutMessage = L.T("Vehicle Fire");
             CalloutAdvisory = driverBurned
-                ? "Vehicle fully involved, the driver got out with ~r~burn injuries~s~."
-                : "A vehicle is on fire on the roadway, the driver reportedly got out.";
+                ? L.T("Vehicle fully involved, the driver got out with ~r~burn injuries~s~.")
+                : L.T("A vehicle is on fire on the roadway, the driver reportedly got out.");
             return true;
         }
 
@@ -41,9 +42,13 @@ namespace LSFD.Callouts
             if (driverBurned)
                 driver = scene.Track(Patients.Spawn(vehicle.GetOffsetPositionRight(5f), PatientCondition.Injured, 0f, InjuryType.Burns));
             else
-                driver = scene.SpawnBystander(vehicle.GetOffsetPositionRight(6f));
+                driver = scene.SpawnCaller(vehicle.GetOffsetPositionRight(6f), "Driver", new[]
+                {
+                    L.T("I smelled something burning, so I pulled over. Then the smoke came out from under the hood."),
+                    CallerLines.Pick(L.T("Everything I own is in that car."), L.T("Is it going to explode? There's a full tank in there."), L.T("I only just bought it!")),
+                });
 
-            Game.DisplayHelp("Extinguish the burning ~r~vehicle~s~." + (driverBurned ? " Treat the ~r~driver~s~." : ""));
+            Game.DisplayHelp(L.T("Extinguish the burning ~r~vehicle~s~.") + (driverBurned ? L.T(" Treat the ~r~driver~s~.") : ""));
         }
 
         public override void Process()

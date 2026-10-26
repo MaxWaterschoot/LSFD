@@ -78,16 +78,16 @@ namespace LSFD.LivingWorld
 
         private static readonly IncidentType[] Types =
         {
-            new IncidentType("Structure Fire", 6, 12, ApparatusType.Engine, ApparatusType.Engine, ApparatusType.Ladder),
-            new IncidentType("Vehicle Fire", 3, 6, ApparatusType.Engine),
-            new IncidentType("Brush Fire", 5, 10, ApparatusType.Engine, ApparatusType.Engine),
-            new IncidentType("Automatic Fire Alarm", 2, 4, ApparatusType.Engine),
-            new IncidentType("Smoke Investigation", 2, 4, ApparatusType.Engine),
-            new IncidentType("Medical Aid", 4, 8, ApparatusType.Ambulance),
-            new IncidentType("Cardiac Arrest", 5, 9, ApparatusType.Engine, ApparatusType.Ambulance),
-            new IncidentType("Traffic Collision", 4, 8, ApparatusType.Engine, ApparatusType.Ambulance),
-            new IncidentType("Elevator Rescue", 3, 6, ApparatusType.Ladder),
-            new IncidentType("Gas Leak", 4, 8, ApparatusType.Engine),
+            new IncidentType(L.T("Structure Fire"), 6, 12, ApparatusType.Engine, ApparatusType.Engine, ApparatusType.Ladder),
+            new IncidentType(L.T("Vehicle Fire"), 3, 6, ApparatusType.Engine),
+            new IncidentType(L.T("Brush Fire"), 5, 10, ApparatusType.Engine, ApparatusType.Engine),
+            new IncidentType(L.T("Automatic Fire Alarm"), 2, 4, ApparatusType.Engine),
+            new IncidentType(L.T("Smoke Investigation"), 2, 4, ApparatusType.Engine),
+            new IncidentType(L.T("Medical Aid"), 4, 8, ApparatusType.Ambulance),
+            new IncidentType(L.T("Cardiac Arrest"), 5, 9, ApparatusType.Engine, ApparatusType.Ambulance),
+            new IncidentType(L.T("Traffic Collision"), 4, 8, ApparatusType.Engine, ApparatusType.Ambulance),
+            new IncidentType(L.T("Elevator Rescue"), 3, 6, ApparatusType.Ladder),
+            new IncidentType(L.T("Gas Leak"), 4, 8, ApparatusType.Engine),
         };
 
         private readonly ApparatusManager apparatus;
@@ -157,12 +157,12 @@ namespace LSFD.LivingWorld
                 OtherIncident incident = Start(declined.CalloutMessage ?? declined.FriendlyName, declined.CalloutPosition, units, 4, 10);
                 if (incident != null)
                 {
-                    Notify.Dispatch("~o~Reassigned", $"~y~{incident.UnitNames}~s~ took the call.");
+                    Notify.Dispatch(L.T("~o~Reassigned"), L.F($"~y~{incident.UnitNames}~s~ took the call."));
                     return;
                 }
             }
 
-            Notify.Dispatch("~o~Reassigned", "The call was given to another unit.");
+            Notify.Dispatch(L.T("~o~Reassigned"), L.T("The call was given to another unit."));
         }
 
         /// <summary>Starts a random incident for other units; for testing from the console.</summary>
@@ -181,7 +181,7 @@ namespace LSFD.LivingWorld
                 return false;
 
             if (Settings.OtherUnitsNotifications)
-                Notify.Dispatch("~b~Other units", $"~y~{incident.UnitNames}~s~ responding to ~o~{incident.Name}~s~, {incident.Street}.");
+                Notify.Dispatch(L.T("~b~Other units"), L.F($"~y~{incident.UnitNames}~s~ responding to ~o~{incident.Name}~s~, {incident.Street}."));
             return true;
         }
 

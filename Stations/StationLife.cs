@@ -1,5 +1,3 @@
-using System.IO;
-using System.Media;
 using LSFD.API;
 using LSFD.Apparatus;
 using LSFD.Core;
@@ -23,8 +21,9 @@ namespace LSFD.Stations
         private const int AlarmTones = 4;
         private const uint ToneInterval = 1200;
 
-        // Drop a StationAlarm.wav in Plugins/LSFD/Audio/Alarms/ for real station tones.
-        private static readonly string AlarmSoundFile = Path.Combine(ModFolder.AlarmAudio, "StationAlarm.wav");
+        // Drop a STATION_ALARM.wav in Plugins/LSFD/Audio/Alarms/ for a recording of real station tones.
+        private const string RecordedAlarm = "Alarms/STATION_ALARM.wav";
+        private static readonly string[] DefaultAlarm = { "Alarms/STATION_PA_CHIME.wav", "Dispatch/Tones/FIRE_TONES.wav" };
 
         private readonly ApparatusManager apparatus;
         private readonly CrewManager crew;
@@ -35,8 +34,7 @@ namespace LSFD.Stations
         private uint alarmAt;
         private int tonesPlayed;
         private bool turningOut;
-        private SoundPlayer alarmSound;
-        private bool alarmSoundLoaded;
+        private bool alarmPlaying;
 
         public StationLife(ApparatusManager apparatus, CrewManager crew, DutyManager duty)
         {
@@ -75,9 +73,10 @@ namespace LSFD.Stations
 
             alarmAt = Game.GameTime;
             tonesPlayed = 0;
+            alarmPlaying = PlayAlarm();
             turningOut = true;
             crew.MountUp(firstDue);
-            Notify.Dispatch("~r~Station alarm", $"{callout.CalloutMessage}: turn out! Get to the ~y~{firstDue.Definition.Name}~s~.");
+            Notify.Dispatch(L.T("~r~Station alarm"), L.F($"{callout.CalloutMessage}: turn out! Get to the ~y~{firstDue.Definition.Name}~s~."));
         }
 
         public void Process()
@@ -91,7 +90,7 @@ namespace LSFD.Stations
                 return;
             }
 
-            if (tonesPlayed < AlarmTones && Game.GameTime - alarmAt >= tonesPlayed * ToneInterval)
+            if (!alarmPlaying && tonesPlayed < AlarmTones && Game.GameTime - alarmAt >= tonesPlayed * ToneInterval)
             {
                 PlayTone();
                 tonesPlayed++;
@@ -102,40 +101,21 @@ namespace LSFD.Stations
                 turningOut = false;
                 float seconds = (Game.GameTime - alarmAt) / 1000f;
                 string rating = seconds <= 60f ? "~g~" : seconds <= 90f ? "~y~" : "~o~";
-                Game.DisplaySubtitle($"Turnout time: {rating}{(int)seconds / 60}:{(int)seconds % 60:00}", 5000);
+                Game.DisplaySubtitle(L.F($"Turnout time: {rating}{(int)seconds / 60}:{(int)seconds % 60:00}"), 5000);
             }
         }
 
-        private void PlayTone()
+        // The recording when there is one, otherwise the PA chime and the fire tones; game beeps when neither is there.
+        private static bool PlayAlarm()
         {
-            if (!alarmSoundLoaded)
-            {
-                alarmSoundLoaded = true;
-                if (File.Exists(AlarmSoundFile))
-                {
-                    try
-                    {
-                        alarmSound = new SoundPlayer(AlarmSoundFile);
-                        alarmSound.Load();
-                    }
-                    catch (System.Exception e)
-                    {
-                        Game.LogTrivial($"LSFD: could not load {AlarmSoundFile}: {e.Message}");
-                        alarmSound = null;
-                    }
-                }
-            }
+            if (Sound.Exists(RecordedAlarm))
+                return Sound.Play(Settings.AlarmVolume, RecordedAlarm) != null;
+            return Sound.Play(Settings.AlarmVolume, DefaultAlarm) != null;
+        }
 
-            if (alarmSound != null)
-            {
-                // A recording plays once, it doesn't need the separate tones.
-                if (tonesPlayed == 0)
-                    alarmSound.Play();
-            }
-            else
-            {
-                NativeFunction.CallByName<uint>("PLAY_SOUND_FRONTEND", -1, "TIMER_STOP", "HUD_MINI_GAME_SOUNDSET", true);
-            }
+        private static void PlayTone()
+        {
+            NativeFunction.CallByName<uint>("PLAY_SOUND_FRONTEND", -1, "TIMER_STOP", "HUD_MINI_GAME_SOUNDSET", true);
         }
     }
 }

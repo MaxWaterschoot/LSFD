@@ -24,14 +24,14 @@ namespace LSFD
             {
                 Game.LogTrivial($"LSFD is not installed correctly, missing: {string.Join(", ", missing)}. " +
                     "Copy the Plugins folder from the download into your GTA V folder.");
-                Notify.Warning("Not loaded: the ~r~Plugins/LSFD~s~ folder is missing or incomplete. Reinstall LSFD from the download.");
+                Notify.Warning(L.T("Not loaded: the ~r~Plugins/LSFD~s~ folder is missing or incomplete. Reinstall LSFD from the download."));
                 return;
             }
 
             Lsfd.Initialize();
             Game.AddConsoleCommands();
 
-            Notify.Info($"Loaded. Visit a ~r~fire station~s~ to go on duty. Tablet: ~b~{Settings.TabletKey}");
+            Notify.Info(L.F($"Loaded. Visit a ~r~fire station~s~ to go on duty. Tablet: ~b~{Settings.TabletKey}"));
             Game.LogTrivial("LSFD has been loaded.");
 
             while (true)
@@ -165,6 +165,41 @@ namespace LSFD
         private static void LSFD_RemoveFires()
         {
             Lsfd.Fire.RemoveAll();
+        }
+
+        [ConsoleCommand("Switches the language, e.g. nl or en; without a name it lists the languages in Plugins/LSFD/Languages/.")]
+        private static void LSFD_Language(string language = "")
+        {
+            if (string.IsNullOrWhiteSpace(language))
+            {
+                Game.LogTrivial($"Language: {L.Language}. Available: {string.Join(", ", L.AvailableLanguages())}.");
+                return;
+            }
+
+            L.Load(language);
+            Game.LogTrivial($"Language set to {L.LanguageName}. Menus and tabs switch after reloading LSFD; set Language in LSFD.ini to keep it.");
+        }
+
+        [ConsoleCommand("Writes Plugins/LSFD/Languages/missing_<language>.xml with the texts that were shown in English because they aren't translated yet.")]
+        private static void LSFD_ExportMissingTranslations()
+        {
+            string path = L.ExportMissing();
+            Game.LogTrivial(path == null ? "Nothing missing so far (or the language is English)." : $"Written to {path}.");
+        }
+
+        [ConsoleCommand("Writes Plugins/LSFD/BugReport.txt with versions, installed mods, settings and the end of the log. Attach it to your bug report.")]
+        private static void LSFD_BugReport()
+        {
+            try
+            {
+                string path = BugReport.Write();
+                Game.LogTrivial($"Bug report written to {path}.");
+                Notify.Info(L.T("Bug report saved to ~y~Plugins/LSFD/BugReport.txt~s~. Attach it to your report."));
+            }
+            catch (Exception e)
+            {
+                Game.LogTrivial($"Could not write the bug report: {e}");
+            }
         }
 
         [ConsoleCommand("Reloads Plugins/LSFD/Data/Stations.xml.")]

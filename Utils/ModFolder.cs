@@ -12,6 +12,7 @@ namespace LSFD.Utils
     ///   Data/        Stations.xml, Apparatus.xml, Tools.xml, FireLocations.xml
     ///   Callouts/    callout DLLs and XML callouts
     ///   Profiles/    player profiles
+    ///   Languages/   translations (nl.xml, ...)
     ///   LSFD.ini
     ///   Keys.ini
     /// </code>
@@ -28,6 +29,7 @@ namespace LSFD.Utils
         public static readonly string Data = Path.Combine(Root, "Data");
         public static readonly string Callouts = Path.Combine(Root, "Callouts");
         public static readonly string Profiles = Path.Combine(Root, "Profiles");
+        public static readonly string Languages = Path.Combine(Root, "Languages");
 
         public static readonly string SettingsFile = Path.Combine(Root, "LSFD.ini");
         public static readonly string KeysFile = Path.Combine(Root, "Keys.ini");

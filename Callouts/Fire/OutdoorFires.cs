@@ -1,4 +1,5 @@
 ﻿using LSFD.API;
+using LSFD.Core;
 using Rage;
 
 namespace LSFD.Callouts
@@ -64,7 +65,7 @@ namespace LSFD.Callouts
         protected override void OnArrival()
         {
             DressScene(scene, center);
-            Game.DisplayHelp($"Extinguish all the ~r~fires~s~ in the area ({CalloutPriorityExtensions.AlarmToDisplay(AlarmLevel)}).");
+            Game.DisplayHelp(L.F($"Extinguish all the ~r~fires~s~ in the area ({CalloutPriorityExtensions.AlarmToDisplay(AlarmLevel)})."));
         }
 
         public override void Process()
@@ -82,8 +83,8 @@ namespace LSFD.Callouts
     [CalloutInfo("Brush Fire", CalloutProbability.High, Category = CalloutCategory.Fire, Priority = CalloutPriority.Priority2, AllowAmbient = true)]
     internal class BrushFire : OutdoorFire
     {
-        protected override string Title => "Brush Fire";
-        protected override string Advisory => "Vegetation fire spreading along the road. Protect nearby structures.";
+        protected override string Title => L.T("Brush Fire");
+        protected override string Advisory => L.T("Vegetation fire spreading along the road. Protect nearby structures.");
         protected override int SecondAlarmChance => 30;
         protected override float SpreadSeconds => 25f;
     }
@@ -91,8 +92,8 @@ namespace LSFD.Callouts
     [CalloutInfo("Trash Fire", CalloutProbability.Medium, Category = CalloutCategory.Fire, Priority = CalloutPriority.Priority3, AllowAmbient = true)]
     internal class TrashFire : OutdoorFire
     {
-        protected override string Title => "Rubbish Fire";
-        protected override string Advisory => "Dumpster and trash fire behind a building, no exposures reported.";
+        protected override string Title => L.T("Rubbish Fire");
+        protected override string Advisory => L.T("Dumpster and trash fire behind a building, no exposures reported.");
         protected override int SecondAlarmChance => 0;
         protected override int MaxAlarmLevel => 1;
         protected override float SpreadSeconds => 60f;
@@ -116,8 +117,8 @@ namespace LSFD.Callouts
             (1300f, -2400f, 1800f, -1800f),
         };
 
-        protected override string Title => "Industrial Fire";
-        protected override string Advisory => "Fire at an industrial site, ~o~possible hazardous materials~s~. Approach from upwind.";
+        protected override string Title => L.T("Industrial Fire");
+        protected override string Advisory => L.T("Fire at an industrial site, ~o~possible hazardous materials~s~. Approach from upwind.");
         protected override bool IsGasFire => true;
         protected override int SecondAlarmChance => 40;
 
@@ -130,7 +131,11 @@ namespace LSFD.Callouts
 
         protected override void DressScene(Scene scene, Vector3 center)
         {
-            scene.SpawnBystander(center.Around2D(15f, 20f));
+            scene.SpawnCaller(center.Around2D(15f, 20f), L.T("Site manager"), new[]
+            {
+                L.T("Everyone on shift is out and accounted for."),
+                L.T("There are drums of solvent stored behind that building. Keep your people away from the smoke!"),
+            });
         }
     }
 }

@@ -147,7 +147,7 @@ namespace LSFD.Medical
             if (requestBackup(ApparatusType.Ambulance, street))
             {
                 lastRequest = Game.GameTime;
-                Notify.Dispatch("~b~Ambulance requested", "A patient is ready for transport, an ambulance is on its way.");
+                Notify.Dispatch(L.T("~b~Ambulance requested"), L.T("A patient is ready for transport, an ambulance is on its way."));
             }
         }
 
@@ -170,7 +170,7 @@ namespace LSFD.Medical
             driver.StartJob(CrewJob.Transport);
 
             operations.Add(new Operation(unit, attendant, driver, patient));
-            Game.DisplaySubtitle($"~b~{attendant.Name}:~s~ Getting the stretcher.", 3000);
+            Game.DisplaySubtitle(L.F($"~b~{attendant.Name}:~s~ Getting the stretcher."), 3000);
         }
 
         /// <summary>Moves the transport along; returns false when it is over (handed over or aborted).</summary>
@@ -201,7 +201,7 @@ namespace LSFD.Medical
                     if (o.TimeInStage < UnloadMilliseconds)
                         break;
                     if (!SpawnStretcher(o))
-                        return AbortWithMessage(o, $"Stretcher model ~y~{Settings.StretcherModel}~s~ doesn't exist, check LSFD.ini.");
+                        return AbortWithMessage(o, L.F($"Stretcher model ~y~{Settings.StretcherModel}~s~ doesn't exist, check LSFD.ini."));
                     AttachStretcher(o);
                     o.NextStage(Stage.ToPatient);
                     break;
@@ -224,7 +224,7 @@ namespace LSFD.Medical
                     PutPatientOnStretcher(o);
                     o.Driver.Ped.Tasks.Clear();
                     AttachStretcher(o);
-                    Game.DisplaySubtitle($"~b~{o.Attendant.Name}:~s~ Patient is on the stretcher, moving to the ambulance.", 3000);
+                    Game.DisplaySubtitle(L.F($"~b~{o.Attendant.Name}:~s~ Patient is on the stretcher, moving to the ambulance."), 3000);
                     o.NextStage(Stage.ToAmbulance);
                     break;
 
@@ -376,8 +376,8 @@ namespace LSFD.Medical
             o.Driver.Ped.Tasks.DriveToPosition(ambulance, o.Hospital.position, urgent ? 25f : 15f,
                 urgent ? VehicleDrivingFlags.Emergency : VehicleDrivingFlags.Normal, HandoverDistance - 5f);
 
-            Notify.Dispatch("~b~Patient transport", $"~y~{o.Unit.Definition.Name}~s~ is transporting a patient to {o.Hospital.name}" +
-                (urgent ? " (~r~Code 3~s~)." : "."));
+            Notify.Dispatch(L.T("~b~Patient transport"), L.F($"~y~{o.Unit.Definition.Name}~s~ is transporting a patient to {o.Hospital.name}") +
+                (urgent ? L.T(" (~r~Code 3~s~).") : "."));
         }
 
         private void HandOver(Operation o)
@@ -389,7 +389,7 @@ namespace LSFD.Medical
             if (patient.Exists())
                 patient.Delete();
 
-            Notify.Dispatch("~g~Patient handed over", $"The patient was handed over at {o.Hospital.name}.");
+            Notify.Dispatch(L.T("~g~Patient handed over"), L.F($"The patient was handed over at {o.Hospital.name}."));
             returnWhenDone.Add(o.Unit);
         }
 

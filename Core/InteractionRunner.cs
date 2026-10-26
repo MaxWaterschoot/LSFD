@@ -39,8 +39,10 @@ namespace LSFD.Core
                 return;
             }
 
-            string verb = interaction.HoldSeconds > 0f ? "Hold" : "Press";
-            Game.DisplayHelp($"{verb} ~b~{Settings.InteractKey}~s~ to {interaction.Prompt}.", 100);
+            // Prompts are written to follow "to": "Press E to [open the compartments]."
+            Game.DisplayHelp(interaction.HoldSeconds > 0f
+                ? L.F($"Hold ~b~{Settings.InteractKey}~s~ to {interaction.Prompt}.")
+                : L.F($"Press ~b~{Settings.InteractKey}~s~ to {interaction.Prompt}."), 100);
 
             if (!Game.IsKeyDown(Settings.InteractKey))
                 return;

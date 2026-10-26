@@ -149,10 +149,10 @@ namespace LSFD.Firefighting
             if (incident == null)
                 return null;
 
-            return new Interaction("isolate the ~y~power~s~ at the panel", () =>
+            return new Interaction(L.T("isolate the ~y~power~s~ at the panel"), () =>
             {
                 incident.IsolatePower();
-                Notify.Info("Power ~g~isolated~s~. Water is safe to use now.");
+                Notify.Info(L.T("Power ~g~isolated~s~. Water is safe to use now."));
             }, IsolateSeconds, "ISOLATING")
             {
                 AnimationDictionary = "mini@repair",

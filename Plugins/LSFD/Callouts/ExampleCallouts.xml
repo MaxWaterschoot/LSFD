@@ -17,7 +17,11 @@
     <Alarm Level="1" />
     <Fire Points="2" Intensity="0.5" SpreadRadius="8" SpreadSeconds="45" Class="Flammable" />
     <Patient Condition="Injured" Injury="Burns" Distance="10" />
-    <Bystander Count="2" />
+    <!-- The first one is the caller: walk up to them and press E to hear what happened. -->
+    <Bystander Count="2" Label="Neighbor">
+      <Line>I heard the smoke alarm and saw flames in the kitchen window.</Line>
+      <Line>They tried to put it out with water. I think they burned their arms.</Line>
+    </Bystander>
   </Callout>
 
   <!-- A gas smell: no fire, just a toxic atmosphere and two tasks. -->

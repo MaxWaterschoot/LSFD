@@ -48,7 +48,7 @@ namespace LSFD.Safety
             Stow();
             Source = source;
             source.SetTaken(EquipmentType.ThermalCamera, true);
-            Notify.Info($"Thermal imaging camera taken. Press ~b~{Settings.ThermalCameraKey}~s~ to turn it on.");
+            Notify.Info(L.F($"Thermal imaging camera taken. Press ~b~{Settings.ThermalCameraKey}~s~ to turn it on."));
         }
 
         public void Stow()

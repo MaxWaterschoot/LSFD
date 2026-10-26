@@ -1,6 +1,7 @@
-﻿using System.Linq;
+using System.Linq;
 using LSFD.API;
 using LSFD.Buildings;
+using LSFD.Core;
 using Rage;
 
 namespace LSFD.Callouts
@@ -19,8 +20,8 @@ namespace LSFD.Callouts
 
             AlarmLevel = RollAlarmLevel(15, 0);
             CalloutPosition = building.Staging;
-            CalloutMessage = "Electrical Fire";
-            CalloutAdvisory = $"~y~{building.Name}~s~. Fire in the electrical room, ~o~power still on~s~.";
+            CalloutMessage = L.T("Electrical Fire");
+            CalloutAdvisory = L.F($"~y~{building.Name}~s~. Fire in the electrical room, ~o~power still on~s~.");
             return true;
         }
 
@@ -42,7 +43,7 @@ namespace LSFD.Callouts
         {
             Interiors.PrepareInterior(building.Position);
             Interiors.LockDoors(building.Position, 15f, 0.5f);
-            Game.DisplayHelp("~o~Live electrics~s~: water will shock you. ~y~Isolate the power~s~ at the panel first, or use an extinguisher.");
+            Game.DisplayHelp(L.T("~o~Live electrics~s~: water will shock you. ~y~Isolate the power~s~ at the panel first, or use an extinguisher."));
         }
 
         public override void Process()
@@ -64,8 +65,8 @@ namespace LSFD.Callouts
         public override bool OnBeforeCalloutDisplayed()
         {
             CalloutPosition = Functions.GetRandomCalloutLocation();
-            CalloutMessage = "Electric Vehicle Fire";
-            CalloutAdvisory = "An electric car is on fire, the battery is popping. ~o~Expect a long cooling job~s~.";
+            CalloutMessage = L.T("Electric Vehicle Fire");
+            CalloutAdvisory = L.T("An electric car is on fire, the battery is popping. ~o~Expect a long cooling job~s~.");
             return true;
         }
 
@@ -90,10 +91,13 @@ namespace LSFD.Callouts
                 CalloutPosition, MathHelper.GetRandomSingle(0f, 360f));
             vehicle.EngineHealth = 0f;
             Fires.SetOnFire(vehicle);
-            scene.SpawnBystander(vehicle.GetOffsetPositionRight(7f));
+            scene.SpawnCaller(vehicle.GetOffsetPositionRight(7f), "Driver", new[]
+            {
+                L.T("It's electric! The battery started hissing and popping under the floor, and then it just went up."),
+                L.T("I got out right away. Every time you think it's out, it flares up again."),
+            });
 
-            Game.DisplayHelp("~o~Lithium battery fire~s~: foam doesn't help, it takes a lot of water and it keeps rekindling. " +
-                "Keep cooling until the thermal camera shows no hotspots.");
+            Game.DisplayHelp(L.T("~o~Lithium battery fire~s~: foam doesn't help, it takes a lot of water and it keeps rekindling. Keep cooling until the thermal camera shows no hotspots."));
         }
 
         public override void Process()

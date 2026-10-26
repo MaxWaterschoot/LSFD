@@ -64,7 +64,7 @@ namespace LSFD.Core
 
             IsOnDuty = true;
             HomeStation = station;
-            Notify.Info($"~g~On duty~s~ at ~y~{station.Name}~s~. Open the tablet with ~b~{Settings.TabletKey}~s~.");
+            Notify.Info(L.F($"~g~On duty~s~ at ~y~{station.Name}~s~. Open the tablet with ~b~{Settings.TabletKey}~s~."));
 
             DutyStateChanged?.Invoke(true);
             Functions.RaiseDutyStateChanged(true);
@@ -87,7 +87,7 @@ namespace LSFD.Core
 
             IsOnDuty = false;
             HomeStation = null;
-            Notify.Info("You are now ~b~off duty~s~.");
+            Notify.Info(L.T("You are now ~b~off duty~s~."));
 
             DutyStateChanged?.Invoke(false);
             Functions.RaiseDutyStateChanged(false);

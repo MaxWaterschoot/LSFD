@@ -26,6 +26,9 @@ namespace LSFD.Core
         public static Keys FoamKey { get; private set; } = Keys.H;
         public static Keys ThermalCameraKey { get; private set; } = Keys.T;
 
+        /// <summary>The file name in Plugins/LSFD/Languages/ without .xml; "en" is English.</summary>
+        public static string Language { get; private set; } = "en";
+
         public static bool ChangeModelOnDuty { get; private set; } = true;
 
         public static float HydrantFlowRate { get; private set; } = 80f;
@@ -75,6 +78,14 @@ namespace LSFD.Core
         public static int MaxSecondsBetweenOtherIncidents { get; private set; } = 360;
         public static bool OtherUnitsNotifications { get; private set; } = true;
 
+        public static bool DispatchRadio { get; private set; } = true;
+        public static float RadioVolume { get; private set; } = 0.8f;
+        public static float AlarmVolume { get; private set; } = 0.7f;
+        public static bool PagerAlert { get; private set; } = true;
+        public static bool SceneAlarms { get; private set; } = true;
+        public static bool PassAlarm { get; private set; } = true;
+        public static bool CprMetronome { get; private set; } = true;
+
         public static bool IsCategoryEnabled(CalloutCategory category)
         {
             return !EnabledCategories.TryGetValue(category, out bool enabled) || enabled;
@@ -98,6 +109,7 @@ namespace LSFD.Core
             var ini = new InitializationFile(ModFolder.SettingsFile);
             ini.Create();
 
+            Language = ini.ReadString("General", "Language", Language).Trim();
             ChangeModelOnDuty = ini.ReadBoolean("Duty", "ChangeModelOnDuty", ChangeModelOnDuty);
 
             HydrantFlowRate = ini.ReadSingle("Water", "HydrantFlowRate", HydrantFlowRate);
@@ -152,7 +164,21 @@ namespace LSFD.Core
                 ini.ReadInt32("World", "MaxSecondsBetweenOtherIncidents", MaxSecondsBetweenOtherIncidents));
             OtherUnitsNotifications = ini.ReadBoolean("World", "OtherUnitsNotifications", OtherUnitsNotifications);
 
+            DispatchRadio = ini.ReadBoolean("Audio", "DispatchRadio", DispatchRadio);
+            RadioVolume = ReadVolume(ini, "RadioVolume", RadioVolume);
+            AlarmVolume = ReadVolume(ini, "AlarmVolume", AlarmVolume);
+            PagerAlert = ini.ReadBoolean("Audio", "PagerAlert", PagerAlert);
+            SceneAlarms = ini.ReadBoolean("Audio", "SceneAlarms", SceneAlarms);
+            PassAlarm = ini.ReadBoolean("Audio", "PassAlarm", PassAlarm);
+            CprMetronome = ini.ReadBoolean("Audio", "CprMetronome", CprMetronome);
+
             Game.LogTrivial($"LSFD settings loaded (tablet: {TabletKey}, interact: {InteractKey}, callouts: {CalloutsEnabled}).");
+        }
+
+        // 0 to 100 in the ini.
+        private static float ReadVolume(InitializationFile ini, string key, float fallback)
+        {
+            return Math.Max(0, Math.Min(100, ini.ReadInt32("Audio", key, (int)Math.Round(fallback * 100f)))) / 100f;
         }
     }
 }

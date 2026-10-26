@@ -1,3 +1,4 @@
+using LSFD.Core;
 namespace LSFD.Apparatus
 {
     /// <summary>Equipment an apparatus can carry. Which items a vehicle has is set per apparatus in Apparatus.xml.</summary>
@@ -65,24 +66,24 @@ namespace LSFD.Apparatus
         {
             switch (type)
             {
-                case EquipmentType.AttackHose: return "Attack hose";
-                case EquipmentType.SupplyLine: return "Supply line";
-                case EquipmentType.FireExtinguisher: return "Fire extinguisher";
-                case EquipmentType.Axe: return "Axe";
-                case EquipmentType.Crowbar: return "Halligan bar";
-                case EquipmentType.Flashlight: return "Flashlight";
-                case EquipmentType.Flare: return "Road flares";
-                case EquipmentType.WindowPunch: return "Window punch";
-                case EquipmentType.Cribbing: return "Cribbing";
-                case EquipmentType.HydraulicSpreader: return "Hydraulic spreader";
-                case EquipmentType.HydraulicCutter: return "Hydraulic cutter";
-                case EquipmentType.AED: return "AED";
-                case EquipmentType.SCBA: return "SCBA cylinders";
-                case EquipmentType.ThermalCamera: return "Thermal imaging camera";
-                case EquipmentType.PPVFan: return "PPV fan";
-                case EquipmentType.GasDetector: return "Gas detector";
-                case EquipmentType.Absorbent: return "Absorbent";
-                case EquipmentType.TrafficCones: return "Traffic cones";
+                case EquipmentType.AttackHose: return L.T("Attack hose");
+                case EquipmentType.SupplyLine: return L.T("Supply line");
+                case EquipmentType.FireExtinguisher: return L.T("Fire extinguisher");
+                case EquipmentType.Axe: return L.T("Axe");
+                case EquipmentType.Crowbar: return L.T("Halligan bar");
+                case EquipmentType.Flashlight: return L.T("Flashlight");
+                case EquipmentType.Flare: return L.T("Road flares");
+                case EquipmentType.WindowPunch: return L.T("Window punch");
+                case EquipmentType.Cribbing: return L.T("Cribbing");
+                case EquipmentType.HydraulicSpreader: return L.T("Hydraulic spreader");
+                case EquipmentType.HydraulicCutter: return L.T("Hydraulic cutter");
+                case EquipmentType.AED: return L.T("AED");
+                case EquipmentType.SCBA: return L.T("SCBA cylinders");
+                case EquipmentType.ThermalCamera: return L.T("Thermal imaging camera");
+                case EquipmentType.PPVFan: return L.T("PPV fan");
+                case EquipmentType.GasDetector: return L.T("Gas detector");
+                case EquipmentType.Absorbent: return L.T("Absorbent");
+                case EquipmentType.TrafficCones: return L.T("Traffic cones");
                 default: return type.ToString();
             }
         }

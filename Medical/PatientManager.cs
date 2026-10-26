@@ -7,6 +7,7 @@ using LSFD.Buildings;
 using LSFD.Core;
 using LSFD.Firefighting;
 using LSFD.UI;
+using LSFD.Utils;
 using LSFD.VehicleRescue;
 using Rage;
 using Rage.Native;
@@ -31,6 +32,8 @@ namespace LSFD.Medical
         public const float TreatSeconds = 8f;
         public const float CprCycleSeconds = 10f;
         public const float CarryPickUpSeconds = 2f;
+
+        private const string CprMetronomeSound = "Effects/AED_METRONOME.wav";
 
         private const float Reach = 1.6f;
         private const float SafeDistance = 10f;
@@ -158,10 +161,10 @@ namespace LSFD.Medical
         {
             switch (tag)
             {
-                case TriageTag.Red: return "~r~RED~s~ (immediate)";
-                case TriageTag.Yellow: return "~y~YELLOW~s~ (delayed)";
-                case TriageTag.Green: return "~g~GREEN~s~ (minor)";
-                case TriageTag.Black: return "~c~BLACK~s~ (expectant)";
+                case TriageTag.Red: return L.T("~r~RED~s~ (immediate)");
+                case TriageTag.Yellow: return L.T("~y~YELLOW~s~ (delayed)");
+                case TriageTag.Green: return L.T("~g~GREEN~s~ (minor)");
+                case TriageTag.Black: return L.T("~c~BLACK~s~ (expectant)");
                 default: return "untagged";
             }
         }
@@ -170,10 +173,10 @@ namespace LSFD.Medical
         {
             switch (injury)
             {
-                case InjuryType.Burns: return "burns";
-                case InjuryType.SmokeInhalation: return "smoke inhalation";
-                case InjuryType.Medical: return "medical";
-                default: return "trauma";
+                case InjuryType.Burns: return L.T("burns");
+                case InjuryType.SmokeInhalation: return L.T("smoke inhalation");
+                case InjuryType.Medical: return L.T("medical");
+                default: return L.T("trauma");
             }
         }
 
@@ -211,8 +214,8 @@ namespace LSFD.Medical
                 SetCondition(patient, worse);
                 if (patient.Ped.DistanceTo(Game.LocalPlayer.Character) <= WarningDistance)
                     Notify.Warning(worse == PatientCondition.CardiacArrest
-                        ? "A patient went into ~r~cardiac arrest~s~! Start CPR."
-                        : "A patient is ~o~deteriorating~s~ and lost consciousness.");
+                        ? L.T("A patient went into ~r~cardiac arrest~s~! Start CPR.")
+                        : L.T("A patient is ~o~deteriorating~s~ and lost consciousness."));
             }
 
             DrawTriageTags();
@@ -281,7 +284,7 @@ namespace LSFD.Medical
 
             Patient carried = patients.FirstOrDefault(p => p.Carrier == player);
             if (carried != null)
-                return new Interaction(IsSafe(carried) ? "put the patient down" : "put the patient down (~o~still in danger~s~)", () => Drop(carried));
+                return new Interaction(IsSafe(carried) ? L.T("put the patient down") : L.T("put the patient down (~o~still in danger~s~)"), () => Drop(carried));
 
             Patient patient = patients
                 .Where(p => p.Ped.Exists() && p.Carrier == null && p.Transport == TransportState.None && p.Ped.DistanceTo(player.Position) <= Reach)
@@ -291,37 +294,37 @@ namespace LSFD.Medical
                 return null;
 
             if (patient.NeedsRescue)
-                return new Interaction("carry the ~r~victim~s~ out", () => StartCarry(patient, player), CarryPickUpSeconds, "LIFTING");
+                return new Interaction(L.T("carry the ~r~victim~s~ out"), () => StartCarry(patient, player), CarryPickUpSeconds, L.T("LIFTING"));
 
             if (patient.NeedsTriage && IsMassCasualty(patient.Ped.Position))
             {
-                return CareInteraction(patient, "~y~triage~s~ the patient", TriageSeconds, "TRIAGE",
+                return CareInteraction(patient, L.T("~y~triage~s~ the patient"), TriageSeconds, L.T("TRIAGE"),
                     "amb@medic@standing@tendtodead@idle_a", "idle_a", () =>
                     {
                         ApplyTriage(patient);
-                        Game.DisplaySubtitle($"Triage: {TagToDisplay(patient.Triage)} · {InjuryToDisplay(patient.Injury)}", 4000);
+                        Game.DisplaySubtitle(L.F($"Triage: {TagToDisplay(patient.Triage)} · {InjuryToDisplay(patient.Injury)}"), 4000);
                     });
             }
 
             switch (patient.Condition)
             {
                 case PatientCondition.CardiacArrest when tools.IsHolding(EquipmentType.AED):
-                    return CareInteraction(patient, "shock the patient with the ~y~AED", tools.Held.UseSeconds, "ANALYZING",
+                    return CareInteraction(patient, L.T("shock the patient with the ~y~AED"), tools.Held.UseSeconds, L.T("ANALYZING"),
                         "amb@medic@standing@tendtodead@idle_a", "idle_a", () => PerformCprCycle(patient, true));
 
                 case PatientCondition.CardiacArrest:
-                    return CareInteraction(patient, "perform ~r~CPR", CprCycleSeconds, "CPR",
+                    return CareInteraction(patient, L.T("perform ~r~CPR"), CprCycleSeconds, L.T("CPR"),
                         "mini@cpr@char_a@cpr_str", "cpr_pumpchest", () => PerformCprCycle(patient, false), cpr: true);
 
                 case PatientCondition.Injured:
                 case PatientCondition.Unconscious:
-                    return CareInteraction(patient, $"treat the ~r~patient~s~ ({InjuryToDisplay(patient.Injury)})", GetTreatSeconds(patient), "TREATING",
+                    return CareInteraction(patient, L.F($"treat the ~r~patient~s~ ({InjuryToDisplay(patient.Injury)})"), GetTreatSeconds(patient), "TREATING",
                         "amb@medic@standing@tendtodead@idle_a", "idle_a", () => Treat(patient));
 
                 case PatientCondition.Stable:
                     return Interaction.Hint(patient.RequiresTransport
-                        ? "The patient is ~g~stable~s~. The ~b~ambulance~s~ crew will take them to hospital."
-                        : "The patient is ~g~stable~s~.");
+                        ? L.T("The patient is ~g~stable~s~. The ~b~ambulance~s~ crew will take them to hospital.")
+                        : L.T("The patient is ~g~stable~s~."));
 
                 default:
                     return null;
@@ -341,14 +344,14 @@ namespace LSFD.Medical
             float chance = Math.Min(0.15f + 0.07f * patient.CprCycles + (withAed ? 0.3f : 0f), 0.85f);
             if (MathHelper.GetRandomSingle(0f, 1f) > chance)
             {
-                Game.DisplaySubtitle(withAed ? "~o~No shock advised.~s~ Continue CPR." : "~o~Still no pulse.~s~ Keep going.", 2500);
+                Game.DisplaySubtitle(withAed ? L.T("~o~No shock advised.~s~ Continue CPR.") : L.T("~o~Still no pulse.~s~ Keep going."), 2500);
                 return false;
             }
 
             patient.WasResuscitated = true;
             SetCondition(patient, PatientCondition.Stable);
             Milestone?.Invoke(PatientMilestone.Resuscitated, patient.Ped);
-            Notify.Info("~g~Pulse is back!~s~ The patient was resuscitated.");
+            Notify.Info(L.T("~g~Pulse is back!~s~ The patient was resuscitated."));
             return true;
         }
 
@@ -358,7 +361,7 @@ namespace LSFD.Medical
                 return;
 
             SetCondition(patient, PatientCondition.Stable);
-            Game.DisplaySubtitle("Patient ~g~treated~s~ and stable.", 2500);
+            Game.DisplaySubtitle(L.T("Patient ~g~treated~s~ and stable."), 2500);
             Milestone?.Invoke(PatientMilestone.Treated, patient.Ped);
         }
 
@@ -388,7 +391,7 @@ namespace LSFD.Medical
             {
                 patient.Rescued = true;
                 Milestone?.Invoke(PatientMilestone.Rescued, patient.Ped);
-                Notify.Info("Victim ~g~rescued~s~ from the building. Treat them for smoke inhalation.");
+                Notify.Info(L.T("Victim ~g~rescued~s~ from the building. Treat them for smoke inhalation."));
             }
 
             ApplyPose(patient);
@@ -405,6 +408,7 @@ namespace LSFD.Medical
             Action complete, bool cpr = false)
         {
             Ped player = Game.LocalPlayer.Character;
+            SoundHandle metronome = null;
             return new Interaction(prompt, complete, seconds, label)
             {
                 AnimationDictionary = dictionary,
@@ -413,10 +417,16 @@ namespace LSFD.Medical
                 {
                     patient.Caregiver = player;
                     if (cpr)
+                    {
                         patient.Ped.Tasks.PlayAnimation("mini@cpr@char_b@cpr_str", "cpr_pumpchest", 8f, AnimationFlags.Loop);
+                        // 110 compressions a minute.
+                        if (Settings.CprMetronome)
+                            metronome = Sound.PlayLooped(CprMetronomeSound, Settings.AlarmVolume);
+                    }
                 },
                 Stopped = () =>
                 {
+                    metronome?.Stop();
                     patient.Caregiver = null;
                     ApplyPose(patient);
                 },
@@ -443,7 +453,7 @@ namespace LSFD.Medical
                 ApplyPose(patient);
 
             if (condition == PatientCondition.Deceased)
-                Notify.Warning("A patient has ~r~died~s~.");
+                Notify.Warning(L.T("A patient has ~r~died~s~."));
 
             ConditionChanged?.Invoke(patient.Ped, condition);
         }

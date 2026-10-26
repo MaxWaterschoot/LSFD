@@ -59,9 +59,9 @@ namespace LSFD.Core
                 return null;
 
             if (action.RequiredEquipment.HasValue && !IsCarrying(action.RequiredEquipment.Value))
-                return Interaction.Hint(action.RequirementHint ?? $"You need the ~y~{action.RequiredEquipment.Value.ToDisplayName()}~s~ from an engine for this.");
+                return Interaction.Hint(action.RequirementHint ?? L.F($"You need the ~y~{action.RequiredEquipment.Value.ToDisplayName()}~s~ from an engine for this."));
             if (action.CanUse != null && !action.CanUse())
-                return Interaction.Hint(action.RequirementHint ?? "You can't do this yet.");
+                return Interaction.Hint(action.RequirementHint ?? L.T("You can't do this yet."));
 
             return new Interaction(action.Prompt, () =>
             {

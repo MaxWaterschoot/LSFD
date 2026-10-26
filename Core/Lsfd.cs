@@ -11,6 +11,7 @@ using LSFD.Profiles;
 using LSFD.Safety;
 using LSFD.Stations;
 using LSFD.UI;
+using LSFD.Utils;
 using LSFD.VehicleRescue;
 using LSFD.Water;
 using Rage;
@@ -52,6 +53,8 @@ namespace LSFD.Core
         public static PoliceSupport Police { get; private set; }
         public static AmbientIncidents Ambient { get; private set; }
         public static OtherUnits OtherUnits { get; private set; }
+        public static DispatchRadio Radio { get; private set; }
+        public static WitnessManager Witnesses { get; private set; }
 
         // AI units sent to the current call; they go back to quarters when it ends.
         private static readonly List<FireApparatus> sceneUnits = new List<FireApparatus>();
@@ -59,6 +62,7 @@ namespace LSFD.Core
         public static void Initialize()
         {
             Settings.Load();
+            L.Load(Settings.Language);
             Profiles = new ProfileManager();
 
             Stations = new FireStationManager();
@@ -93,10 +97,12 @@ namespace LSFD.Core
             Police = new PoliceSupport();
             Ambient = new AmbientIncidents(Registry, Callouts, Duty);
             OtherUnits = new OtherUnits(Apparatus, Stations, Callouts, ReturnApparatus);
+            Radio = new DispatchRadio(Duty, Stations, Apparatus);
+            Witnesses = new WitnessManager();
 
             // In order of priority: the first one with something to offer gets the interact key.
             SceneActions = new SceneActionManager(Tools);
-            Interactions = new InteractionRunner(Patients, SceneActions, Fire, Entry, Ventilation, Hydrants, Extrication, Apparatus, Stations, Traffic);
+            Interactions = new InteractionRunner(Patients, SceneActions, Witnesses, Fire, Entry, Ventilation, Hydrants, Extrication, Apparatus, Stations, Traffic);
 
             Menus = new MenuManager(Duty, Apparatus, Hose, Hydrants, Tools, Scba, ThermalCamera, Ventilation, Profiles);
             Tablet = new Tablet(Duty, Callouts, Apparatus, Crew, Stations, Patients, Fire, Profiles, OtherUnits, ReturnApparatus, RequestBackup);
@@ -105,7 +111,12 @@ namespace LSFD.Core
             Stations.StationMenuRequested += Menus.OpenStationMenu;
             Apparatus.CompartmentMenuRequested += Menus.OpenCompartmentMenu;
             Apparatus.Spawned += Crew.SpawnCrew;
-            Callouts.CalloutCompleted += Hud.ShowCalloutCompleted;
+            // The radio first, so "Copy" comes before "Additional units are en route".
+            Callouts.CalloutOffered += Radio.OnCalloutOffered;
+            Callouts.CalloutAccepted += Radio.OnCalloutAccepted;
+            Callouts.CalloutEnded += Radio.OnCalloutEnded;
+            Callouts.CalloutDeclined += Radio.OnCalloutDeclined;
+            Duty.DutyStateChanged += Radio.OnDutyStateChanged;
             Callouts.CalloutAccepted += OnCalloutAccepted;
             Callouts.CalloutEnded += OnCalloutEnded;
             Duty.DutyStateChanged += OnDutyStateChanged;
@@ -115,6 +126,12 @@ namespace LSFD.Core
             Callouts.CalloutAccepted += StationLife.OnCalloutAccepted;
             Callouts.CalloutAccepted += Profiles.OnCalloutAccepted;
             Callouts.CalloutEnded += Profiles.OnCalloutEnded;
+            Profiles.ReportReady += Hud.ShowCallReport;
+            Patients.ConditionChanged += (ped, condition) =>
+            {
+                if (condition == PatientCondition.Deceased)
+                    Profiles.OnPatientDied();
+            };
             Patients.Milestone += OnPatientMilestone;
             Fire.Escalated += OnFireEscalated;
             Fire.StatusChanged += OnFireStatusChanged;
@@ -166,6 +183,8 @@ namespace LSFD.Core
             Police.Process();
             Ambient.Process();
             OtherUnits.Process(Duty.IsOnDuty);
+            Witnesses.Process();
+            Sound.Process();
 
             if (!uiOpen)
                 Interactions.Process();
@@ -193,6 +212,8 @@ namespace LSFD.Core
             Stations?.CleanupFireStations();
             Profiles?.Save();
             Registry?.Shutdown();
+            Witnesses?.Clear();
+            Sound.Shutdown();
         }
 
         /// <summary>Sends an apparatus back to quarters, stowing everything that is connected to it.</summary>
@@ -222,14 +243,17 @@ namespace LSFD.Core
             FireStation station = OtherUnits.FindAvailableStation(type, destination) ?? Stations.GetNearestStation(destination);
             if (definition == null || station == null)
             {
-                Notify.Dispatch("~o~No units", $"There is no {type} available in Apparatus.xml.");
+                Notify.Dispatch(L.T("~o~No units"), L.F($"There is no {type} available in Apparatus.xml."));
                 return false;
             }
 
             FireApparatus unit = Apparatus.SpawnResponding(definition, station, destination);
-            if (unit != null)
-                sceneUnits.Add(unit);
-            return unit != null;
+            if (unit == null)
+                return false;
+
+            sceneUnits.Add(unit);
+            Radio.OnBackupSent(type);
+            return true;
         }
 
         // Like real dispatch: every alarm above the first brings another engine company, and calls with
@@ -257,10 +281,14 @@ namespace LSFD.Core
         private static void OnFireEscalated(FireIncident incident)
         {
             string alarm = CalloutPriorityExtensions.AlarmToDisplay(incident.AlarmLevel);
-            Notify.Dispatch($"~r~Upgraded to {alarm}", $"The fire at ~y~{World.GetStreetName(incident.Origin)}~s~ is spreading. Another engine company is responding.");
+            Notify.Dispatch(L.F($"~r~Upgraded to {alarm}"), L.F($"The fire at ~y~{World.GetStreetName(incident.Origin)}~s~ is spreading. Another engine company is responding."));
 
             if (incident.Owner != null && incident.Owner == Callouts.Current)
+            {
+                Profiles.OnFireEscalated(incident.Owner);
+                Radio.OnFireEscalated(incident);
                 RequestBackup(ApparatusType.Engine, incident.Owner.StagingPosition);
+            }
         }
 
         private static void OnFireStatusChanged(FireIncident incident, FireStatus status)
@@ -271,13 +299,13 @@ namespace LSFD.Core
             switch (status)
             {
                 case FireStatus.UnderControl:
-                    Notify.Dispatch("Fire under control", "Command reports the fire is ~y~under control~s~. Keep working it.");
+                    Notify.Dispatch(L.T("Fire under control"), L.T("Command reports the fire is ~y~under control~s~. Keep working it."));
                     break;
                 case FireStatus.Knockdown:
-                    Notify.Dispatch("Knockdown", "No open flames left. ~o~Overhaul~s~: soak every hotspot, the thermal camera shows them.");
+                    Notify.Dispatch(L.T("Knockdown"), L.T("No open flames left. ~o~Overhaul~s~: soak every hotspot, the thermal camera shows them."));
                     break;
                 case FireStatus.Out:
-                    Notify.Dispatch("~g~Fire out", "All hotspots are overhauled, the fire is out.");
+                    Notify.Dispatch(L.T("~g~Fire out"), L.T("All hotspots are overhauled, the fire is out."));
                     Profiles.OnFireOut();
                     break;
             }
@@ -310,7 +338,7 @@ namespace LSFD.Core
         {
             bool wasBeaten = incident.Status == FireStatus.UnderControl || incident.Status == FireStatus.Knockdown;
             if (wasBeaten && incident.Owner != null && incident.Owner == Callouts.Current)
-                Notify.Warning("~r~Rekindle!~s~ A hotspot burst into flames again.");
+                Notify.Warning(L.T("~r~Rekindle!~s~ A hotspot burst into flames again."));
         }
 
         private static void OnCalloutEnded(Callout callout)

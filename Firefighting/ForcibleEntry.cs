@@ -57,9 +57,9 @@ namespace LSFD.Firefighting
 
             uint weapon = NativeFunction.CallByName<uint>("GET_SELECTED_PED_WEAPON", player);
             if (!EntryTools.Contains(weapon))
-                return Interaction.Hint("The door is ~r~locked~s~. Force it with a ~y~halligan bar~s~ or ~y~axe~s~ from the engine.");
+                return Interaction.Hint(L.T("The door is ~r~locked~s~. Force it with a ~y~halligan bar~s~ or ~y~axe~s~ from the engine."));
 
-            return new Interaction("~r~force~s~ the door", () => Force(door.Door), ForceSeconds, "FORCING")
+            return new Interaction(L.T("~r~force~s~ the door"), () => Force(door.Door), ForceSeconds, L.T("FORCING"))
             {
                 AnimationDictionary = "mini@repair",
                 AnimationName = "fixing_a_player",
@@ -90,7 +90,7 @@ namespace LSFD.Firefighting
             locked.RemoveAll(d => d.Door == door);
             Unfreeze(door);
             NativeFunction.CallByName<uint>("PLAY_SOUND_FROM_ENTITY", -1, "Crash", door, "DLC_HEIST_HACKING_SNAKE_SOUNDS", false, 0);
-            Game.DisplaySubtitle("Door ~g~forced~s~.", 2000);
+            Game.DisplaySubtitle(L.T("Door ~g~forced~s~."), 2000);
         }
 
         // Doors are thin, upright and about a person wide; map doors are props like any other.

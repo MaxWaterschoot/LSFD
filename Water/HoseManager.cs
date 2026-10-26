@@ -127,13 +127,13 @@ namespace LSFD.Water
 
             if (distance > length + LengthSnapMargin)
             {
-                Notify.Warning("The hose was pulled out of your hands, it doesn't reach any further.");
+                Notify.Warning(L.T("The hose was pulled out of your hands, it doesn't reach any further."));
                 StowHose();
                 return false;
             }
 
             if (distance > length - LengthWarningMargin)
-                Game.DisplaySubtitle("~o~The hose is almost fully stretched out.", 100);
+                Game.DisplaySubtitle(L.T("~o~The hose is almost fully stretched out."), 100);
 
             return true;
         }
@@ -146,7 +146,7 @@ namespace LSFD.Water
             if (Game.IsKeyDown(Settings.FoamKey))
             {
                 if (Source.Definition.FoamCapacity <= 0f)
-                    Game.DisplaySubtitle($"~o~The {Source.Definition.Name} carries no foam.", 2500);
+                    Game.DisplaySubtitle(L.F($"~o~The {Source.Definition.Name} carries no foam."), 2500);
                 else
                     Nozzle.Agent = Nozzle.IsFoam ? ExtinguishingAgent.Water : ExtinguishingAgent.Foam;
             }
@@ -163,7 +163,7 @@ namespace LSFD.Water
             if (!Source.PumpEngaged)
             {
                 StopSpraying();
-                Game.DisplaySubtitle($"~o~The pump of the {Source.Definition.Name} is disengaged.~s~ Engage it on the tablet.", 100);
+                Game.DisplaySubtitle(L.F($"~o~The pump of the {Source.Definition.Name} is disengaged.~s~ Engage it on the tablet."), 100);
                 return;
             }
 
@@ -174,12 +174,12 @@ namespace LSFD.Water
             if (Nozzle.IsFoam && Source.DrawFoam(Nozzle.FoamUse * Game.FrameTime) <= 0f)
             {
                 Nozzle.Agent = ExtinguishingAgent.Water;
-                Notify.Warning($"The {Source.Definition.Name} is ~o~out of foam~s~, back to water.");
+                Notify.Warning(L.F($"The {Source.Definition.Name} is ~o~out of foam~s~, back to water."));
             }
             if (IsTankEmpty)
             {
                 StopSpraying();
-                Game.DisplaySubtitle($"~r~The {Source.Definition.Name} is out of water.~s~ Connect it to a hydrant.", 100);
+                Game.DisplaySubtitle(L.F($"~r~The {Source.Definition.Name} is out of water.~s~ Connect it to a hydrant."), 100);
                 return;
             }
 

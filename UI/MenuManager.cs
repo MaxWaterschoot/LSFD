@@ -28,9 +28,9 @@ namespace LSFD.UI
 
         private readonly MenuPool pool = new MenuPool();
 
-        private readonly UIMenu stationMenu = Theme.CreateMenu("Fire station");
-        private readonly UIMenu requestApparatusMenu = Theme.CreateMenu("Request apparatus");
-        private readonly UIMenu lockerMenu = Theme.CreateMenu("Locker room");
+        private readonly UIMenu stationMenu = Theme.CreateMenu(L.T("Fire station"));
+        private readonly UIMenu requestApparatusMenu = Theme.CreateMenu(L.T("Request apparatus"));
+        private readonly UIMenu lockerMenu = Theme.CreateMenu(L.T("Locker room"));
         private readonly ProfileManager profiles;
         private readonly UIMenu compartmentMenu = Theme.CreateMenu("Compartments");
 
@@ -90,7 +90,7 @@ namespace LSFD.UI
 
             if (duty.IsOnDuty)
             {
-                Add(stationMenu, new UIMenuItem("Go off duty", "Clock out and change back into your own clothes."), () =>
+                Add(stationMenu, new UIMenuItem(L.T("Go off duty"), L.T("Clock out and change back into your own clothes.")), () =>
                 {
                     pool.CloseAllMenus();
                     duty.GoOffDuty();
@@ -98,26 +98,26 @@ namespace LSFD.UI
             }
             else
             {
-                Add(stationMenu, new UIMenuItem("Go on duty", "Suit up in the locker room and clock in at this station."), () =>
+                Add(stationMenu, new UIMenuItem(L.T("Go on duty"), L.T("Suit up in the locker room and clock in at this station.")), () =>
                 {
                     pool.CloseAllMenus();
                     duty.GoOnDuty(currentStation);
                 });
             }
 
-            UIMenuItem requestItem = Add(stationMenu, new UIMenuItem("Request apparatus", "Have a vehicle and its crew brought out in front of the station."), null);
+            UIMenuItem requestItem = Add(stationMenu, new UIMenuItem(L.T("Request apparatus"), L.T("Have a vehicle and its crew brought out in front of the station.")), null);
             requestItem.Enabled = duty.IsOnDuty;
             stationMenu.BindMenuToItem(requestApparatusMenu, requestItem);
             BuildRequestApparatusMenu();
 
-            UIMenuItem lockerItem = Add(stationMenu, new UIMenuItem("Locker room", "Choose the outfit you wear on duty (EUP outfits too)."), null);
+            UIMenuItem lockerItem = Add(stationMenu, new UIMenuItem(L.T("Locker room"), L.T("Choose the outfit you wear on duty (EUP outfits too).")), null);
             stationMenu.BindMenuToItem(lockerMenu, lockerItem);
             BuildLockerMenu();
 
-            Add(stationMenu, new UIMenuItem("Restock personal gear", "A full SCBA cylinder, your health and a flashlight."), () =>
+            Add(stationMenu, new UIMenuItem(L.T("Restock personal gear"), L.T("A full SCBA cylinder, your health and a flashlight.")), () =>
             {
                 duty.RestockPersonalGear();
-                Notify.Info("Personal gear restocked.");
+                Notify.Info(L.T("Personal gear restocked."));
             }).Enabled = duty.IsOnDuty;
 
             stationMenu.RefreshIndex();
@@ -131,16 +131,16 @@ namespace LSFD.UI
 
             if (definition.HasPump)
             {
-                compartmentMenu.AddItem(new UIMenuItem("Water tank", "Connect a supply line to a hydrant to refill the tank.")
+                compartmentMenu.AddItem(new UIMenuItem(L.T("Water tank"), L.T("Connect a supply line to a hydrant to refill the tank."))
                 {
                     Skipped = true,
-                    RightLabel = source.IsSupplied ? "~b~On hydrant" : $"{source.Water:N0} / {definition.WaterCapacity:N0} L",
+                    RightLabel = source.IsSupplied ? L.T("~b~On hydrant") : $"{source.Water:N0} / {definition.WaterCapacity:N0} L",
                 });
             }
 
             if (definition.FoamCapacity > 0f)
             {
-                compartmentMenu.AddItem(new UIMenuItem("Foam tank", $"Switch the nozzle to foam with {Settings.FoamKey} for fuel and vehicle fires.")
+                compartmentMenu.AddItem(new UIMenuItem(L.T("Foam tank"), L.F($"Switch the nozzle to foam with {Settings.FoamKey} for fuel and vehicle fires."))
                 {
                     Skipped = true,
                     RightLabel = $"{source.Foam:N0} / {definition.FoamCapacity:N0} L",
@@ -163,8 +163,8 @@ namespace LSFD.UI
             if (definition.Carries(EquipmentType.AttackHose))
             {
                 bool holdingThis = hose.Source == source;
-                Add(compartmentMenu, new UIMenuItem(holdingThis ? "Stow attack hose" : "Pull attack hose",
-                    $"{definition.HoseLength:0} m line with an adjustable straight/fog nozzle."), () =>
+                Add(compartmentMenu, new UIMenuItem(holdingThis ? L.T("Stow attack hose") : L.T("Pull attack hose"),
+                    L.F($"{definition.HoseLength:0} m line with an adjustable straight/fog nozzle.")), () =>
                 {
                     if (holdingThis)
                     {
@@ -181,8 +181,8 @@ namespace LSFD.UI
 
             if (definition.Carries(EquipmentType.SupplyLine))
             {
-                string text = source.IsSupplied ? "Disconnect supply line" : hydrants.CarryingFrom == source ? "Return supply line" : "Take supply line";
-                Add(compartmentMenu, new UIMenuItem(text, $"{definition.SupplyLineLength:0} m line to connect this apparatus to a fire hydrant."), () =>
+                string text = source.IsSupplied ? L.T("Disconnect supply line") : hydrants.CarryingFrom == source ? L.T("Return supply line") : L.T("Take supply line");
+                Add(compartmentMenu, new UIMenuItem(text, L.F($"{definition.SupplyLineLength:0} m line to connect this apparatus to a fire hydrant.")), () =>
                 {
                     if (source.IsSupplied)
                         hydrants.Disconnect(source);
@@ -201,14 +201,14 @@ namespace LSFD.UI
 
             if (definition.Carries(EquipmentType.SCBA))
             {
-                var item = new UIMenuItem("Swap SCBA cylinder", "Replace the cylinder on your back with a full one.")
+                var item = new UIMenuItem(L.T("Swap SCBA cylinder"), L.T("Replace the cylinder on your back with a full one."))
                 {
                     RightLabel = $"{(scba.IsLowOnAir ? "~r~" : "")}{scba.AirFraction:P0}",
                 };
                 Add(compartmentMenu, item, () =>
                 {
                     scba.Refill();
-                    Notify.Info("Full ~b~SCBA cylinder~s~ on your back.");
+                    Notify.Info(L.T("Full ~b~SCBA cylinder~s~ on your back."));
                     pool.CloseAllMenus();
                 });
             }
@@ -216,8 +216,8 @@ namespace LSFD.UI
             if (definition.Carries(EquipmentType.PPVFan))
             {
                 bool taken = ventilation.Source == source;
-                Add(compartmentMenu, new UIMenuItem(taken ? "Put PPV fan back" : "Take PPV fan",
-                    "Blows the smoke out of a building: set it up in the doorway, facing in. The fresh air also feeds the fire."), () =>
+                Add(compartmentMenu, new UIMenuItem(taken ? L.T("Put PPV fan back") : L.T("Take PPV fan"),
+                    L.T("Blows the smoke out of a building: set it up in the doorway, facing in. The fresh air also feeds the fire.")), () =>
                 {
                     if (taken)
                         ventilation.Stow();
@@ -231,7 +231,7 @@ namespace LSFD.UI
             {
                 bool carryingThis = thermalCamera.Source == source;
                 var item = new UIMenuCheckboxItem(EquipmentType.ThermalCamera.ToDisplayName(), carryingThis,
-                    $"Shows victims, flames and hotspots through the smoke. Turn it on with {Settings.ThermalCameraKey}.");
+                    L.F($"Shows victims, flames and hotspots through the smoke. Turn it on with {Settings.ThermalCameraKey}."));
                 Add(compartmentMenu, item, () =>
                 {
                     if (item.Checked)
@@ -248,13 +248,13 @@ namespace LSFD.UI
             if (handTools.Count == 0)
                 return;
 
-            compartmentMenu.AddItem(Theme.CreateHeader("Rescue tools"));
+            compartmentMenu.AddItem(Theme.CreateHeader(L.T("Rescue tools")));
             foreach (EquipmentType tool in handTools)
             {
                 bool holding = tools.IsHolding(tool) && tools.HeldFrom == source;
-                var item = new UIMenuItem(tool.ToDisplayName(), holding ? "Put it back in the compartment." : "Carry it in your hands.")
+                var item = new UIMenuItem(tool.ToDisplayName(), holding ? L.T("Put it back in the compartment.") : L.T("Carry it in your hands."))
                 {
-                    RightLabel = holding ? "~g~In hand" : "",
+                    RightLabel = holding ? L.T("~g~In hand") : "",
                 };
                 Add(compartmentMenu, item, () =>
                 {
@@ -278,10 +278,10 @@ namespace LSFD.UI
             if (weaponTools.Count == 0)
                 return;
 
-            compartmentMenu.AddItem(Theme.CreateHeader("Hand tools"));
+            compartmentMenu.AddItem(Theme.CreateHeader(L.T("Hand tools")));
             foreach (EquipmentType tool in weaponTools)
             {
-                var item = new UIMenuCheckboxItem(tool.ToDisplayName(), source.IsTaken(tool), "Take it from or put it back in the compartment.");
+                var item = new UIMenuCheckboxItem(tool.ToDisplayName(), source.IsTaken(tool), L.T("Take it from or put it back in the compartment."));
                 Add(compartmentMenu, item, () =>
                 {
                     if (item.Checked)
@@ -294,12 +294,12 @@ namespace LSFD.UI
 
         private void BuildLockerMenu()
         {
-            Rebuild(lockerMenu, "Locker room");
+            Rebuild(lockerMenu, L.T("Locker room"));
             Outfit selected = profiles.SelectedOutfit;
 
-            Add(lockerMenu, new UIMenuItem("Standard turnout gear", "The default LSFD firefighter.")
+            Add(lockerMenu, new UIMenuItem(L.T("Standard turnout gear"), L.T("The default LSFD firefighter."))
             {
-                RightLabel = selected == null ? "~g~Wearing" : "",
+                RightLabel = selected == null ? L.T("~g~Wearing") : "",
             }, () => ChangeOutfit(null));
 
             if (profiles.Outfits.Outfits.Count > 0)
@@ -307,17 +307,17 @@ namespace LSFD.UI
             foreach (Outfit outfit in profiles.Outfits.Outfits)
             {
                 Outfit choice = outfit;
-                Add(lockerMenu, new UIMenuItem(outfit.Name, $"Model {outfit.Model}. Rename or edit it in Plugins/LSFD/Profiles/Outfits.xml.")
+                Add(lockerMenu, new UIMenuItem(outfit.Name, L.F($"Model {outfit.Model}. Rename or edit it in Plugins/LSFD/Profiles/Outfits.xml."))
                 {
-                    RightLabel = selected == outfit ? "~g~Wearing" : "",
+                    RightLabel = selected == outfit ? L.T("~g~Wearing") : "",
                 }, () => ChangeOutfit(choice));
             }
 
             lockerMenu.AddItem(Theme.CreateHeader("EUP"));
-            Add(lockerMenu, new UIMenuItem("Save what I'm wearing", "Dress up with the EUP menu (or any outfit tool) first, then save it here as your duty outfit."), () =>
+            Add(lockerMenu, new UIMenuItem(L.T("Save what I'm wearing"), L.T("Dress up with the EUP menu (or any outfit tool) first, then save it here as your duty outfit.")), () =>
             {
                 Outfit saved = profiles.SaveCurrentOutfit();
-                Notify.Info($"Saved as ~y~{saved.Name}~s~ and selected. Rename it in Profiles/Outfits.xml.");
+                Notify.Info(L.F($"Saved as ~y~{saved.Name}~s~ and selected. Rename it in Profiles/Outfits.xml."));
                 pool.CloseAllMenus();
             });
 
@@ -328,22 +328,22 @@ namespace LSFD.UI
         {
             pool.CloseAllMenus();
             duty.ChangeOutfit(outfit);
-            Notify.Info(outfit == null ? "Wearing the ~y~standard turnout gear~s~." : $"Wearing ~y~{outfit.Name}~s~.");
+            Notify.Info(outfit == null ? L.T("Wearing the ~y~standard turnout gear~s~.") : L.F($"Wearing ~y~{outfit.Name}~s~."));
         }
 
         private void BuildRequestApparatusMenu()
         {
-            Rebuild(requestApparatusMenu, "Request apparatus");
+            Rebuild(requestApparatusMenu, L.T("Request apparatus"));
 
             foreach (var group in apparatus.Repository.Spawnable.GroupBy(d => d.HasPump))
             {
-                requestApparatusMenu.AddItem(Theme.CreateHeader(group.Key ? "Fire apparatus" : "Support units"));
+                requestApparatusMenu.AddItem(Theme.CreateHeader(group.Key ? L.T("Fire apparatus") : L.T("Support units")));
                 foreach (ApparatusDefinition definition in group)
                 {
-                    string tank = definition.HasPump ? $"{definition.WaterCapacity:N0} L tank, " : "";
-                    string crew = definition.MaxCrew > 0 ? $"crew of {definition.MinCrew}-{definition.MaxCrew}, " : "";
+                    string tank = definition.HasPump ? L.F($"{definition.WaterCapacity:N0} L tank, ") : "";
+                    string crew = definition.MaxCrew > 0 ? L.F($"crew of {definition.MinCrew}-{definition.MaxCrew}, ") : "";
                     string equipment = string.Join(", ", definition.Equipment.Select(e => e.ToDisplayName()));
-                    var item = new UIMenuItem(definition.Name, $"{tank}{crew}carries: {equipment}.")
+                    var item = new UIMenuItem(definition.Name, L.F($"{tank}{crew}carries: {equipment}."))
                     {
                         RightLabel = definition.Type.ToString(),
                         LeftBadge = UIMenuItem.BadgeStyle.Car,

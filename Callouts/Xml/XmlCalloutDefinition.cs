@@ -172,6 +172,12 @@ namespace LSFD.Callouts.Xml
     {
         [XmlAttribute] public int Count { get; set; } = 1;
         [XmlAttribute] public float Distance { get; set; } = 12f;
+
+        /// <summary>Shown before every line and on the map, when there are lines.</summary>
+        [XmlAttribute] public string Label { get; set; } = "Caller";
+
+        /// <summary>What the first of these bystanders tells the player when they talk to them.</summary>
+        [XmlElement("Line")] public List<string> Lines { get; set; } = new List<string>();
     }
 
     /// <summary>An invisible toxic atmosphere (like CO) at the location; hurts without the SCBA face piece.</summary>

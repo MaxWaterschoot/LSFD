@@ -62,8 +62,7 @@ namespace LSFD.Buildings
 
             Game.LogTrivial(found != null
                 ? $"LSFD: interior mod detected ({found}), interior callouts are enabled."
-                : "LSFD: Enable All Interiors not found, callouts that need locked interiors are disabled. " +
-                  "Set [Interiors] EnableAllInteriors=Enabled in LSFD.ini to override.");
+                : "LSFD: Enable All Interiors not found, callouts that need locked interiors are disabled. Set [Interiors] EnableAllInteriors=Enabled in LSFD.ini to override.");
             return found != null;
         }
 

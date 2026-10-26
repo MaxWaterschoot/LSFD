@@ -3,6 +3,8 @@ using System.Linq;
 using LSFD.API;
 using LSFD.Apparatus;
 using LSFD.Buildings;
+using LSFD.Core;
+using LSFD.Utils;
 using Rage;
 using Rage.Native;
 
@@ -78,16 +80,17 @@ namespace LSFD.Callouts
 
         private Cause cause;
         private int alarmSound = -1;
+        private PositionalSound alarm;
 
         protected override FireLocationKind[] Kinds => new[]
         {
             FireLocationKind.Store, FireLocationKind.Commercial, FireLocationKind.Office, FireLocationKind.Public, FireLocationKind.Industrial,
         };
 
-        protected override string Title => "Automatic Fire Alarm";
+        protected override string Title => L.T("Automatic Fire Alarm");
 
         protected override string Describe(BuildingInfo building) =>
-            $"~y~{building.Name}~s~. The fire alarm system went off, no caller on the line. Investigate.";
+            L.F($"~y~{building.Name}~s~. The fire alarm system went off, no caller on the line. Investigate.");
 
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -100,11 +103,16 @@ namespace LSFD.Callouts
         protected override void Investigate()
         {
             Vector3 p = Building.Position;
-            alarmSound = NativeFunction.CallByName<int>("GET_SOUND_ID");
-            NativeFunction.CallByName<uint>("PLAY_SOUND_FROM_COORD", alarmSound, "Burglar_Bell", p.X, p.Y, p.Z, "Generic_Alarms", false, 0, false);
+            if (Settings.SceneAlarms)
+                alarm = Sound.PlayAt("Alarms/SMOKE_DETECTOR.wav", p, Settings.AlarmVolume, 45f);
+            if (alarm == null)
+            {
+                alarmSound = NativeFunction.CallByName<int>("GET_SOUND_ID");
+                NativeFunction.CallByName<uint>("PLAY_SOUND_FROM_COORD", alarmSound, "Burglar_Bell", p.X, p.Y, p.Z, "Generic_Alarms", false, 0, false);
+            }
 
-            AddSceneAction(new SceneAction(p, "check the ~y~fire alarm panel", ReadPanel) { HoldSeconds = 5f, ProgressLabel = "CHECKING" });
-            Game.DisplayHelp("Go inside and check the ~y~fire alarm panel~s~ to find out which detector went off.");
+            AddSceneAction(new SceneAction(p, L.T("check the ~y~fire alarm panel"), ReadPanel) { HoldSeconds = 5f, ProgressLabel = L.T("CHECKING") });
+            Game.DisplayHelp(L.T("Go inside and check the ~y~fire alarm panel~s~ to find out which detector went off."));
         }
 
         private void ReadPanel()
@@ -112,24 +120,24 @@ namespace LSFD.Callouts
             switch (cause)
             {
                 case Cause.FaultyDetector:
-                    Game.DisplaySubtitle("Panel: ~y~detector fault~s~ in zone 3. No smoke, no fire.", 5000);
+                    Game.DisplaySubtitle(L.T("Panel: ~y~detector fault~s~ in zone 3. No smoke, no fire."), 5000);
                     AddReset(Building.Position);
                     break;
 
                 case Cause.BurntFood:
-                    Game.DisplaySubtitle("Panel: smoke detector in the ~y~kitchen~s~. Somebody burnt their lunch.", 5000);
+                    Game.DisplaySubtitle(L.T("Panel: smoke detector in the ~y~kitchen~s~. Somebody burnt their lunch."), 5000);
                     Vector3 kitchen = Building.Position.Around2D(2f, 4f);
-                    AddSceneAction(new SceneAction(kitchen, "~b~ventilate~s~ the kitchen", () => AddReset(Building.Position))
+                    AddSceneAction(new SceneAction(kitchen, L.T("~b~ventilate~s~ the kitchen"), () => AddReset(Building.Position))
                     {
                         HoldSeconds = 6f,
-                        ProgressLabel = "VENTILATING",
+                        ProgressLabel = L.T("VENTILATING"),
                     });
                     break;
 
                 case Cause.RealFire:
                     StopAlarm();
                     StartRealFire(Building.Position.Around2D(2f, 4f), FireClass.Ordinary);
-                    Functions.DisplayNotification("~r~Working fire", $"Smoke and flames inside ~y~{Building.Name}~s~. Upgraded to a structure fire.");
+                    Functions.DisplayNotification(L.T("~r~Working fire"), L.F($"Smoke and flames inside ~y~{Building.Name}~s~. Upgraded to a structure fire."));
                     IsResolved = true;
                     break;
             }
@@ -137,16 +145,18 @@ namespace LSFD.Callouts
 
         private void AddReset(Vector3 panel)
         {
-            AddSceneAction(new SceneAction(panel, "~g~reset~s~ the fire alarm", () =>
+            AddSceneAction(new SceneAction(panel, L.T("~g~reset~s~ the fire alarm"), () =>
             {
                 StopAlarm();
-                Game.DisplaySubtitle("Alarm ~g~reset~s~. Building handed back to the owner.", 4000);
+                Game.DisplaySubtitle(L.T("Alarm ~g~reset~s~. Building handed back to the owner."), 4000);
                 IsResolved = true;
-            }) { HoldSeconds = 3f, ProgressLabel = "RESETTING" });
+            }) { HoldSeconds = 3f, ProgressLabel = L.T("RESETTING") });
         }
 
         private void StopAlarm()
         {
+            alarm?.Stop();
+            alarm = null;
             if (alarmSound < 0)
                 return;
 
@@ -173,10 +183,10 @@ namespace LSFD.Callouts
             FireLocationKind.Store, FireLocationKind.Commercial, FireLocationKind.Office, FireLocationKind.Public,
         };
 
-        protected override string Title => "Smell of Smoke";
+        protected override string Title => L.T("Smell of Smoke");
 
         protected override string Describe(BuildingInfo building) =>
-            $"~y~{building.Name}~s~. Staff smell something burning, no visible smoke. Locate the source.";
+            L.F($"~y~{building.Name}~s~. Staff smell something burning, no visible smoke. Locate the source.");
 
         protected override void Investigate()
         {
@@ -187,34 +197,34 @@ namespace LSFD.Callouts
             {
                 int index = i;
                 Vector3 position = Building.Position.Around2D(1.5f, 5f);
-                searches.Add(AddSceneAction(new SceneAction(position, "search for the ~y~source~s~ of the smell", () => Searched(index, position))
+                searches.Add(AddSceneAction(new SceneAction(position, L.T("search for the ~y~source~s~ of the smell"), () => Searched(index, position))
                 {
                     HoldSeconds = 4f,
-                    ProgressLabel = "SEARCHING",
+                    ProgressLabel = L.T("SEARCHING"),
                     AnimationDictionary = "",
                 }));
             }
 
-            Game.DisplayHelp("Search the building. The ~y~thermal imaging camera~s~ shows heat behind walls.");
+            Game.DisplayHelp(L.T("Search the building. The ~y~thermal imaging camera~s~ shows heat behind walls."));
         }
 
         private void Searched(int index, Vector3 position)
         {
             if (index == sourceIndex)
             {
-                Game.DisplaySubtitle("~r~Overheated wiring~s~ is smoldering behind the wall!", 5000);
+                Game.DisplaySubtitle(L.T("~r~Overheated wiring~s~ is smoldering behind the wall!"), 5000);
                 StartRealFire(position, FireClass.Electrical, Building.Position);
                 foreach (SceneAction search in searches)
                     search.Remove();
                 IsResolved = true;
-                Functions.DisplayNotification("~r~Electrical fire", "Isolate the power at the panel (~y~yellow arrow~s~) before you use water.");
+                Functions.DisplayNotification(L.T("~r~Electrical fire"), L.T("Isolate the power at the panel (~y~yellow arrow~s~) before you use water."));
                 return;
             }
 
-            Game.DisplaySubtitle("Nothing here.", 2000);
+            Game.DisplaySubtitle(L.T("Nothing here."), 2000);
             if (searches.All(s => s.IsDone))
             {
-                Game.DisplaySubtitle("Nothing found inside. Probably a barbecue next door.", 5000);
+                Game.DisplaySubtitle(L.T("Nothing found inside. Probably a barbecue next door."), 5000);
                 IsResolved = true;
             }
         }
@@ -225,10 +235,11 @@ namespace LSFD.Callouts
     {
         private readonly List<Ped> occupants = new List<Ped>();
         private ToxicAtmosphere carbonMonoxide;
+        private PositionalSound detector;
         private int occupantCount;
 
         protected override FireLocationKind[] Kinds => new[] { FireLocationKind.House, FireLocationKind.Apartment };
-        protected override string Title => "Carbon Monoxide Alarm";
+        protected override string Title => L.T("Carbon Monoxide Alarm");
 
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -237,11 +248,15 @@ namespace LSFD.Callouts
         }
 
         protected override string Describe(BuildingInfo building) =>
-            $"~y~{building.Name}~s~. CO detector sounding" + (occupantCount > 0 ? ", ~r~occupants feel dizzy~s~." : ", occupants are outside.");
+            occupantCount > 0
+                ? L.F($"~y~{building.Name}~s~. CO detector sounding, ~r~occupants feel dizzy~s~.")
+                : L.F($"~y~{building.Name}~s~. CO detector sounding, occupants are outside.");
 
         protected override void Investigate()
         {
             carbonMonoxide = Hazards.AddToxicAtmosphere(Building.Position, 15f, 0.6f);
+            if (Settings.SceneAlarms)
+                detector = Sound.PlayAt("Alarms/CO_ALARM.wav", Building.Position, Settings.AlarmVolume, 30f);
 
             for (int i = 0; i < occupantCount; i++)
             {
@@ -249,42 +264,43 @@ namespace LSFD.Callouts
                 occupants.Add(Patients.SpawnTrappedInBuilding(Building.Position.Around2D(1f, 4f), Building.Staging, condition));
             }
 
-            AddSceneAction(new SceneAction(Building.Position, "~y~measure~s~ the CO level", Measured)
+            AddSceneAction(new SceneAction(Building.Position, L.T("~y~measure~s~ the CO level"), Measured)
             {
                 RequiredEquipment = EquipmentType.GasDetector,
                 HoldSeconds = 4f,
-                ProgressLabel = "MEASURING",
+                ProgressLabel = L.T("MEASURING"),
                 AnimationDictionary = "",
             });
-            Game.DisplayHelp($"Carbon monoxide is invisible: put your ~b~SCBA~s~ on ({Core.Settings.MaskKey}) and measure with the ~y~gas detector~s~.");
+            Game.DisplayHelp(L.F($"Carbon monoxide is invisible: put your ~b~SCBA~s~ on ({Settings.MaskKey}) and measure with the ~y~gas detector~s~."));
         }
 
         private void Measured()
         {
             int ppm = MathHelper.GetRandomInteger(250, 600);
-            Game.DisplaySubtitle($"Gas detector: ~r~CO {ppm} ppm~s~. Get everyone out and ventilate!", 5000);
+            Game.DisplaySubtitle(L.F($"Gas detector: ~r~CO {ppm} ppm~s~. Get everyone out and ventilate!"), 5000);
 
-            AddSceneAction(new SceneAction(Building.Position.Around2D(2f, 4f), "~b~ventilate~s~ (open windows and doors)", Ventilated)
+            AddSceneAction(new SceneAction(Building.Position.Around2D(2f, 4f), L.T("~b~ventilate~s~ (open windows and doors)"), Ventilated)
             {
                 HoldSeconds = 8f,
-                ProgressLabel = "VENTILATING",
+                ProgressLabel = L.T("VENTILATING"),
             });
         }
 
         private void Ventilated()
         {
             carbonMonoxide.Strength = 0.1f;
-            Game.DisplaySubtitle("Windows and doors open, the gas is clearing.", 4000);
-            AddSceneAction(new SceneAction(Building.Position, "~y~measure~s~ again", () =>
+            Game.DisplaySubtitle(L.T("Windows and doors open, the gas is clearing."), 4000);
+            AddSceneAction(new SceneAction(Building.Position, L.T("~y~measure~s~ again"), () =>
             {
                 carbonMonoxide.Remove();
-                Game.DisplaySubtitle("Gas detector: ~g~CO 0 ppm~s~. Tell the occupants to have the boiler checked.", 5000);
+                StopDetector();
+                Game.DisplaySubtitle(L.T("Gas detector: ~g~CO 0 ppm~s~. Tell the occupants to have the boiler checked."), 5000);
                 IsResolved = true;
             })
             {
                 RequiredEquipment = EquipmentType.GasDetector,
                 HoldSeconds = 4f,
-                ProgressLabel = "MEASURING",
+                ProgressLabel = L.T("MEASURING"),
                 AnimationDictionary = "",
             });
         }
@@ -295,9 +311,16 @@ namespace LSFD.Callouts
                 Complete();
         }
 
+        private void StopDetector()
+        {
+            detector?.Stop();
+            detector = null;
+        }
+
         protected override void OnEnd()
         {
             carbonMonoxide?.Remove();
+            StopDetector();
             foreach (Ped occupant in occupants.Where(o => o.Exists()))
             {
                 Patients.Release(occupant);

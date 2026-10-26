@@ -40,7 +40,7 @@ namespace LSFD.Water
             CarryingFrom = source;
             source.SetTaken(EquipmentType.SupplyLine, true);
             carriedLine = new HoseRope(source.Vehicle, Game.LocalPlayer.Character, source.Definition.SupplyLineLength);
-            Notify.Info($"Bring the supply line of the ~y~{source.Definition.Name}~s~ to a ~b~fire hydrant~s~ (max {source.Definition.SupplyLineLength:0} m).");
+            Notify.Info(L.F($"Bring the supply line of the ~y~{source.Definition.Name}~s~ to a ~b~fire hydrant~s~ (max {source.Definition.SupplyLineLength:0} m)."));
         }
 
         public void ReturnSupplyLine()
@@ -68,7 +68,7 @@ namespace LSFD.Water
             source.DisconnectHydrant();
             source.SetTaken(EquipmentType.SupplyLine, false);
             if (notify)
-                Notify.Info($"Supply line of the ~y~{source.Definition.Name}~s~ disconnected and stowed.");
+                Notify.Info(L.F($"Supply line of the ~y~{source.Definition.Name}~s~ disconnected and stowed."));
         }
 
         public void DisconnectAll()
@@ -87,11 +87,11 @@ namespace LSFD.Water
             if (IsCarrying)
             {
                 Object hydrant = FindHydrant(player.Position, HydrantReach);
-                return hydrant == null ? null : new Interaction("connect the supply line to the ~b~hydrant", () => Connect(hydrant), 2f, "CONNECTING");
+                return hydrant == null ? null : new Interaction(L.T("connect the supply line to the ~b~hydrant"), () => Connect(hydrant), 2f, L.T("CONNECTING"));
             }
 
             FireApparatus connected = apparatus.All.FirstOrDefault(a => a.IsSupplied && a.ConnectedHydrant.Value.DistanceTo(player.Position) <= HydrantReach);
-            return connected == null ? null : new Interaction("disconnect the supply line", () => Disconnect(connected), 1.5f, "DISCONNECTING");
+            return connected == null ? null : new Interaction(L.T("disconnect the supply line"), () => Disconnect(connected), 1.5f, L.T("DISCONNECTING"));
         }
 
         public void Process()
@@ -106,7 +106,7 @@ namespace LSFD.Water
                 }
                 else if (player.DistanceTo(CarryingFrom.RearPosition) > CarryingFrom.Definition.SupplyLineLength)
                 {
-                    Notify.Warning("The supply line doesn't reach that far, move the apparatus closer to a hydrant.");
+                    Notify.Warning(L.T("The supply line doesn't reach that far, move the apparatus closer to a hydrant."));
                     ReturnSupplyLine();
                 }
                 else
@@ -139,7 +139,7 @@ namespace LSFD.Water
             source.SetTaken(EquipmentType.SupplyLine, true);
             connectedLines[source] = new HoseRope(source.Vehicle, hydrant, source.Definition.SupplyLineLength);
 
-            Notify.Info($"~b~Hydrant connected.~s~ The ~y~{source.Definition.Name}~s~ is now being supplied with water.");
+            Notify.Info(L.F($"~b~Hydrant connected.~s~ The ~y~{source.Definition.Name}~s~ is now being supplied with water."));
         }
 
         private static Object FindHydrant(Vector3 position, float radius)

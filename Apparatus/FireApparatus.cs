@@ -82,14 +82,16 @@ namespace LSFD.Apparatus
                 takenEquipment.Remove(type);
         }
 
+        /// <summary>Liters every apparatus has pumped since the plugin started, for the call report.</summary>
+        public static float TotalWaterUsed { get; private set; }
+
         /// <summary>Takes up to <paramref name="liters"/> from the tank and returns how much was delivered. Unlimited while on a hydrant.</summary>
         public float DrawWater(float liters)
         {
-            if (IsSupplied)
-                return liters;
-
-            float delivered = Math.Min(liters, Water);
-            Water -= delivered;
+            float delivered = IsSupplied ? liters : Math.Min(liters, Water);
+            if (!IsSupplied)
+                Water -= delivered;
+            TotalWaterUsed += delivered;
             return delivered;
         }
 
@@ -113,7 +115,7 @@ namespace LSFD.Apparatus
             if (Vehicle.DistanceTo(ConnectedHydrant.Value) > Definition.SupplyLineLength)
             {
                 DisconnectHydrant();
-                Notify.Warning($"The supply line of your ~y~{Definition.Name}~s~ snapped off the hydrant.");
+                Notify.Warning(L.F($"The supply line of your ~y~{Definition.Name}~s~ snapped off the hydrant."));
             }
         }
     }

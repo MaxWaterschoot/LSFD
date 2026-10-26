@@ -1,7 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using LSFD.API;
 using LSFD.Apparatus;
+using LSFD.Core;
 using LSFD.Firefighting;
 using LSFD.Utils;
 using Rage;
@@ -42,11 +43,11 @@ namespace LSFD.Callouts
                 float heading = start + 360f / cones * i;
                 Vector3 offset = MathHelper.ConvertHeadingToDirection(heading) * radius;
                 Vector3 position = World.GetNextPositionOnStreet(center + offset);
-                cordon.Add(AddSceneAction(new SceneAction(position, "place ~y~traffic cones~s~ for the cordon", () => PlaceCone(position))
+                cordon.Add(AddSceneAction(new SceneAction(position, L.T("place ~y~traffic cones~s~ for the cordon"), () => PlaceCone(position))
                 {
                     RequiredEquipment = EquipmentType.TrafficCones,
                     HoldSeconds = 1.5f,
-                    ProgressLabel = "PLACING",
+                    ProgressLabel = L.T("PLACING"),
                     Radius = 2.5f,
                 }));
             }
@@ -65,7 +66,7 @@ namespace LSFD.Callouts
 
             if (IsCordoned)
             {
-                Game.DisplaySubtitle("Cordon ~g~in place~s~. Onlookers are moving back.", 4000);
+                Game.DisplaySubtitle(L.T("Cordon ~g~in place~s~. Onlookers are moving back."), 4000);
                 OnCordoned();
             }
         }
@@ -123,8 +124,8 @@ namespace LSFD.Callouts
         public override bool OnBeforeCalloutDisplayed()
         {
             CalloutPosition = Functions.GetRandomCalloutLocation();
-            CalloutMessage = "Gas Leak";
-            CalloutAdvisory = "Construction crew hit a gas main, ~o~strong smell of gas~s~. Approach from upwind, no ignition sources.";
+            CalloutMessage = L.T("Gas Leak");
+            CalloutAdvisory = L.T("Construction crew hit a gas main, ~o~strong smell of gas~s~. Approach from upwind, no ignition sources.");
             CalloutAreaRadius = 40f;
             return true;
         }
@@ -138,20 +139,25 @@ namespace LSFD.Callouts
             Model barrier = "prop_barrier_work05";
             if (barrier.IsValid)
                 Scene.Track(new Rage.Object(barrier, leak.Around2D(1.5f)) { IsPersistent = true });
-            for (int i = 0; i < 3; i++)
+            onlookers.Add(Scene.SpawnCaller(leak.Around2D(6f, 12f), "Foreman", new[]
+            {
+                L.T("We were digging for a water line and the excavator went right through the gas main."),
+                L.T("The shut-off valve is under a cover in the street, a few meters from the hole. You need a bar to turn it."),
+            }));
+            for (int i = 0; i < 2; i++)
                 onlookers.Add(Scene.SpawnBystander(leak.Around2D(6f, 12f)));
 
             AddCordon(leak, 20f, 3);
             Vector3 valve = World.GetNextPositionOnStreet(leak.Around2D(6f, 9f));
-            AddSceneAction(new SceneAction(valve, "close the ~y~gas valve~s~", CloseValve)
+            AddSceneAction(new SceneAction(valve, L.T("close the ~y~gas valve~s~"), CloseValve)
             {
                 RequiredEquipment = EquipmentType.Crowbar,
-                RequirementHint = "The valve needs a ~y~halligan bar~s~ from the engine as a key.",
+                RequirementHint = L.T("The valve needs a ~y~halligan bar~s~ from the engine as a key."),
                 HoldSeconds = 6f,
-                ProgressLabel = "CLOSING VALVE",
+                ProgressLabel = L.T("CLOSING VALVE"),
             });
 
-            Game.DisplayHelp("Set up a ~y~cordon~s~ with traffic cones, then close the ~y~gas valve~s~. Any spark can ignite the gas.");
+            Game.DisplayHelp(L.T("Set up a ~y~cordon~s~ with traffic cones, then close the ~y~gas valve~s~. Any spark can ignite the gas."));
         }
 
         protected override void OnCordoned()
@@ -164,16 +170,16 @@ namespace LSFD.Callouts
         {
             valveClosed = true;
             cloud.Stop();
-            Game.DisplaySubtitle("Valve ~g~closed~s~. Let the gas clear and check the area with the gas detector.", 5000);
-            AddSceneAction(new SceneAction(leak, "~y~measure~s~ for gas", () =>
+            Game.DisplaySubtitle(L.T("Valve ~g~closed~s~. Let the gas clear and check the area with the gas detector."), 5000);
+            AddSceneAction(new SceneAction(leak, L.T("~y~measure~s~ for gas"), () =>
             {
                 allClear = true;
-                Game.DisplaySubtitle("Gas detector: ~g~0% LEL~s~. The gas company takes over.", 5000);
+                Game.DisplaySubtitle(L.T("Gas detector: ~g~0% LEL~s~. The gas company takes over."), 5000);
             })
             {
                 RequiredEquipment = EquipmentType.GasDetector,
                 HoldSeconds = 4f,
-                ProgressLabel = "MEASURING",
+                ProgressLabel = L.T("MEASURING"),
                 AnimationDictionary = "",
             });
         }
@@ -183,7 +189,7 @@ namespace LSFD.Callouts
             cloud.Stop();
             World.SpawnExplosion(leak, 9, 4f, true, false, 1f);
             StartFire(leak, gas: true);
-            Functions.DisplayNotification("~r~Gas ignited!", "The leak caught fire. Close the valve and protect the surroundings; don't put it out before the gas is off.");
+            Functions.DisplayNotification(L.T("~r~Gas ignited!"), L.T("The leak caught fire. Close the valve and protect the surroundings; don't put it out before the gas is off."));
         }
 
         public override void Process()
@@ -215,8 +221,8 @@ namespace LSFD.Callouts
         public override bool OnBeforeCalloutDisplayed()
         {
             CalloutPosition = Functions.GetRandomCalloutLocation();
-            CalloutMessage = "Fuel Spill";
-            CalloutAdvisory = "Vehicle with a ruptured fuel tank, ~o~fuel all over the roadway~s~. No injuries reported.";
+            CalloutMessage = L.T("Fuel Spill");
+            CalloutAdvisory = L.T("Vehicle with a ruptured fuel tank, ~o~fuel all over the roadway~s~. No injuries reported.");
             return true;
         }
 
@@ -224,7 +230,11 @@ namespace LSFD.Callouts
         {
             vehicle = Scene.SpawnCar(CalloutPosition, MathHelper.GetRandomSingle(0f, 360f));
             Rescue.CrashVehicle(vehicle, new Vector3(0f, -1f, 0f), 0.4f);
-            Scene.SpawnBystander(vehicle.GetOffsetPositionRight(5f));
+            Scene.SpawnCaller(vehicle.GetOffsetPositionRight(5f), "Driver", new[]
+            {
+                L.T("I hit something on the road and the tank split open. It's gasoline, it's everywhere."),
+                L.T("Nobody's hurt. I turned the engine off and got out."),
+            });
 
             for (int i = 0; i < 4; i++)
             {
@@ -234,23 +244,23 @@ namespace LSFD.Callouts
                 NativeFunction.CallByName<uint>("ADD_PETROL_DECAL", spot.X, spot.Y, spot.Z, ground, 2.5f, 1f);
 
                 Vector3 puddle = spot;
-                puddles.Add(AddSceneAction(new SceneAction(puddle, "spread ~y~absorbent~s~ on the fuel", () =>
+                puddles.Add(AddSceneAction(new SceneAction(puddle, L.T("spread ~y~absorbent~s~ on the fuel"), () =>
                 {
                     NativeFunction.CallByName<uint>("REMOVE_DECALS_IN_RANGE", puddle.X, puddle.Y, puddle.Z, 2f);
                     if (!IsLeaking)
-                        Game.DisplaySubtitle("All fuel ~g~absorbed~s~. The road can be swept.", 4000);
+                        Game.DisplaySubtitle(L.T("All fuel ~g~absorbed~s~. The road can be swept."), 4000);
                 })
                 {
                     RequiredEquipment = EquipmentType.Absorbent,
                     HoldSeconds = 4f,
-                    ProgressLabel = "ABSORBING",
+                    ProgressLabel = L.T("ABSORBING"),
                     AnimationName = "fixing_a_ped",
                     Radius = 2f,
                 }));
             }
 
             AddCordon(CalloutPosition, 18f, 2);
-            Game.DisplayHelp("Cordon off the road with ~y~traffic cones~s~ and soak up the fuel with ~y~absorbent~s~ before it ignites.");
+            Game.DisplayHelp(L.T("Cordon off the road with ~y~traffic cones~s~ and soak up the fuel with ~y~absorbent~s~ before it ignites."));
         }
 
         protected override void Ignite()
@@ -259,7 +269,7 @@ namespace LSFD.Callouts
             StartFire(spot, gas: false);
             if (vehicle.Exists())
                 Fires.SetOnFire(vehicle);
-            Functions.DisplayNotification("~r~Fuel ignited!", "The spill caught fire. Use ~y~foam~s~ on the burning fuel.");
+            Functions.DisplayNotification(L.T("~r~Fuel ignited!"), L.T("The spill caught fire. Use ~y~foam~s~ on the burning fuel."));
         }
 
         public override void Process()

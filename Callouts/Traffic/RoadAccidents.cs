@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using LSFD.API;
+using LSFD.Core;
 using Rage;
 
 namespace LSFD.Callouts
@@ -70,6 +71,9 @@ namespace LSFD.Callouts
             return ped;
         }
 
+        /// <summary>Someone who saw it happen and has something to tell the player.</summary>
+        protected Ped Witness(Vector3 position, params string[] statement) => Scene.SpawnCaller(position, "Witness", statement);
+
         /// <summary>Someone who got out by themselves with minor injuries (green).</summary>
         protected Ped WalkingWounded(Vector3 position)
         {
@@ -96,8 +100,8 @@ namespace LSFD.Callouts
     [CalloutInfo("Vehicle Collision", CalloutProbability.High, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1, AllowAmbient = true)]
     internal class VehicleCollision : RoadAccident
     {
-        protected override string Title => "Head-on Collision";
-        protected override string Advisory => "Two vehicles, one occupant ~r~trapped~s~. Extrication required.";
+        protected override string Title => L.T("Head-on Collision");
+        protected override string Advisory => L.T("Two vehicles, one occupant ~r~trapped~s~. Extrication required.");
 
         protected override void BuildScene(float heading)
         {
@@ -105,18 +109,21 @@ namespace LSFD.Callouts
             Vector3 second = first.GetOffsetPositionFront(5.5f) + first.RightVector * MathHelper.GetRandomSingle(-0.8f, 0.8f);
             Vehicle other = Wreck(second, heading + 180f + MathHelper.GetRandomSingle(-25f, 25f), new Vector3(0f, 1f, 0f), 0.5f, 0.9f);
 
-            Trap(first);
+            Ped driver = Trap(first);
             Patient(other.GetOffsetPositionRight(3f), PatientCondition.Injured);
+            Witness(other.GetOffsetPositionRight(-5f),
+                L.T("The car came right across the center line, hit them head on!"),
+                L.F($"The driver isn't moving. I tried {CallerLines.His(driver)} door, it's jammed shut."));
 
-            Game.DisplayHelp("Stabilize the vehicle with ~y~cribbing~s~, force or cut a door with the ~y~hydraulic tools~s~, extricate and treat the ~r~patient~s~.");
+            Game.DisplayHelp(L.T("Stabilize the vehicle with ~y~cribbing~s~, force or cut a door with the ~y~hydraulic tools~s~, extricate and treat the ~r~patient~s~."));
         }
     }
 
     [CalloutInfo("Minor Collision", CalloutProbability.High, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority3, AllowAmbient = true)]
     internal class MinorCollision : RoadAccident
     {
-        protected override string Title => "Minor Collision";
-        protected override string Advisory => "Rear-end collision, one driver complaining of neck pain.";
+        protected override string Title => L.T("Minor Collision");
+        protected override string Advisory => L.T("Rear-end collision, one driver complaining of neck pain.");
 
         protected override void BuildScene(float heading)
         {
@@ -124,33 +131,37 @@ namespace LSFD.Callouts
             Vehicle back = Wreck(front.GetOffsetPositionFront(-5f), heading, new Vector3(0f, 1f, 0f), 0.2f, 0.35f);
 
             Patient(front.GetOffsetPositionRight(2.5f), PatientCondition.Injured);
-            Scene.SpawnBystander(back.GetOffsetPositionRight(3f));
-            Game.DisplayHelp("Check the vehicles and treat the ~r~injured driver~s~.");
+            Witness(back.GetOffsetPositionRight(3f),
+                L.T("They stopped all of a sudden and I couldn't brake in time. I'm so sorry."),
+                L.T("I'm fine, but the other driver says the neck hurts."));
+            Game.DisplayHelp(L.T("Check the vehicles and treat the ~r~injured driver~s~."));
         }
     }
 
     [CalloutInfo("Vehicle Rollover", CalloutProbability.Medium, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1, AllowAmbient = true)]
     internal class VehicleRollover : RoadAccident
     {
-        protected override string Title => "Vehicle Rollover";
-        protected override string Advisory => "Single vehicle rolled over, driver ~r~trapped~s~ upside down.";
+        protected override string Title => L.T("Vehicle Rollover");
+        protected override string Advisory => L.T("Single vehicle rolled over, driver ~r~trapped~s~ upside down.");
 
         protected override void BuildScene(float heading)
         {
             Vehicle vehicle = Wreck(CalloutPosition + new Vector3(0f, 0f, 1f), heading, new Vector3(0f, 0f, 1f), 0.5f, 0.9f);
             vehicle.Rotation = new Rotator(0f, 180f, heading);
-            Trap(vehicle);
+            Ped driver = Trap(vehicle);
 
-            Scene.SpawnBystander(vehicle.GetOffsetPositionRight(6f));
-            Game.DisplayHelp("The vehicle is on its roof: stabilize it with ~y~cribbing~s~ before cutting the ~r~driver~s~ out.");
+            Witness(vehicle.GetOffsetPositionRight(6f),
+                L.T("It clipped the curb and just flipped, it rolled over twice!"),
+                L.F($"The driver's still hanging upside down in there. {CallerLines.Capital(CallerLines.He(driver))} was talking a minute ago."));
+            Game.DisplayHelp(L.T("The vehicle is on its roof: stabilize it with ~y~cribbing~s~ before cutting the ~r~driver~s~ out."));
         }
     }
 
     [CalloutInfo("Motorcycle Accident", CalloutProbability.Medium, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1, AllowAmbient = true)]
     internal class MotorcycleAccident : RoadAccident
     {
-        protected override string Title => "Motorcycle Accident";
-        protected override string Advisory => "Motorcyclist down after a collision with a car.";
+        protected override string Title => L.T("Motorcycle Accident");
+        protected override string Advisory => L.T("Motorcyclist down after a collision with a car.");
 
         protected override void BuildScene(float heading)
         {
@@ -159,24 +170,28 @@ namespace LSFD.Callouts
             Vehicle bike = Scene.SpawnBike(car.GetOffsetPositionRight(-4f), heading + 70f);
             bike.Rotation = new Rotator(0f, 90f, heading + 70f);
 
-            Patient(bike.GetOffsetPositionFront(3f), SeriousCondition());
-            Scene.SpawnBystander(car.GetOffsetPositionRight(3f));
-            Game.DisplayHelp("Assess the ~r~motorcyclist~s~ and start treatment.");
+            Ped rider = Patient(bike.GetOffsetPositionFront(3f), SeriousCondition());
+            Witness(car.GetOffsetPositionRight(3f),
+                L.F($"I pulled out, I just didn't see {CallerLines.Him(rider)} coming!"),
+                L.F($"{CallerLines.Capital(CallerLines.He(rider))}'s not getting up. I didn't want to move {CallerLines.Him(rider)}, {CallerLines.He(rider)} still has the helmet on."));
+            Game.DisplayHelp(L.T("Assess the ~r~motorcyclist~s~ and start treatment."));
         }
     }
 
     [CalloutInfo("Pedestrian Struck", CalloutProbability.Medium, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1, AllowAmbient = true)]
     internal class PedestrianStruck : RoadAccident
     {
-        protected override string Title => "Pedestrian Struck";
-        protected override string Advisory => "Pedestrian hit by a vehicle, driver stayed on scene.";
+        protected override string Title => L.T("Pedestrian Struck");
+        protected override string Advisory => L.T("Pedestrian hit by a vehicle, driver stayed on scene.");
 
         protected override void BuildScene(float heading)
         {
             Vehicle car = Wreck(CalloutPosition, heading, new Vector3(0f, 1f, 0f), 0.15f, 0.3f);
-            Patient(car.GetOffsetPositionFront(5f), SeriousCondition());
-            Scene.SpawnBystander(car.GetOffsetPositionRight(2.5f));
-            Game.DisplayHelp("Treat the ~r~pedestrian~s~. Start CPR if there is no pulse.");
+            Ped pedestrian = Patient(car.GetOffsetPositionFront(5f), SeriousCondition());
+            Witness(car.GetOffsetPositionRight(2.5f),
+                L.F($"I didn't see {CallerLines.Him(pedestrian)}! {CallerLines.Capital(CallerLines.He(pedestrian))} stepped out between the parked cars!"),
+                L.F($"I was only doing thirty. {CallerLines.Capital(CallerLines.He(pedestrian))} hit the windshield and landed over there."));
+            Game.DisplayHelp(L.T("Treat the ~r~pedestrian~s~. Start CPR if there is no pulse."));
         }
     }
 
@@ -185,8 +200,8 @@ namespace LSFD.Callouts
     {
         private bool vehicleOnFire;
 
-        protected override string Title => "Multi-Vehicle Collision";
-        protected override string Advisory => "Pile-up with multiple patients and entrapment. ~o~Mass casualty incident~s~.";
+        protected override string Title => L.T("Multi-Vehicle Collision");
+        protected override string Advisory => L.T("Pile-up with multiple patients and entrapment. ~o~Mass casualty incident~s~.");
 
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -229,8 +244,7 @@ namespace LSFD.Callouts
             if (vehicleOnFire)
                 Fires.SetOnFire(fourth);
 
-            Game.DisplayHelp("~o~Mass casualty incident~s~: ~y~triage~s~ every patient first (hold E), then treat ~r~red~s~, ~y~yellow~s~ and ~g~green~s~ in that order. " +
-                "Black means expectant: CPR only once the others are cared for.");
+            Game.DisplayHelp(L.T("~o~Mass casualty incident~s~: ~y~triage~s~ every patient first (hold E), then treat ~r~red~s~, ~y~yellow~s~ and ~g~green~s~ in that order. Black means expectant: CPR only once the others are cared for."));
         }
     }
 }

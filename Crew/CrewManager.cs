@@ -6,9 +6,9 @@ using LSFD.Apparatus;
 using LSFD.Core;
 using LSFD.Firefighting;
 using LSFD.Medical;
-using LSFD.Water;
 using LSFD.UI;
 using LSFD.VehicleRescue;
+using LSFD.Water;
 using Rage;
 using Rage.Native;
 
@@ -101,7 +101,7 @@ namespace LSFD.Crew
 
             model.Dismiss();
             if (!apparatus.IsAiUnit)
-                Notify.Info($"~y~{definition.Name}~s~ crew: {count} firefighter{(count == 1 ? "" : "s")} on board.");
+                Notify.Info((count == 1 ? L.F($"~y~{definition.Name}~s~ crew: 1 firefighter on board.") : L.F($"~y~{definition.Name}~s~ crew: {count} firefighters on board.")));
         }
 
         /// <summary>Gives every crew member the same order.</summary>
@@ -110,7 +110,7 @@ namespace LSFD.Crew
             foreach (CrewMember member in crew)
                 Command(member, order);
 
-            Game.DisplaySubtitle($"~b~Crew:~s~ {OrderToRadio(order)}", 3000);
+            Game.DisplaySubtitle(L.F($"~b~Crew:~s~ {OrderToRadio(order)}"), 3000);
         }
 
         public void Command(CrewMember member, CrewOrder order)
@@ -152,15 +152,15 @@ namespace LSFD.Crew
         {
             switch (order)
             {
-                case CrewOrder.FollowPlayer: return "Following";
-                case CrewOrder.HoldPosition: return "Holding";
+                case CrewOrder.FollowPlayer: return L.T("Following");
+                case CrewOrder.HoldPosition: return L.T("Holding");
                 case CrewOrder.Extinguish: return "Firefighting";
-                case CrewOrder.RescueVictims: return "Search & rescue";
-                case CrewOrder.TreatPatients: return "Patient care";
-                case CrewOrder.WorkScene: return "Working the scene";
-                case CrewOrder.ReturnToApparatus: return "Returning";
-                case CrewOrder.DeckGun: return "Deck gun";
-                default: return "With apparatus";
+                case CrewOrder.RescueVictims: return L.T("Search & rescue");
+                case CrewOrder.TreatPatients: return L.T("Patient care");
+                case CrewOrder.WorkScene: return L.T("Working the scene");
+                case CrewOrder.ReturnToApparatus: return L.T("Returning");
+                case CrewOrder.DeckGun: return L.T("Deck gun");
+                default: return L.T("With apparatus");
             }
         }
 
@@ -168,15 +168,15 @@ namespace LSFD.Crew
         {
             switch (job)
             {
-                case CrewJob.Extinguish: return "Extinguishing";
-                case CrewJob.Carry: return "Rescuing victim";
-                case CrewJob.Extricate: return "Extricating";
-                case CrewJob.Cpr: return "Performing CPR";
-                case CrewJob.Treat: return "Treating patient";
-                case CrewJob.Transport: return "Transporting patient";
-                case CrewJob.ForceEntry: return "Forcing entry";
-                case CrewJob.Triage: return "Triage";
-                case CrewJob.HoseLine: return "Flowing a hose line";
+                case CrewJob.Extinguish: return L.T("Extinguishing");
+                case CrewJob.Carry: return L.T("Rescuing victim");
+                case CrewJob.Extricate: return L.T("Extricating");
+                case CrewJob.Cpr: return L.T("Performing CPR");
+                case CrewJob.Treat: return L.T("Treating patient");
+                case CrewJob.Transport: return L.T("Transporting patient");
+                case CrewJob.ForceEntry: return L.T("Forcing entry");
+                case CrewJob.Triage: return L.T("Triage");
+                case CrewJob.HoseLine: return L.T("Flowing a hose line");
                 default: return null;
             }
         }
@@ -352,7 +352,7 @@ namespace LSFD.Crew
                 return;
             }
 
-            Game.DisplaySubtitle($"~b~{member.Name}:~s~ Nothing left to do here, coming to you.", 3000);
+            Game.DisplaySubtitle(L.F($"~b~{member.Name}:~s~ Nothing left to do here, coming to you."), 3000);
             Command(member, CrewOrder.FollowPlayer);
         }
 
@@ -418,7 +418,7 @@ namespace LSFD.Crew
             else if (MoveTo(member, patient.SafePosition, 2f))
             {
                 patients.Drop(patient);
-                Game.DisplaySubtitle($"~b~{member.Name}:~s~ Victim is out!", 3000);
+                Game.DisplaySubtitle(L.F($"~b~{member.Name}:~s~ Victim is out!"), 3000);
                 StopJob(member);
             }
         }
@@ -442,7 +442,7 @@ namespace LSFD.Crew
             else if (Game.GameTime - member.JobPhaseStartedAt > ExtricateMilliseconds)
             {
                 extrication.ExtricateByCrew(trapped);
-                Game.DisplaySubtitle($"~b~{member.Name}:~s~ Patient is out of the vehicle.", 3000);
+                Game.DisplaySubtitle(L.F($"~b~{member.Name}:~s~ Patient is out of the vehicle."), 3000);
                 StopJob(member);
             }
         }
@@ -584,13 +584,13 @@ namespace LSFD.Crew
 
             if (gunners.Count == 0)
             {
-                Game.DisplaySubtitle("~o~None of your apparatus has a deck gun.", 3000);
+                Game.DisplaySubtitle(L.T("~o~None of your apparatus has a deck gun."), 3000);
                 return;
             }
 
             foreach (CrewMember gunner in gunners)
                 Command(gunner, CrewOrder.DeckGun);
-            Game.DisplaySubtitle($"~b~Crew:~s~ {OrderToRadio(CrewOrder.DeckGun)}", 3000);
+            Game.DisplaySubtitle(L.F($"~b~Crew:~s~ {OrderToRadio(CrewOrder.DeckGun)}"), 3000);
         }
 
         private void OperateDeckGun(CrewMember member)
@@ -647,7 +647,7 @@ namespace LSFD.Crew
             else if (Game.GameTime - member.JobPhaseStartedAt > 2500)
             {
                 patients.ApplyTriage(patient);
-                Game.DisplaySubtitle($"~b~{member.Name}:~s~ Triage {PatientManager.TagToDisplay(patient.Triage)}", 2500);
+                Game.DisplaySubtitle(L.F($"~b~{member.Name}:~s~ Triage {PatientManager.TagToDisplay(patient.Triage)}"), 2500);
                 StopJob(member);
             }
         }
@@ -673,7 +673,7 @@ namespace LSFD.Crew
             else if (Game.GameTime - member.JobPhaseStartedAt > ForcibleEntry.ForceSeconds * 1000)
             {
                 entry.Force(door);
-                Game.DisplaySubtitle($"~b~{member.Name}:~s~ Door is open!", 3000);
+                Game.DisplaySubtitle(L.F($"~b~{member.Name}:~s~ Door is open!"), 3000);
                 StopJob(member);
             }
         }
@@ -699,7 +699,7 @@ namespace LSFD.Crew
                 member.HoseRope = new HoseRope(source.Vehicle, ped, source.Definition.HoseLength);
                 member.Stream = new WaterStream(fire);
                 member.NextPhase();
-                Game.DisplaySubtitle($"~b~{member.Name}:~s~ Stretching a line!", 2500);
+                Game.DisplaySubtitle(L.F($"~b~{member.Name}:~s~ Stretching a line!"), 2500);
                 return;
             }
 
@@ -846,15 +846,15 @@ namespace LSFD.Crew
         {
             switch (order)
             {
-                case CrewOrder.FollowPlayer: return "On you, chief.";
-                case CrewOrder.HoldPosition: return "Holding position.";
-                case CrewOrder.Extinguish: return "Grabbing extinguishers, attacking the fire.";
-                case CrewOrder.RescueVictims: return "Starting search and rescue.";
-                case CrewOrder.TreatPatients: return "Taking care of the patients.";
-                case CrewOrder.WorkScene: return "Copy, working the scene.";
-                case CrewOrder.ReturnToApparatus: return "Returning to the apparatus.";
-                case CrewOrder.DeckGun: return "Manning the deck gun.";
-                default: return "Copy.";
+                case CrewOrder.FollowPlayer: return L.T("On you, chief.");
+                case CrewOrder.HoldPosition: return L.T("Holding position.");
+                case CrewOrder.Extinguish: return L.T("Grabbing extinguishers, attacking the fire.");
+                case CrewOrder.RescueVictims: return L.T("Starting search and rescue.");
+                case CrewOrder.TreatPatients: return L.T("Taking care of the patients.");
+                case CrewOrder.WorkScene: return L.T("Copy, working the scene.");
+                case CrewOrder.ReturnToApparatus: return L.T("Returning to the apparatus.");
+                case CrewOrder.DeckGun: return L.T("Manning the deck gun.");
+                default: return L.T("Copy.");
             }
         }
     }

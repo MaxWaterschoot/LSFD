@@ -1,0 +1,754 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LSFD language file. Translate the text between the tags, keep {0}, {1} and the ~colour~ codes.
+     See docs/TRANSLATING.md. Empty means the English text is shown. -->
+<Language Name="Nederlands" Culture="nl-NL" Translators="LSFD">
+  <!-- EntryPoint.cs -->
+  <String en="Not loaded: the ~r~Plugins/LSFD~s~ folder is missing or incomplete. Reinstall LSFD from the download.">Niet geladen: de map ~r~Plugins/LSFD~s~ ontbreekt of is onvolledig. Installeer LSFD opnieuw vanuit de download.</String>
+  <String en="Loaded. Visit a ~r~fire station~s~ to go on duty. Tablet: ~b~{0}" note="{0} = Settings.TabletKey">Geladen. Ga naar een ~r~brandweerkazerne~s~ om in dienst te gaan. Tablet: ~b~{0}</String>
+  <String en="Bug report saved to ~y~Plugins/LSFD/BugReport.txt~s~. Attach it to your report.">Bugrapport opgeslagen in ~y~Plugins/LSFD/BugReport.txt~s~. Voeg het toe aan je melding.</String>
+  <!-- Stations/FireStationManager.cs -->
+  <String en="open the ~r~{0}~s~ menu" note="{0} = station.Name">het menu van ~r~{0}~s~ te openen</String>
+  <!-- Stations/StationData.cs -->
+  <String en="Los Santos">Los Santos</String>
+  <String en="Los Santos County">Los Santos County</String>
+  <String en="Blaine County">Blaine County</String>
+  <String en="Airport">Luchthaven</String>
+  <String en="Military">Militair</String>
+  <String en="Municipal">Gemeentelijk</String>
+  <!-- Stations/StationLife.cs -->
+  <String en="~r~Station alarm">~r~Kazernealarm</String>
+  <String en="{0}: turn out! Get to the ~y~{1}~s~." note="{0} = callout.CalloutMessage, {1} = firstDue.Definition.Name">{0}: uitrukken! Naar de ~y~{1}~s~.</String>
+  <String en="Turnout time: {0}{1}:{2:00}" note="{0} = rating, {1} = (int)seconds / 60, {2} = (int)seconds % 60">Uitruktijd: {0}{1}:{2:00}</String>
+  <!-- UI/Hud.cs -->
+  <String en="TANK">TANK</String>
+  <String en="WATER">WATER</String>
+  <String en="NOZZLE">STRAALPIJP</String>
+  <String en="FOAM">SCHUIM</String>
+  <String en="PRESSURE">DRUK</String>
+  <String en="TOOL">GEREEDSCHAP</String>
+  <String en="FIRE">BRAND</String>
+  <String en="AIR">LUCHT</String>
+  <String en="HEAT">HITTE</String>
+  <String en="~r~DANGER">~r~GEVAAR</String>
+  <String en="TIC">WBC</String>
+  <String en="AIR (MASK OFF)">LUCHT (MASKER AF)</String>
+  <String en="1 victim">1 slachtoffer</String>
+  <String en="{0} victims" note="{0} = camera.VisibleVictims">{0} slachtoffers</String>
+  <String en="1 hotspot">1 hotspot</String>
+  <String en="{0} hotspots" note="{0} = camera.VisibleHotspots">{0} hotspots</String>
+  <String en="~b~HYDRANT">~b~BRANDKRAAN</String>
+  <String en="STRAIGHT">STRAAL</String>
+  <String en="FOG">NEVEL</String>
+  <String en=" · ~w~FOAM"> · ~w~SCHUIM</String>
+  <String en="CALL COMPLETED">MELDING AFGEROND</String>
+  <String en="CALL ENDED">MELDING BEËINDIGD</String>
+  <String en="{0} · Score {1} ({2})" note="{0} = report.Name, {1} = report.Score, {2} = CallScore.Grade(report.Score)">{0} · Score {1} ({2})</String>
+  <String en="Call report: {0}" note="{0} = report.Name">Rapport: {0}</String>
+  <String en="Response: {0}~n~Water: ~b~{1:N0} L~s~ · On the call {2} min~n~Rescued ~g~{3}~s~ · Treated {4}" note="{0} = CallScore.Response(report), {1} = report.WaterUsed, {2} = report.Minutes, {3} = report.Rescued, {4} = report.Treated">Aanrijtijd: {0}~n~Water: ~b~{1:N0} L~s~ · Op de melding {2} min~n~Gered ~g~{3}~s~ · Behandeld {4}</String>
+  <String en=" · Lost ~r~{0}~s~" note="{0} = report.Deceased"> · Overleden ~r~{0}~s~</String>
+  <String en="~n~Score: {0}" note="{0} = CallScore.Display(report.Score)">~n~Score: {0}</String>
+  <String en=" · ~y~+{0}~s~ points" note="{0} = points"> · ~y~+{0}~s~ punten</String>
+  <String en="ON DUTY">IN DIENST</String>
+  <String en="Los Santos Fire Department">Los Santos Fire Department</String>
+  <String en="OFF DUTY">UIT DIENST</String>
+  <String en="Thanks for your service">Bedankt voor je inzet</String>
+  <!-- UI/MenuManager.cs -->
+  <String en="Fire station">Brandweerkazerne</String>
+  <String en="Request apparatus">Voertuig aanvragen</String>
+  <String en="Locker room">Kleedkamer</String>
+  <String en="Go off duty">Uit dienst gaan</String>
+  <String en="Clock out and change back into your own clothes.">Klok uit en trek je eigen kleren weer aan.</String>
+  <String en="Go on duty">In dienst gaan</String>
+  <String en="Suit up in the locker room and clock in at this station.">Trek je uitrukpak aan in de kleedkamer en klok in op deze kazerne.</String>
+  <String en="Have a vehicle and its crew brought out in front of the station.">Laat een voertuig met bemanning voor de kazerne klaarzetten.</String>
+  <String en="Choose the outfit you wear on duty (EUP outfits too).">Kies het tenue dat je in dienst draagt (ook EUP-tenues).</String>
+  <String en="Restock personal gear">Persoonlijke uitrusting aanvullen</String>
+  <String en="A full SCBA cylinder, your health and a flashlight.">Een volle ademluchtcilinder, je gezondheid en een zaklamp.</String>
+  <String en="Personal gear restocked.">Persoonlijke uitrusting aangevuld.</String>
+  <String en="Water tank">Watertank</String>
+  <String en="Connect a supply line to a hydrant to refill the tank.">Sluit een toevoerleiding aan op een brandkraan om de tank te vullen.</String>
+  <String en="~b~On hydrant">~b~Op brandkraan</String>
+  <String en="Foam tank">Schuimtank</String>
+  <String en="Switch the nozzle to foam with {0} for fuel and vehicle fires." note="{0} = Settings.FoamKey">Zet de straalpijp op schuim met {0}, voor brandstof- en voertuigbranden.</String>
+  <String en="Stow attack hose">Aanvalsslang opbergen</String>
+  <String en="Pull attack hose">Aanvalsslang uitrollen</String>
+  <String en="{0:0} m line with an adjustable straight/fog nozzle." note="{0} = definition.HoseLength">Slang van {0:0} m met een verstelbare straal/nevel-straalpijp.</String>
+  <String en="Disconnect supply line">Toevoerleiding loskoppelen</String>
+  <String en="Return supply line">Toevoerleiding terugbrengen</String>
+  <String en="Take supply line">Toevoerleiding pakken</String>
+  <String en="{0:0} m line to connect this apparatus to a fire hydrant." note="{0} = definition.SupplyLineLength">Leiding van {0:0} m om dit voertuig op een brandkraan aan te sluiten.</String>
+  <String en="Swap SCBA cylinder">Ademluchtcilinder wisselen</String>
+  <String en="Replace the cylinder on your back with a full one.">Vervang de cilinder op je rug door een volle.</String>
+  <String en="Full ~b~SCBA cylinder~s~ on your back.">Volle ~b~ademluchtcilinder~s~ op je rug.</String>
+  <String en="Put PPV fan back">Overdrukventilator terugzetten</String>
+  <String en="Take PPV fan">Overdrukventilator pakken</String>
+  <String en="Blows the smoke out of a building: set it up in the doorway, facing in. The fresh air also feeds the fire.">Blaast de rook uit een gebouw: zet hem in de deuropening, naar binnen gericht. De verse lucht voedt ook de brand.</String>
+  <String en="Shows victims, flames and hotspots through the smoke. Turn it on with {0}." note="{0} = Settings.ThermalCameraKey">Toont slachtoffers, vlammen en hotspots door de rook heen. Zet hem aan met {0}.</String>
+  <String en="Rescue tools">Redgereedschap</String>
+  <String en="Put it back in the compartment.">Leg het terug in het vak.</String>
+  <String en="Carry it in your hands.">Draag het in je handen.</String>
+  <String en="~g~In hand">~g~In de hand</String>
+  <String en="Hand tools">Handgereedschap</String>
+  <String en="Take it from or put it back in the compartment.">Pak het uit het vak of leg het terug.</String>
+  <String en="Standard turnout gear">Standaard uitrukpak</String>
+  <String en="The default LSFD firefighter.">De standaard LSFD-brandweerman.</String>
+  <String en="~g~Wearing">~g~Aan</String>
+  <String en="Model {0}. Rename or edit it in Plugins/LSFD/Profiles/Outfits.xml." note="{0} = outfit.Model">Model {0}. Hernoem of wijzig het in Plugins/LSFD/Profiles/Outfits.xml.</String>
+  <String en="Save what I'm wearing">Opslaan wat ik nu draag</String>
+  <String en="Dress up with the EUP menu (or any outfit tool) first, then save it here as your duty outfit.">Kleed je eerst aan met het EUP-menu (of een andere tool), sla het daarna hier op als je diensttenue.</String>
+  <String en="Saved as ~y~{0}~s~ and selected. Rename it in Profiles/Outfits.xml." note="{0} = saved.Name">Opgeslagen als ~y~{0}~s~ en gekozen. Hernoem het in Profiles/Outfits.xml.</String>
+  <String en="Wearing the ~y~standard turnout gear~s~.">Je draagt het ~y~standaard uitrukpak~s~.</String>
+  <String en="Wearing ~y~{0}~s~." note="{0} = outfit.Name">Je draagt ~y~{0}~s~.</String>
+  <String en="Fire apparatus">Brandweervoertuigen</String>
+  <String en="Support units">Ondersteunende eenheden</String>
+  <String en="{0:N0} L tank, " note="{0} = definition.WaterCapacity">tank van {0:N0} L,</String>
+  <String en="crew of {0}-{1}, " note="{0} = definition.MinCrew, {1} = definition.MaxCrew">bemanning van {0}-{1},</String>
+  <String en="{0}{1}carries: {2}." note="{0} = tank, {1} = crew, {2} = equipment">{0}{1}aan boord: {2}.</String>
+  <!-- UI/Notify.cs -->
+  <String en="~r~Fire Department">~r~Brandweer</String>
+  <String en="LSFD Dispatch">LSFD Meldkamer</String>
+  <String en="~o~Attention">~o~Let op</String>
+  <!-- UI/Tablet.cs -->
+  <String en="LSFD Mobile Data Terminal">LSFD Mobiele Data Terminal</String>
+  <String en="LOS SANTOS FIRE DEPARTMENT">LOS SANTOS FIRE DEPARTMENT</String>
+  <String en="Active Dispatch">Meldkamer</String>
+  <String en="Vehicle Control">Voertuigen</String>
+  <String en="Scene Management">Inzet</String>
+  <String en="Fire Stations">Kazernes</String>
+  <String en="ON DUTY · {0}" note="{0} = duty.HomeStation.Name.ToUpperInvariant()">IN DIENST · {0}</String>
+  <String en="Off duty">Uit dienst</String>
+  <String en="Go on duty at a fire station to receive calls.">Ga in dienst op een kazerne om meldingen te krijgen.</String>
+  <String en="Incoming call">Inkomende melding</String>
+  <String en="Respond: {0}" note="{0} = offered.CalloutMessage">Reageren: {0}</String>
+  <String en="Details">Details</String>
+  <String en="Decline">Weigeren</String>
+  <String en="Let dispatch assign another unit.">Laat de meldkamer een andere eenheid sturen.</String>
+  <String en="Assigned call">Toegewezen melding</String>
+  <String en="~g~On scene">~g~Ter plaatse</String>
+  <String en="Set GPS to the scene">GPS naar de melding</String>
+  <String en="GPS set to the scene.">GPS ingesteld op de melding.</String>
+  <String en="Clear call">Melding afsluiten</String>
+  <String en="Report the call as handled or cancelled.">Meld de melding als afgehandeld of geannuleerd.</String>
+  <String en="Call cleared.">Melding afgesloten.</String>
+  <String en="Request additional units">Extra eenheden aanvragen</String>
+  <String en="Engine company">Tankautospuit</String>
+  <String en="An AI engine with crew responds and works the scene.">Een AI-tankautospuit met bemanning komt ter plaatse en helpt mee.</String>
+  <String en="Ambulance">Ambulance</String>
+  <String en="An AI ambulance crew responds and takes care of patients.">Een AI-ambulance komt ter plaatse en zorgt voor de patiënten.</String>
+  <String en="No active calls">Geen actieve meldingen</String>
+  <String en="You are available. Dispatch will send you the next call.">Je bent beschikbaar. De meldkamer stuurt je de volgende melding.</String>
+  <String en="Request a call">Melding aanvragen</String>
+  <String en="Ask dispatch for a call right away.">Vraag de meldkamer meteen om een melding.</String>
+  <String en="~o~No calls">~o~Geen meldingen</String>
+  <String en="There are no calls waiting right now.">Er staan nu geen meldingen open.</String>
+  <String en="Other units">Andere eenheden</String>
+  <String en="on scene">ter plaatse</String>
+  <String en="en route">onderweg</String>
+  <String en="Last call report: {0}" note="{0} = report.Name">Laatste rapport: {0}</String>
+  <String en="Outcome">Resultaat</String>
+  <String en="{0} · {1} min on the call." note="{0} = report.Location, {1} = report.Minutes">{0} · {1} min op de melding.</String>
+  <String en="~g~Completed">~g~Afgerond</String>
+  <String en="~o~Not completed">~o~Niet afgerond</String>
+  <String en="Response time">Aanrijtijd</String>
+  <String en="From accepting the call to arriving on scene, against a target for the distance.">Van het aannemen van de melding tot ter plaatse, vergeleken met een streeftijd voor de afstand.</String>
+  <String en="Water used">Water gebruikt</String>
+  <String en="Pumped by every apparatus on the call, from the tank or a hydrant.">Gepompt door alle voertuigen op de melding, uit de tank of van een brandkraan.</String>
+  <String en="People rescued">Personen gered</String>
+  <String en="Carried out of buildings.">Uit gebouwen gedragen.</String>
+  <String en="Patients treated">Patiënten behandeld</String>
+  <String en="{0} resuscitated." note="{0} = report.Resuscitated">{0} gereanimeerd.</String>
+  <String en="Patients lost">Patiënten overleden</String>
+  <String en="Alarms struck during the call">Opgeschaalde alarmen</String>
+  <String en="The fire grew to a bigger alarm.">De brand groeide naar een groter alarm.</String>
+  <String en="Score">Score</String>
+  <String en="Response time, lives lost, fire escalation and whether the call was completed; rescues earn extra. Completed calls add a tenth of the score to your career points.">Aanrijtijd, overleden slachtoffers, opschaling en of de melding is afgerond; reddingen leveren extra op. Afgeronde meldingen tellen voor een tiende mee in je carrièrepunten.</String>
+  <String en="No apparatus">Geen voertuigen</String>
+  <String en="Request an apparatus at a fire station, or walk up to a fire truck.">Vraag een voertuig aan op een kazerne, of loop naar een brandweerwagen.</String>
+  <String en=" · AI, other call"> · AI, andere melding</String>
+  <String en=" · AI, en route"> · AI, onderweg</String>
+  <String en=" · AI"> · AI</String>
+  <String en="Connect a supply line to a hydrant to refill.">Sluit een toevoerleiding aan op een brandkraan om te vullen.</String>
+  <String en="Pump engaged">Pomp ingeschakeld</String>
+  <String en="Feeds water to the attack hose.">Levert water aan de aanvalsslang.</String>
+  <String en="Pump pressure">Pompdruk</String>
+  <String en="Discharge pressure to the attack hose.">Uitgaande druk naar de aanvalsslang.</String>
+  <String en="Emergency lights">Zwaailicht</String>
+  <String en="Silent mode (lights only)">Stille modus (alleen licht)</String>
+  <String en="Return to station">Terug naar de kazerne</String>
+  <String en="Sends this apparatus and its crew back to quarters.">Stuurt dit voertuig en zijn bemanning terug naar de kazerne.</String>
+  <String en="~y~{0}~s~ is returning to quarters." note="{0} = unit.Definition.Name">~y~{0}~s~ gaat terug naar de kazerne.</String>
+  <String en="Scene">Inzet</String>
+  <String en="Fire">Brand</String>
+  <String en="Growing → burning → under control → knockdown → out.">Groeiend → brandend → onder controle → meester → uit.</String>
+  <String en="  Alarm">  Alarm</String>
+  <String en="Goes up when the fire grows too big; every alarm brings another engine.">Gaat omhoog als de brand te groot wordt; elk alarm brengt een extra tankautospuit.</String>
+  <String en="  Burning spots">  Brandende plekken</String>
+  <String en="Spots with open flames.">Plekken met open vuur.</String>
+  <String en="  Hotspots">  Hotspots</String>
+  <String en="Knocked down, but they rekindle unless you overhaul them with water. The thermal camera shows them.">Geblust, maar ze laaien weer op tenzij je ze nablust met water. De warmtebeeldcamera toont ze.</String>
+  <String en="  Time since dispatch">  Tijd sinds alarmering</String>
+  <String en="  Fire class">  Brandklasse</String>
+  <String en="Flammable: use foam. Electrical: isolate the power first. Battery: lots of water, keeps rekindling.">Brandbaar: gebruik schuim. Elektrisch: eerst de stroom uitschakelen. Accu: veel water, laait steeds weer op.</String>
+  <String en="  Power">  Stroom</String>
+  <String en="Isolate it at the panel (yellow arrow) before using water.">Schakel hem uit bij de verdeelkast (gele pijl) voordat je water gebruikt.</String>
+  <String en="~g~Isolated">~g~Uitgeschakeld</String>
+  <String en="~r~LIVE">~r~ONDER SPANNING</String>
+  <String en="  Ventilation">  Ventilatie</String>
+  <String en="A PPV fan in the doorway pushes the smoke out, but feeds the fire.">Een overdrukventilator in de deuropening blaast de rook naar buiten, maar voedt de brand.</String>
+  <String en="~b~PPV running">~b~Ventilator draait</String>
+  <String en="None">Geen</String>
+  <String en="Fires nearby">Branden in de buurt</String>
+  <String en="Fires within {0:0} m of you." note="{0} = SceneRadius">Branden binnen {0:0} m van je.</String>
+  <String en="~g~None">~g~Geen</String>
+  <String en="Patients">Patiënten</String>
+  <String en="Patients within the scene area.">Patiënten in het inzetgebied.</String>
+  <String en="  Trapped in building">  Ingesloten in gebouw</String>
+  <String en="Carry them out to the staging area.">Draag ze naar buiten, naar de opstelplaats.</String>
+  <String en="  Cardiac arrest">  Hartstilstand</String>
+  <String en="Needs CPR now.">Heeft nu reanimatie nodig.</String>
+  <String en="  Awaiting treatment">  Wacht op behandeling</String>
+  <String en="Injured or unconscious.">Gewond of bewusteloos.</String>
+  <String en="  Stable">  Stabiel</String>
+  <String en="Waiting for an ambulance to take them to hospital.">Wacht op een ambulance naar het ziekenhuis.</String>
+  <String en="  In transport">  In vervoer</String>
+  <String en="Being loaded or in the ambulance.">Wordt ingeladen of ligt in de ambulance.</String>
+  <String en="Mass casualty incident: triage">Grootschalig incident: triage</String>
+  <String en="  Red (immediate)">  Rood (direct)</String>
+  <String en="  Yellow (delayed)">  Geel (uitgesteld)</String>
+  <String en="  Green (minor)">  Groen (licht)</String>
+  <String en="  Black (expectant)">  Zwart (verwachtend)</String>
+  <String en="  Not triaged yet">  Nog niet getrieerd</String>
+  <String en="Hold E at a patient, or order the crew to patient care.">Houd E ingedrukt bij een patiënt, of geef de bemanning de opdracht patiëntenzorg.</String>
+  <String en="Crew ({0})" note="{0} = crew.Members.Count">Bemanning ({0})</String>
+  <String en="No crew">Geen bemanning</String>
+  <String en="Apparatus come with AI firefighters when requested at a station.">Voertuigen komen met AI-brandweerlieden als je ze op een kazerne aanvraagt.</String>
+  <String en=" (AI unit)"> (AI-eenheid)</String>
+  <String en="Riding on the {0}." note="{0} = unit">Rijdt mee op de {0}.</String>
+  <String en="Orders to your crew">Opdrachten aan je bemanning</String>
+  <String en="Work the scene">Werk de inzet af</String>
+  <String en="Do what is most urgent: CPR, rescues, extrication, treatment, then the fire.">Doe wat het dringendst is: reanimatie, redding, bevrijding, behandeling, dan de brand.</String>
+  <String en="Search and rescue">Zoeken en redden</String>
+  <String en="Carry victims out of buildings and extricate trapped occupants.">Draag slachtoffers uit gebouwen en bevrijd ingesloten inzittenden.</String>
+  <String en="Patient care">Patiëntenzorg</String>
+  <String en="CPR and first aid for every patient on scene.">Reanimatie en eerste hulp voor elke patiënt ter plaatse.</String>
+  <String en="Attack the fire">Brand aanvallen</String>
+  <String en="Stretch hose lines from the engines (extinguishers when none are left) and attack the closest fires.">Leg slangen uit vanaf de tankautospuiten (blussers als die op zijn) en val de dichtstbijzijnde branden aan.</String>
+  <String en="Operate the deck gun">Dakmonitor bedienen</String>
+  <String en="One firefighter per engine works the roof-mounted water cannon.">Eén brandweerman per tankautospuit bedient het waterkanon op het dak.</String>
+  <String en="Follow me">Volg mij</String>
+  <String en="Walk with you.">Lopen met je mee.</String>
+  <String en="Hold position">Positie houden</String>
+  <String en="Stay where they are.">Blijven waar ze zijn.</String>
+  <String en="Return to apparatus">Terug naar het voertuig</String>
+  <String en="Get back in the vehicles.">Stap weer in de voertuigen.</String>
+  <String en="Rank">Rang</String>
+  <String en="{0} points to the next rank." note="{0} = next.Value - points">Nog {0} punten tot de volgende rang.</String>
+  <String en="The top of the department.">De top van het korps.</String>
+  <String en="Points">Punten</String>
+  <String en="Calls, fires, rescues and patients all count.">Meldingen, branden, reddingen en patiënten tellen allemaal mee.</String>
+  <String en="Hours on duty">Uren in dienst</String>
+  <String en="Average score">Gemiddelde score</String>
+  <String en="Of your last 10 call reports.">Van je laatste 10 rapporten.</String>
+  <String en="Statistics">Statistieken</String>
+  <String en="Calls completed">Meldingen afgerond</String>
+  <String en="Fires put out">Branden geblust</String>
+  <String en="Carried out of burning buildings.">Uit brandende gebouwen gedragen.</String>
+  <String en="Patients resuscitated">Patiënten gereanimeerd</String>
+  <String en="Patients transported">Patiënten vervoerd</String>
+  <String en="Recent calls">Recente meldingen</String>
+  <String en="No calls yet">Nog geen meldingen</String>
+  <String en="Accepted calls are logged here.">Aangenomen meldingen worden hier bijgehouden.</String>
+  <String en="{0}{1} · {2} · {3} min" note="{0} = CalloutCategoryExtensions.ToDisplayName(call.Category), {1} = (alarm != &quot;&quot; ? &quot; · &quot; + alarm : &quot;&quot;), {2} = call.Location, {3} = call.Minutes">{0}{1} · {2} · {3} min</String>
+  <String en="~n~Response {0} · Water {1:N0} L · Rescued {2}" note="{0} = CallScore.Response(call), {1} = call.WaterUsed, {2} = call.Rescued">~n~Aanrijtijd {0} · Water {1:N0} L · Gered {2}</String>
+  <String en=" · Lost {0}" note="{0} = call.Deceased"> · Overleden {0}</String>
+  <String en="~o~Cancelled">~o~Geannuleerd</String>
+  <String en="{0} ({1}). Select to set a GPS waypoint." note="{0} = station.Data.Address, {1} = station.Data.Type.ToDisplayName()">{0} ({1}). Selecteer om een GPS-punt te zetten.</String>
+  <String en="GPS set to ~y~{0}~s~." note="{0} = station.Name">GPS ingesteld op ~y~{0}~s~.</String>
+  <!-- LivingWorld/OtherUnits.cs -->
+  <String en="Structure Fire">Gebouwbrand</String>
+  <String en="Vehicle Fire">Voertuigbrand</String>
+  <String en="Brush Fire">Natuurbrand</String>
+  <String en="Automatic Fire Alarm">Automatische brandmelding</String>
+  <String en="Smoke Investigation">Rookontwikkeling</String>
+  <String en="Medical Aid">Medische hulp</String>
+  <String en="Cardiac Arrest">Hartstilstand</String>
+  <String en="Traffic Collision">Verkeersongeval</String>
+  <String en="Elevator Rescue">Liftopsluiting</String>
+  <String en="Gas Leak">Gaslek</String>
+  <String en="~o~Reassigned">~o~Overgedragen</String>
+  <String en="~y~{0}~s~ took the call." note="{0} = incident.UnitNames">~y~{0}~s~ heeft de melding overgenomen.</String>
+  <String en="The call was given to another unit.">De melding is aan een andere eenheid gegeven.</String>
+  <String en="~b~Other units">~b~Andere eenheden</String>
+  <String en="~y~{0}~s~ responding to ~o~{1}~s~, {2}." note="{0} = incident.UnitNames, {1} = incident.Name, {2} = incident.Street">~y~{0}~s~ onderweg naar ~o~{1}~s~, {2}.</String>
+  <!-- LivingWorld/PoliceSupport.cs -->
+  <String en="Sheriff">Sheriff</String>
+  <String en="Police">Politie</String>
+  <!-- LivingWorld/TrafficControl.cs -->
+  <String en="pick up the ~y~traffic cone">de ~y~pion~s~ op te pakken</String>
+  <String en="All {0} ~y~traffic cones~s~ are out. Pick one up to place it elsewhere." note="{0} = MaxCones">Alle {0} ~y~pionnen~s~ staan al. Pak er een op om hem ergens anders te zetten.</String>
+  <String en="place a ~y~traffic cone~s~ (traffic stops here)">een ~y~pion~s~ te plaatsen (het verkeer stopt hier)</String>
+  <String en="PLACING">PLAATSEN</String>
+  <!-- LivingWorld/WitnessManager.cs -->
+  <String en="ask the ~y~{0}~s~ again" note="{0} = near.Label.ToLowerInvariant()">de ~y~{0}~s~ nog eens te vragen</String>
+  <String en="talk to the ~y~{0}" note="{0} = near.Label.ToLowerInvariant()">met de ~y~{0}~s~ te praten</String>
+  <!-- Core/CalloutManager.cs -->
+  <String en="Call cancelled, you went off duty.">Melding geannuleerd, je bent uit dienst gegaan.</String>
+  <String en="Press ~b~{0}~s~ or use the tablet to respond." note="{0} = Settings.AcceptCalloutKey">Druk op ~b~{0}~s~ of gebruik de tablet om te reageren.</String>
+  <String en="~y~On view:~s~ {0}" note="{0} = callout.CalloutMessage ?? callout.FriendlyName">~y~Zelf aangetroffen:~s~ {0}</String>
+  <String en="Press ~b~{0}~s~ to stop and handle it yourself." note="{0} = Settings.AcceptCalloutKey">Druk op ~b~{0}~s~ om te stoppen en het zelf af te handelen.</String>
+  <String en="You were incapacitated, another unit is taking over.">Je bent uitgeschakeld, een andere eenheid neemt het over.</String>
+  <!-- Core/CalloutRegistry.cs -->
+  <String en="Could not read the callouts in ~y~{0}~s~, see RagePluginHook.log." note="{0} = file">Kon de meldingen in ~y~{0}~s~ niet lezen, zie RagePluginHook.log.</String>
+  <String en="Callout pack ~y~{0}~s~ was not loaded: it {1}" note="{0} = name, {1} = problem">Meldingenpakket ~y~{0}~s~ is niet geladen: {1}</String>
+  <!-- Core/DutyManager.cs -->
+  <String en="~g~On duty~s~ at ~y~{0}~s~. Open the tablet with ~b~{1}~s~." note="{0} = station.Name, {1} = Settings.TabletKey">~g~In dienst~s~ op ~y~{0}~s~. Open de tablet met ~b~{1}~s~.</String>
+  <String en="You are now ~b~off duty~s~.">Je bent nu ~b~uit dienst~s~.</String>
+  <!-- Core/Interaction.cs -->
+  <String en="WORKING">BEZIG</String>
+  <!-- Core/InteractionRunner.cs -->
+  <String en="Hold ~b~{0}~s~ to {1}." note="{0} = Settings.InteractKey, {1} = interaction.Prompt">Houd ~b~{0}~s~ ingedrukt om {1}.</String>
+  <String en="Press ~b~{0}~s~ to {1}." note="{0} = Settings.InteractKey, {1} = interaction.Prompt">Druk op ~b~{0}~s~ om {1}.</String>
+  <!-- Core/Lsfd.cs -->
+  <String en="~o~No units">~o~Geen eenheden</String>
+  <String en="There is no {0} available in Apparatus.xml." note="{0} = type">Er is geen {0} beschikbaar in Apparatus.xml.</String>
+  <String en="~r~Upgraded to {0}" note="{0} = alarm">~r~Opgeschaald naar {0}</String>
+  <String en="The fire at ~y~{0}~s~ is spreading. Another engine company is responding." note="{0} = World.GetStreetName(incident.Origin)">De brand op ~y~{0}~s~ breidt zich uit. Er komt nog een tankautospuit.</String>
+  <String en="Fire under control">Brand onder controle</String>
+  <String en="Command reports the fire is ~y~under control~s~. Keep working it.">De bevelvoerder meldt dat de brand ~y~onder controle~s~ is. Ga door.</String>
+  <String en="Knockdown">Brand meester</String>
+  <String en="No open flames left. ~o~Overhaul~s~: soak every hotspot, the thermal camera shows them.">Geen open vuur meer. ~o~Nablussen~s~: maak elke hotspot nat, de warmtebeeldcamera toont ze.</String>
+  <String en="~g~Fire out">~g~Brand uit</String>
+  <String en="All hotspots are overhauled, the fire is out.">Alle hotspots zijn nageblust, de brand is uit.</String>
+  <String en="~r~Rekindle!~s~ A hotspot burst into flames again.">~r~Opgelaaid!~s~ Een hotspot is weer in brand gevlogen.</String>
+  <!-- Core/SceneActionManager.cs -->
+  <String en="You need the ~y~{0}~s~ from an engine for this." note="{0} = action.RequiredEquipment.Value.ToDisplayName()">Je hebt hiervoor de ~y~{0}~s~ van een tankautospuit nodig.</String>
+  <String en="You can't do this yet.">Dat kan nog niet.</String>
+  <!-- Water/HoseManager.cs -->
+  <String en="The hose was pulled out of your hands, it doesn't reach any further.">De slang is uit je handen getrokken, hij reikt niet verder.</String>
+  <String en="~o~The hose is almost fully stretched out.">~o~De slang is bijna helemaal uitgerold.</String>
+  <String en="~o~The {0} carries no foam." note="{0} = Source.Definition.Name">~o~De {0} heeft geen schuim aan boord.</String>
+  <String en="~o~The pump of the {0} is disengaged.~s~ Engage it on the tablet." note="{0} = Source.Definition.Name">~o~De pomp van de {0} staat uit.~s~ Zet hem aan op de tablet.</String>
+  <String en="The {0} is ~o~out of foam~s~, back to water." note="{0} = Source.Definition.Name">Het ~o~schuim~s~ van de {0} is op, terug naar water.</String>
+  <String en="~r~The {0} is out of water.~s~ Connect it to a hydrant." note="{0} = Source.Definition.Name">~r~De {0} heeft geen water meer.~s~ Sluit hem aan op een brandkraan.</String>
+  <!-- Water/HydrantManager.cs -->
+  <String en="Bring the supply line of the ~y~{0}~s~ to a ~b~fire hydrant~s~ (max {1:0} m)." note="{0} = source.Definition.Name, {1} = source.Definition.SupplyLineLength">Breng de toevoerleiding van de ~y~{0}~s~ naar een ~b~brandkraan~s~ (max. {1:0} m).</String>
+  <String en="Supply line of the ~y~{0}~s~ disconnected and stowed." note="{0} = source.Definition.Name">Toevoerleiding van de ~y~{0}~s~ losgekoppeld en opgeborgen.</String>
+  <String en="connect the supply line to the ~b~hydrant">de toevoerleiding op de ~b~brandkraan~s~ aan te sluiten</String>
+  <String en="CONNECTING">AANSLUITEN</String>
+  <String en="disconnect the supply line">de toevoerleiding los te koppelen</String>
+  <String en="DISCONNECTING">LOSKOPPELEN</String>
+  <String en="The supply line doesn't reach that far, move the apparatus closer to a hydrant.">De toevoerleiding reikt niet zo ver, zet het voertuig dichter bij een brandkraan.</String>
+  <String en="~b~Hydrant connected.~s~ The ~y~{0}~s~ is now being supplied with water." note="{0} = source.Definition.Name">~b~Brandkraan aangesloten.~s~ De ~y~{0}~s~ krijgt nu water.</String>
+  <!-- Firefighting/FireSystem.cs -->
+  <String en="isolate the ~y~power~s~ at the panel">de ~y~stroom~s~ bij de verdeelkast uit te schakelen</String>
+  <String en="Power ~g~isolated~s~. Water is safe to use now.">Stroom ~g~uitgeschakeld~s~. Je kunt nu veilig water gebruiken.</String>
+  <!-- Firefighting/ForcibleEntry.cs -->
+  <String en="The door is ~r~locked~s~. Force it with a ~y~halligan bar~s~ or ~y~axe~s~ from the engine.">De deur zit ~r~op slot~s~. Forceer hem met een ~y~halligan~s~ of ~y~bijl~s~ van de tankautospuit.</String>
+  <String en="~r~force~s~ the door">de deur te ~r~forceren</String>
+  <String en="FORCING">FORCEREN</String>
+  <String en="Door ~g~forced~s~.">Deur ~g~geforceerd~s~.</String>
+  <!-- Firefighting/Ventilation.cs -->
+  <String en="Carrying the ~b~PPV fan~s~. Press ~b~{0}~s~ in the doorway, facing in, to set it up." note="{0} = Settings.InteractKey">Je draagt de ~b~overdrukventilator~s~. Druk op ~b~{0}~s~ in de deuropening, naar binnen gericht, om hem neer te zetten.</String>
+  <String en="set up the ~b~PPV fan~s~ here">de ~b~overdrukventilator~s~ hier neer te zetten</String>
+  <String en="pick up the ~b~PPV fan">de ~b~overdrukventilator~s~ op te pakken</String>
+  <String en="~b~PPV fan~s~ running: the smoke is being pushed out. Mind the fire, it gets more air too.">~b~Ventilator~s~ draait: de rook wordt naar buiten geblazen. Let op de brand, die krijgt ook meer lucht.</String>
+  <String en="~b~PPV fan~s~ running, but it isn't blowing into a burning building.">~b~Ventilator~s~ draait, maar blaast niet in een brandend gebouw.</String>
+  <!-- Crew/CrewManager.cs -->
+  <String en="~y~{0}~s~ crew: 1 firefighter on board." note="{0} = definition.Name">Bemanning ~y~{0}~s~: 1 brandweerman aan boord.</String>
+  <String en="~y~{0}~s~ crew: {1} firefighters on board." note="{0} = definition.Name, {1} = count">Bemanning ~y~{0}~s~: {1} brandweerlieden aan boord.</String>
+  <String en="~b~Crew:~s~ {0}" note="{0} = OrderToRadio(order)">~b~Bemanning:~s~ {0}</String>
+  <String en="Following">Volgt</String>
+  <String en="Holding">Wacht</String>
+  <String en="Search &amp; rescue">Zoeken &amp; redden</String>
+  <String en="Working the scene">Werkt de inzet af</String>
+  <String en="Returning">Keert terug</String>
+  <String en="Deck gun">Dakmonitor</String>
+  <String en="With apparatus">Bij het voertuig</String>
+  <String en="Extinguishing">Blust</String>
+  <String en="Rescuing victim">Redt slachtoffer</String>
+  <String en="Extricating">Bevrijdt</String>
+  <String en="Performing CPR">Reanimeert</String>
+  <String en="Treating patient">Behandelt patiënt</String>
+  <String en="Transporting patient">Vervoert patiënt</String>
+  <String en="Forcing entry">Forceert toegang</String>
+  <String en="Triage">Triage</String>
+  <String en="Flowing a hose line">Bedient een slang</String>
+  <String en="~b~{0}:~s~ Nothing left to do here, coming to you." note="{0} = member.Name">~b~{0}:~s~ Niets meer te doen hier, ik kom naar je toe.</String>
+  <String en="~b~{0}:~s~ Victim is out!" note="{0} = member.Name">~b~{0}:~s~ Slachtoffer is buiten!</String>
+  <String en="~b~{0}:~s~ Patient is out of the vehicle." note="{0} = member.Name">~b~{0}:~s~ Patiënt is uit het voertuig.</String>
+  <String en="~o~None of your apparatus has a deck gun.">~o~Geen van je voertuigen heeft een dakmonitor.</String>
+  <String en="~b~{0}:~s~ Triage {1}" note="{0} = member.Name, {1} = PatientManager.TagToDisplay(patient.Triage)">~b~{0}:~s~ Triage {1}</String>
+  <String en="~b~{0}:~s~ Door is open!" note="{0} = member.Name">~b~{0}:~s~ Deur is open!</String>
+  <String en="~b~{0}:~s~ Stretching a line!" note="{0} = member.Name">~b~{0}:~s~ Ik leg een slang uit!</String>
+  <String en="On you, chief.">Ik volg je, chef.</String>
+  <String en="Holding position.">Positie gehouden.</String>
+  <String en="Grabbing extinguishers, attacking the fire.">Blussers gepakt, we vallen de brand aan.</String>
+  <String en="Starting search and rescue.">We beginnen met zoeken en redden.</String>
+  <String en="Taking care of the patients.">We zorgen voor de patiënten.</String>
+  <String en="Copy, working the scene.">Begrepen, we werken de inzet af.</String>
+  <String en="Returning to the apparatus.">Terug naar het voertuig.</String>
+  <String en="Manning the deck gun.">Ik bemand de dakmonitor.</String>
+  <String en="Copy.">Begrepen.</String>
+  <!-- VehicleRescue/ExtricationManager.cs -->
+  <String en="extricate the ~r~patient">de ~r~patiënt~s~ te bevrijden</String>
+  <String en="EXTRICATING">BEVRIJDEN</String>
+  <String en="The door is ~r~jammed~s~. Get the ~y~hydraulic tools~s~ from an apparatus.">De deur ~r~klemt~s~. Haal het ~y~hydraulisch gereedschap~s~ uit een voertuig.</String>
+  <String en="stabilize the vehicle with ~y~cribbing">het voertuig te stutten met ~y~stutblokken</String>
+  <String en="STABILIZING">STUTTEN</String>
+  <String en="~o~Stabilize the vehicle with cribbing~s~ before using hydraulic tools.">~o~Stut het voertuig met stutblokken~s~ voordat je hydraulisch gereedschap gebruikt.</String>
+  <String en="force the door open">de deur open te spreiden</String>
+  <String en="SPREADING">SPREIDEN</String>
+  <String en="cut the door off">de deur eraf te knippen</String>
+  <String en="CUTTING">KNIPPEN</String>
+  <String en="break the window">de ruit in te slaan</String>
+  <String en="BREAKING">INSLAAN</String>
+  <String en="break the windscreen">de voorruit in te slaan</String>
+  <String en="Vehicle ~g~stabilized~s~. It is safe to use the hydraulic tools.">Voertuig ~g~gestut~s~. Je kunt nu veilig het hydraulisch gereedschap gebruiken.</String>
+  <String en="Patient ~g~extricated~s~. Treat their injuries.">Patiënt ~g~bevrijd~s~. Behandel de verwondingen.</String>
+  <!-- VehicleRescue/ToolManager.cs -->
+  <String en="You are carrying the ~y~{0}~s~." note="{0} = type.ToDisplayName()">Je draagt de ~y~{0}~s~.</String>
+  <!-- Safety/BreathingApparatus.cs -->
+  <String en="~b~Face piece on.~s~ Breathing from your cylinder ({0:P0})." note="{0} = AirFraction">~b~Gelaatstuk op.~s~ Je ademt uit je cilinder ({0:P0}).</String>
+  <String en="Face piece off.">Gelaatstuk af.</String>
+  <String en="~r~PASS alarm~s~: you haven't moved for 30 seconds. Move to reset it.">~r~PASS-alarm~s~: je hebt 30 seconden niet bewogen. Beweeg om het te resetten.</String>
+  <String en="~r~Your SCBA cylinder is empty!~s~ Get out of the smoke and swap it at an engine.">~r~Je ademluchtcilinder is leeg!~s~ Ga uit de rook en wissel hem bij een tankautospuit.</String>
+  <String en="~o~Low air~s~: {0:P0} left. Head out and swap your cylinder at an engine." note="{0} = AirFraction">~o~Weinig lucht~s~: nog {0:P0}. Ga naar buiten en wissel je cilinder bij een tankautospuit.</String>
+  <!-- Safety/HazardManager.cs -->
+  <String en="~r~Your cylinder is empty!~s~ Get out of the smoke.">~r~Je cilinder is leeg!~s~ Ga uit de rook.</String>
+  <String en="~r~You are breathing smoke!~s~ Put your face piece on with ~b~{0}~s~." note="{0} = Settings.MaskKey">~r~Je ademt rook in!~s~ Zet je gelaatstuk op met ~b~{0}~s~.</String>
+  <String en="~r~Electric shock!~s~ Isolate the power first, or use an extinguisher.">~r~Elektrische schok!~s~ Schakel eerst de stroom uit, of gebruik een blusser.</String>
+  <String en="~r~Too hot!~s~ Back off, or protect yourself with a ~b~fog~s~ pattern.">~r~Te heet!~s~ Ga terug, of bescherm jezelf met een ~b~nevelstraal~s~.</String>
+  <!-- Safety/ThermalCamera.cs -->
+  <String en="Thermal imaging camera taken. Press ~b~{0}~s~ to turn it on." note="{0} = Settings.ThermalCameraKey">Warmtebeeldcamera gepakt. Druk op ~b~{0}~s~ om hem aan te zetten.</String>
+  <!-- Apparatus/ApparatusManager.cs -->
+  <String en="Vehicle model ~y~{0}~s~ does not exist, check Apparatus.xml." note="{0} = definition.Model">Voertuigmodel ~y~{0}~s~ bestaat niet, controleer Apparatus.xml.</String>
+  <String en="Your ~y~{0}~s~ is ready in front of the station." note="{0} = definition.Name">Je ~y~{0}~s~ staat klaar voor de kazerne.</String>
+  <String en="~b~Unit responding">~b~Eenheid onderweg</String>
+  <String en="~y~{0}~s~ from {1} is en route to the scene." note="{0} = definition.Name, {1} = station.Name">~y~{0}~s~ van {1} is onderweg naar de melding.</String>
+  <String en="open the ~y~{0}~s~ compartments" note="{0} = nearby.Definition.Name">de vakken van de ~y~{0}~s~ te openen</String>
+  <!-- Apparatus/Equipment.cs -->
+  <String en="Attack hose">Aanvalsslang</String>
+  <String en="Supply line">Toevoerleiding</String>
+  <String en="Fire extinguisher">Brandblusser</String>
+  <String en="Axe">Bijl</String>
+  <String en="Halligan bar">Halligan</String>
+  <String en="Flashlight">Zaklamp</String>
+  <String en="Road flares">Fakkels</String>
+  <String en="Window punch">Glasbreker</String>
+  <String en="Cribbing">Stutblokken</String>
+  <String en="Hydraulic spreader">Hydraulische spreider</String>
+  <String en="Hydraulic cutter">Hydraulische schaar</String>
+  <String en="AED">AED</String>
+  <String en="SCBA cylinders">Ademluchtcilinders</String>
+  <String en="Thermal imaging camera">Warmtebeeldcamera</String>
+  <String en="PPV fan">Overdrukventilator</String>
+  <String en="Gas detector">Gasmeter</String>
+  <String en="Absorbent">Absorptiekorrels</String>
+  <String en="Traffic cones">Pionnen</String>
+  <!-- Apparatus/FireApparatus.cs -->
+  <String en="The supply line of your ~y~{0}~s~ snapped off the hydrant." note="{0} = Definition.Name">De toevoerleiding van je ~y~{0}~s~ is van de brandkraan geschoten.</String>
+  <!-- Medical/AmbulanceTransport.cs -->
+  <String en="~b~Ambulance requested">~b~Ambulance aangevraagd</String>
+  <String en="A patient is ready for transport, an ambulance is on its way.">Een patiënt is klaar voor vervoer, er is een ambulance onderweg.</String>
+  <String en="~b~{0}:~s~ Getting the stretcher." note="{0} = attendant.Name">~b~{0}:~s~ Ik haal de brancard.</String>
+  <String en="Stretcher model ~y~{0}~s~ doesn't exist, check LSFD.ini." note="{0} = Settings.StretcherModel">Brancardmodel ~y~{0}~s~ bestaat niet, controleer LSFD.ini.</String>
+  <String en="~b~{0}:~s~ Patient is on the stretcher, moving to the ambulance." note="{0} = o.Attendant.Name">~b~{0}:~s~ Patiënt ligt op de brancard, we gaan naar de ambulance.</String>
+  <String en="~b~Patient transport">~b~Patiëntvervoer</String>
+  <String en="~y~{0}~s~ is transporting a patient to {1}" note="{0} = o.Unit.Definition.Name, {1} = o.Hospital.name">~y~{0}~s~ brengt een patiënt naar {1}</String>
+  <String en=" (~r~Code 3~s~)."> (~r~Code 3~s~).</String>
+  <String en="~g~Patient handed over">~g~Patiënt overgedragen</String>
+  <String en="The patient was handed over at {0}." note="{0} = o.Hospital.name">De patiënt is overgedragen in {0}.</String>
+  <!-- Medical/Hospitals.cs -->
+  <String en="Pillbox Hill Medical Center">Pillbox Hill Medical Center</String>
+  <String en="Central Los Santos Medical Center">Central Los Santos Medical Center</String>
+  <String en="Mount Zonah Medical Center">Mount Zonah Medical Center</String>
+  <String en="St. Fiacre Hospital">St. Fiacre Hospital</String>
+  <String en="Sandy Shores Medical Center">Sandy Shores Medical Center</String>
+  <String en="Paleto Bay Care Center">Paleto Bay Care Center</String>
+  <!-- Medical/PatientManager.cs -->
+  <String en="~r~RED~s~ (immediate)">~r~ROOD~s~ (direct)</String>
+  <String en="~y~YELLOW~s~ (delayed)">~y~GEEL~s~ (uitgesteld)</String>
+  <String en="~g~GREEN~s~ (minor)">~g~GROEN~s~ (licht)</String>
+  <String en="~c~BLACK~s~ (expectant)">~c~ZWART~s~ (verwachtend)</String>
+  <String en="burns">brandwonden</String>
+  <String en="smoke inhalation">rookinhalatie</String>
+  <String en="medical">medisch</String>
+  <String en="trauma">letsel</String>
+  <String en="A patient went into ~r~cardiac arrest~s~! Start CPR.">Een patiënt heeft een ~r~hartstilstand~s~! Begin met reanimeren.</String>
+  <String en="A patient is ~o~deteriorating~s~ and lost consciousness.">Een patiënt ~o~gaat achteruit~s~ en is buiten bewustzijn.</String>
+  <String en="put the patient down">de patiënt neer te leggen</String>
+  <String en="put the patient down (~o~still in danger~s~)">de patiënt neer te leggen (~o~nog in gevaar~s~)</String>
+  <String en="carry the ~r~victim~s~ out">het ~r~slachtoffer~s~ naar buiten te dragen</String>
+  <String en="LIFTING">OPTILLEN</String>
+  <String en="~y~triage~s~ the patient">de patiënt te ~y~triëren</String>
+  <String en="TRIAGE">TRIAGE</String>
+  <String en="Triage: {0} · {1}" note="{0} = TagToDisplay(patient.Triage), {1} = InjuryToDisplay(patient.Injury)">Triage: {0} · {1}</String>
+  <String en="shock the patient with the ~y~AED">de patiënt te defibrilleren met de ~y~AED</String>
+  <String en="ANALYZING">ANALYSEREN</String>
+  <String en="perform ~r~CPR">te ~r~reanimeren</String>
+  <String en="CPR">REANIMATIE</String>
+  <String en="treat the ~r~patient~s~ ({0})" note="{0} = InjuryToDisplay(patient.Injury)">de ~r~patiënt~s~ te behandelen ({0})</String>
+  <String en="The patient is ~g~stable~s~. The ~b~ambulance~s~ crew will take them to hospital.">De patiënt is ~g~stabiel~s~. De ~b~ambulance~s~ brengt hem naar het ziekenhuis.</String>
+  <String en="The patient is ~g~stable~s~.">De patiënt is ~g~stabiel~s~.</String>
+  <String en="~o~No shock advised.~s~ Continue CPR.">~o~Geen schok geadviseerd.~s~ Ga door met reanimeren.</String>
+  <String en="~o~Still no pulse.~s~ Keep going.">~o~Nog steeds geen pols.~s~ Ga door.</String>
+  <String en="~g~Pulse is back!~s~ The patient was resuscitated.">~g~Er is weer een pols!~s~ De patiënt is gereanimeerd.</String>
+  <String en="Patient ~g~treated~s~ and stable.">Patiënt ~g~behandeld~s~ en stabiel.</String>
+  <String en="Victim ~g~rescued~s~ from the building. Treat them for smoke inhalation.">Slachtoffer ~g~gered~s~ uit het gebouw. Behandel hem voor rookinhalatie.</String>
+  <String en="A patient has ~r~died~s~.">Een patiënt is ~r~overleden~s~.</String>
+  <!-- API/CalloutInfoAttribute.cs -->
+  <String en="Traffic">Verkeer</String>
+  <String en="Medical">Medisch</String>
+  <String en="Rescue">Hulpverlening</String>
+  <String en="Hazmat">Gevaarlijke stoffen</String>
+  <String en="Code 2">Code 2</String>
+  <String en="Code 3">Code 3</String>
+  <String en="1st Alarm">1e alarm</String>
+  <String en="2nd Alarm">2e alarm</String>
+  <String en="3rd Alarm">3e alarm</String>
+  <String en="{0}th Alarm" note="{0} = alarmLevel">{0}e alarm</String>
+  <!-- API/FireIncident.cs -->
+  <String en="~r~Growing">~r~Groeiend</String>
+  <String en="~o~Burning">~o~Brandend</String>
+  <String en="~y~Under control">~y~Onder controle</String>
+  <String en="~b~Knockdown">~b~Meester</String>
+  <!-- API/Language.cs -->
+  <String en="Extinguish the fire.">Blus de brand.</String>
+  <String en="{0} patients" note="{0} = count">{0} patiënten</String>
+  <!-- API/Witnesses.cs -->
+  <String en="Caller">Melder</String>
+  <String en="Witness">Getuige</String>
+  <!-- Profiles/CallReport.cs -->
+  <String en="On view">Zelf aangetroffen</String>
+  <String en="{0}{1}~s~ (target {2})" note="{0} = color, {1} = Time(record.ResponseSeconds), {2} = Time(record.TargetSeconds)">{0}{1}~s~ (streeftijd {2})</String>
+  <!-- Profiles/Profile.cs -->
+  <String en="Probationary Firefighter">Aspirant-brandwacht</String>
+  <String en="Firefighter">Brandwacht</String>
+  <String en="Engineer">Hoofdbrandwacht</String>
+  <String en="Lieutenant">Bevelvoerder</String>
+  <String en="Captain">Officier van dienst</String>
+  <String en="Battalion Chief">Hoofdofficier</String>
+  <String en="Fire Chief">Commandant</String>
+  <!-- Profiles/ProfileManager.cs -->
+  <String en="~g~Promoted~s~ to ~y~{0}~s~!" note="{0} = after">~g~Bevorderd~s~ tot ~y~{0}~s~!</String>
+  <!-- Callouts/CallerLines.cs -->
+  <String en="son">zoon</String>
+  <String en="husband">man</String>
+  <String en="brother">broer</String>
+  <String en="dad">vader</String>
+  <String en="roommate|male">huisgenoot</String>
+  <String en="neighbor|male">buurman</String>
+  <String en="daughter">dochter</String>
+  <String en="wife">vrouw</String>
+  <String en="sister">zus</String>
+  <String en="mom">moeder</String>
+  <String en="roommate|female">huisgenote</String>
+  <String en="neighbor|female">buurvrouw</String>
+  <String en="he">hij</String>
+  <String en="she">zij</String>
+  <String en="him">hem</String>
+  <String en="her">haar</String>
+  <String en="his">zijn</String>
+  <String en="her|possessive">haar</String>
+  <String en="on the ground floor">op de begane grond</String>
+  <String en="on the {0} floor" note="{0} = Ordinal(floor)">op de {0} verdieping</String>
+  <String en="in the back">achterin</String>
+  <String en="near the front">aan de voorkant</String>
+  <String en="first">eerste</String>
+  <String en="second">tweede</String>
+  <String en="third">derde</String>
+  <String en="fourth">vierde</String>
+  <String en="fifth">vijfde</String>
+  <String en="{0}th" note="{0} = number">{0}e</String>
+  <!-- Callouts/Traffic/RoadAccidents.cs -->
+  <String en="Head-on Collision">Frontale aanrijding</String>
+  <String en="Two vehicles, one occupant ~r~trapped~s~. Extrication required.">Twee voertuigen, één inzittende ~r~bekneld~s~. Bevrijding nodig.</String>
+  <String en="The car came right across the center line, hit them head on!">Die auto kwam zo over de middenstreep en reed frontaal op ze in!</String>
+  <String en="The driver isn't moving. I tried {0} door, it's jammed shut." note="{0} = CallerLines.His(driver)">De bestuurder beweegt niet. Ik heb {0} deur geprobeerd, die zit muurvast.</String>
+  <String en="Stabilize the vehicle with ~y~cribbing~s~, force or cut a door with the ~y~hydraulic tools~s~, extricate and treat the ~r~patient~s~.">Stut het voertuig met ~y~stutblokken~s~, forceer of knip een deur met het ~y~hydraulisch gereedschap~s~, bevrijd en behandel de ~r~patiënt~s~.</String>
+  <String en="Minor Collision">Kop-staartbotsing</String>
+  <String en="Rear-end collision, one driver complaining of neck pain.">Kop-staartbotsing, een bestuurder heeft nekklachten.</String>
+  <String en="They stopped all of a sudden and I couldn't brake in time. I'm so sorry.">Ze remden ineens en ik kon niet meer op tijd stoppen. Het spijt me zo.</String>
+  <String en="I'm fine, but the other driver says the neck hurts.">Met mij gaat het, maar de andere bestuurder heeft last van de nek.</String>
+  <String en="Check the vehicles and treat the ~r~injured driver~s~.">Controleer de voertuigen en behandel de ~r~gewonde bestuurder~s~.</String>
+  <String en="Vehicle Rollover">Voertuig over de kop</String>
+  <String en="Single vehicle rolled over, driver ~r~trapped~s~ upside down.">Eén voertuig over de kop geslagen, bestuurder ~r~bekneld~s~ ondersteboven.</String>
+  <String en="It clipped the curb and just flipped, it rolled over twice!">Hij raakte de stoeprand en sloeg gewoon over de kop, twee keer!</String>
+  <String en="The driver's still hanging upside down in there. {0} was talking a minute ago." note="{0} = CallerLines.Capital(CallerLines.He(driver))">De bestuurder hangt nog ondersteboven in de auto. {0} praatte een minuut geleden nog.</String>
+  <String en="The vehicle is on its roof: stabilize it with ~y~cribbing~s~ before cutting the ~r~driver~s~ out.">Het voertuig ligt op zijn dak: stut het met ~y~stutblokken~s~ voordat je de ~r~bestuurder~s~ eruit knipt.</String>
+  <String en="Motorcycle Accident">Motorongeval</String>
+  <String en="Motorcyclist down after a collision with a car.">Motorrijder gevallen na een aanrijding met een auto.</String>
+  <String en="I pulled out, I just didn't see {0} coming!" note="{0} = CallerLines.Him(rider)">Ik trok op, ik zag {0} gewoon niet aankomen!</String>
+  <String en="{0}'s not getting up. I didn't want to move {1}, {2} still has the helmet on." note="{0} = CallerLines.Capital(CallerLines.He(rider)), {1} = CallerLines.Him(rider), {2} = CallerLines.He(rider)">{0} komt niet overeind. Ik wilde {1} niet verplaatsen, {2} heeft de helm nog op.</String>
+  <String en="Assess the ~r~motorcyclist~s~ and start treatment.">Beoordeel de ~r~motorrijder~s~ en begin met de behandeling.</String>
+  <String en="Pedestrian Struck">Voetganger aangereden</String>
+  <String en="Pedestrian hit by a vehicle, driver stayed on scene.">Voetganger aangereden door een voertuig, de bestuurder is gebleven.</String>
+  <String en="I didn't see {0}! {1} stepped out between the parked cars!" note="{0} = CallerLines.Him(pedestrian), {1} = CallerLines.Capital(CallerLines.He(pedestrian))">Ik zag {0} niet! {1} stapte tussen de geparkeerde auto's door de weg op!</String>
+  <String en="I was only doing thirty. {0} hit the windshield and landed over there." note="{0} = CallerLines.Capital(CallerLines.He(pedestrian))">Ik reed maar vijftig. {0} kwam op de voorruit en belandde daar.</String>
+  <String en="Treat the ~r~pedestrian~s~. Start CPR if there is no pulse.">Behandel de ~r~voetganger~s~. Begin met reanimeren als er geen pols is.</String>
+  <String en="Multi-Vehicle Collision">Kettingbotsing</String>
+  <String en="Pile-up with multiple patients and entrapment. ~o~Mass casualty incident~s~.">Kettingbotsing met meerdere patiënten en beknelling. ~o~Grootschalig incident~s~.</String>
+  <String en="~o~Mass casualty incident~s~: ~y~triage~s~ every patient first (hold E), then treat ~r~red~s~, ~y~yellow~s~ and ~g~green~s~ in that order. Black means expectant: CPR only once the others are cared for.">~o~Grootschalig incident~s~: ~y~triëer~s~ eerst elke patiënt (houd E ingedrukt), behandel dan ~r~rood~s~, ~y~geel~s~ en ~g~groen~s~ in die volgorde. Zwart betekent verwachtend: alleen reanimeren als de anderen verzorgd zijn.</String>
+  <!-- Callouts/Hazmat/HazmatCalls.cs -->
+  <String en="place ~y~traffic cones~s~ for the cordon">~y~pionnen~s~ te plaatsen voor de afzetting</String>
+  <String en="Cordon ~g~in place~s~. Onlookers are moving back.">Afzetting ~g~staat~s~. Omstanders gaan naar achteren.</String>
+  <String en="Construction crew hit a gas main, ~o~strong smell of gas~s~. Approach from upwind, no ignition sources.">Een bouwploeg heeft een gasleiding geraakt, ~o~sterke gaslucht~s~. Benader bovenwinds, geen ontstekingsbronnen.</String>
+  <String en="We were digging for a water line and the excavator went right through the gas main.">We groeven voor een waterleiding en de graafmachine ging dwars door de gasleiding.</String>
+  <String en="The shut-off valve is under a cover in the street, a few meters from the hole. You need a bar to turn it.">De afsluiter zit onder een deksel in de straat, een paar meter van het gat. Je hebt een staaf nodig om hem te draaien.</String>
+  <String en="close the ~y~gas valve~s~">de ~y~gaskraan~s~ dicht te draaien</String>
+  <String en="The valve needs a ~y~halligan bar~s~ from the engine as a key.">Voor de afsluiter heb je een ~y~halligan~s~ van de tankautospuit nodig als sleutel.</String>
+  <String en="CLOSING VALVE">AFSLUITEN</String>
+  <String en="Set up a ~y~cordon~s~ with traffic cones, then close the ~y~gas valve~s~. Any spark can ignite the gas.">Zet een ~y~afzetting~s~ met pionnen en draai dan de ~y~gaskraan~s~ dicht. Elke vonk kan het gas ontsteken.</String>
+  <String en="Valve ~g~closed~s~. Let the gas clear and check the area with the gas detector.">Afsluiter ~g~dicht~s~. Laat het gas wegtrekken en controleer het gebied met de gasmeter.</String>
+  <String en="~y~measure~s~ for gas">op gas te ~y~meten</String>
+  <String en="Gas detector: ~g~0% LEL~s~. The gas company takes over.">Gasmeter: ~g~0% LEL~s~. Het gasbedrijf neemt het over.</String>
+  <String en="MEASURING">METEN</String>
+  <String en="~r~Gas ignited!">~r~Gas ontstoken!</String>
+  <String en="The leak caught fire. Close the valve and protect the surroundings; don't put it out before the gas is off.">Het lek heeft vlam gevat. Draai de afsluiter dicht en bescherm de omgeving; niet blussen voordat het gas dicht is.</String>
+  <String en="Fuel Spill">Brandstoflekkage</String>
+  <String en="Vehicle with a ruptured fuel tank, ~o~fuel all over the roadway~s~. No injuries reported.">Voertuig met een gescheurde brandstoftank, ~o~brandstof over de hele weg~s~. Geen gewonden gemeld.</String>
+  <String en="I hit something on the road and the tank split open. It's gasoline, it's everywhere.">Ik reed over iets heen en de tank scheurde open. Het is benzine, het ligt overal.</String>
+  <String en="Nobody's hurt. I turned the engine off and got out.">Niemand is gewond. Ik heb de motor uitgezet en ben uitgestapt.</String>
+  <String en="spread ~y~absorbent~s~ on the fuel">~y~absorptiekorrels~s~ op de brandstof te strooien</String>
+  <String en="All fuel ~g~absorbed~s~. The road can be swept.">Alle brandstof ~g~opgenomen~s~. De weg kan geveegd worden.</String>
+  <String en="ABSORBING">ABSORBEREN</String>
+  <String en="Cordon off the road with ~y~traffic cones~s~ and soak up the fuel with ~y~absorbent~s~ before it ignites.">Zet de weg af met ~y~pionnen~s~ en neem de brandstof op met ~y~absorptiekorrels~s~ voordat het vlam vat.</String>
+  <String en="~r~Fuel ignited!">~r~Brandstof ontstoken!</String>
+  <String en="The spill caught fire. Use ~y~foam~s~ on the burning fuel.">De lekkage heeft vlam gevat. Gebruik ~y~schuim~s~ op de brandende brandstof.</String>
+  <!-- Callouts/Xml/XmlCallout.cs -->
+  <String en="~g~Scene handled">~g~Inzet afgehandeld</String>
+  <String en="Everything is taken care of. Good work.">Alles is geregeld. Goed werk.</String>
+  <!-- Callouts/Fire/AlarmCalls.cs -->
+  <String en="~y~{0}~s~. The fire alarm system went off, no caller on the line. Investigate." note="{0} = building.Name">~y~{0}~s~. De brandmeldinstallatie is afgegaan, geen melder aan de lijn. Ga verkennen.</String>
+  <String en="check the ~y~fire alarm panel">het ~y~brandmeldpaneel~s~ te controleren</String>
+  <String en="CHECKING">CONTROLEREN</String>
+  <String en="Go inside and check the ~y~fire alarm panel~s~ to find out which detector went off.">Ga naar binnen en controleer het ~y~brandmeldpaneel~s~ om te zien welke melder is afgegaan.</String>
+  <String en="Panel: ~y~detector fault~s~ in zone 3. No smoke, no fire.">Paneel: ~y~storing melder~s~ in zone 3. Geen rook, geen brand.</String>
+  <String en="Panel: smoke detector in the ~y~kitchen~s~. Somebody burnt their lunch.">Paneel: rookmelder in de ~y~keuken~s~. Iemand heeft zijn lunch laten aanbranden.</String>
+  <String en="~b~ventilate~s~ the kitchen">de keuken te ~b~ventileren</String>
+  <String en="VENTILATING">VENTILEREN</String>
+  <String en="~r~Working fire">~r~Uitslaande brand</String>
+  <String en="Smoke and flames inside ~y~{0}~s~. Upgraded to a structure fire." note="{0} = Building.Name">Rook en vlammen in ~y~{0}~s~. Opgeschaald naar een gebouwbrand.</String>
+  <String en="~g~reset~s~ the fire alarm">het brandalarm te ~g~resetten</String>
+  <String en="Alarm ~g~reset~s~. Building handed back to the owner.">Alarm ~g~gereset~s~. Gebouw teruggegeven aan de eigenaar.</String>
+  <String en="RESETTING">RESETTEN</String>
+  <String en="Smell of Smoke">Brandlucht</String>
+  <String en="~y~{0}~s~. Staff smell something burning, no visible smoke. Locate the source." note="{0} = building.Name">~y~{0}~s~. Personeel ruikt iets branderigs, geen zichtbare rook. Zoek de bron.</String>
+  <String en="search for the ~y~source~s~ of the smell">te zoeken naar de ~y~bron~s~ van de lucht</String>
+  <String en="SEARCHING">ZOEKEN</String>
+  <String en="Search the building. The ~y~thermal imaging camera~s~ shows heat behind walls.">Doorzoek het gebouw. De ~y~warmtebeeldcamera~s~ toont warmte achter muren.</String>
+  <String en="~r~Overheated wiring~s~ is smoldering behind the wall!">~r~Oververhitte bedrading~s~ smeult achter de muur!</String>
+  <String en="~r~Electrical fire">~r~Elektrische brand</String>
+  <String en="Isolate the power at the panel (~y~yellow arrow~s~) before you use water.">Schakel de stroom uit bij de verdeelkast (~y~gele pijl~s~) voordat je water gebruikt.</String>
+  <String en="Nothing here.">Niets hier.</String>
+  <String en="Nothing found inside. Probably a barbecue next door.">Niets gevonden binnen. Waarschijnlijk een barbecue bij de buren.</String>
+  <String en="Carbon Monoxide Alarm">CO-melding</String>
+  <String en="~y~{0}~s~. CO detector sounding, ~r~occupants feel dizzy~s~." note="{0} = building.Name">~y~{0}~s~. CO-melder gaat af, ~r~bewoners voelen zich duizelig~s~.</String>
+  <String en="~y~{0}~s~. CO detector sounding, occupants are outside." note="{0} = building.Name">~y~{0}~s~. CO-melder gaat af, de bewoners staan buiten.</String>
+  <String en="~y~measure~s~ the CO level">het ~y~CO-gehalte~s~ te meten</String>
+  <String en="Carbon monoxide is invisible: put your ~b~SCBA~s~ on ({0}) and measure with the ~y~gas detector~s~." note="{0} = Settings.MaskKey">Koolmonoxide is onzichtbaar: zet je ~b~ademlucht~s~ op ({0}) en meet met de ~y~gasmeter~s~.</String>
+  <String en="Gas detector: ~r~CO {0} ppm~s~. Get everyone out and ventilate!" note="{0} = ppm">Gasmeter: ~r~CO {0} ppm~s~. Haal iedereen naar buiten en ventileer!</String>
+  <String en="~b~ventilate~s~ (open windows and doors)">te ~b~ventileren~s~ (ramen en deuren open)</String>
+  <String en="Windows and doors open, the gas is clearing.">Ramen en deuren open, het gas trekt weg.</String>
+  <String en="~y~measure~s~ again">opnieuw te ~y~meten</String>
+  <String en="Gas detector: ~g~CO 0 ppm~s~. Tell the occupants to have the boiler checked.">Gasmeter: ~g~CO 0 ppm~s~. Laat de bewoners de cv-ketel nakijken.</String>
+  <!-- Callouts/Fire/BuildingFire.cs -->
+  <String en="Caller reports ~r~1 occupant trapped~s~ inside.">Melder meldt ~r~1 bewoner ingesloten~s~ binnen.</String>
+  <String en="Caller reports ~r~{0} occupants trapped~s~ inside." note="{0} = trappedCount">Melder meldt ~r~{0} bewoners ingesloten~s~ binnen.</String>
+  <String en="Occupants are reported out of the building.">De bewoners zijn volgens de melding buiten.</String>
+  <String en="Talk to the ~y~caller~s~, search the building and ~r~carry the victims out~s~, then extinguish the ~r~fire~s~. Your crew can help from the tablet.">Praat met de ~y~melder~s~, doorzoek het gebouw en ~r~draag de slachtoffers naar buiten~s~, blus dan de ~r~brand~s~. Je bemanning kan helpen via de tablet.</String>
+  <String en="Stretch a ~b~hose line~s~ into the building and extinguish the ~r~fire~s~. The ~y~caller~s~ is waiting out front.">Leg een ~b~slang~s~ het gebouw in en blus de ~r~brand~s~. De ~y~melder~s~ wacht voor de deur.</String>
+  <String en=" Put your ~b~SCBA~s~ face piece on ({0}) before you go into the smoke." note="{0} = Settings.MaskKey"> Zet je ~b~gelaatstuk~s~ op ({0}) voordat je de rook in gaat.</String>
+  <String en="Everybody's out, I counted twice.">Iedereen is buiten, ik heb twee keer geteld.</String>
+  <String en="We all got out, thank God. Nobody's inside.">We zijn er allemaal uit, godzijdank. Er is niemand meer binnen.</String>
+  <String en="Please, help! My {0} is still inside, {1}!" note="{0} = CallerLines.Relation(victim), {1} = where">Help, alsjeblieft! Mijn {0} is nog binnen, {1}!</String>
+  <String en="And my {0}, {1}. I think." note="{0} = CallerLines.Relation(victim), {1} = where">En mijn {0}, {1}. Denk ik.</String>
+  <String en="{0}'s not answering when I call {1}!" note="{0} = he, {1} = CallerLines.Him(victim)">{0} reageert niet als ik {1} roep!</String>
+  <String en="{0} was screaming for help, now I can't hear {1} anymore!" note="{0} = he, {1} = CallerLines.Him(victim)">{0} schreeuwde om hulp, nu hoor ik {1} niet meer!</String>
+  <String en="There's more people in there, I don't know where!">Er zijn nog meer mensen binnen, ik weet niet waar!</String>
+  <String en="It smelled like gas right before it went up.">Het rook naar gas vlak voordat het in brand vloog.</String>
+  <String en="It started in the kitchen, it spread so fast.">Het begon in de keuken, het ging zo snel.</String>
+  <String en="I heard a bang and then there was smoke everywhere.">Ik hoorde een knal en toen was er overal rook.</String>
+  <String en="The smoke alarm woke me up, the hallway was already full of smoke.">De rookmelder maakte me wakker, de gang stond al vol rook.</String>
+  <String en="Reported victim">Gemeld slachtoffer</String>
+  <String en="~y~Caller">~y~Melder</String>
+  <String en="Where the caller last saw {0} is marked on your map." note="{0} = (reportedVictims.Count == 1 ? L.T(&quot;the victim&quot;) : L.T(&quot;the victims&quot;))">Waar de melder {0} het laatst zag, staat op je kaart.</String>
+  <String en="the victim">het slachtoffer</String>
+  <String en="the victims">de slachtoffers</String>
+  <String en="Commercial Structure Fire">Brand in bedrijfspand</String>
+  <String en="Apartment Fire">Brand in appartement</String>
+  <String en="Residential Structure Fire">Woningbrand</String>
+  <String en="Industrial Building Fire">Brand in industriepand</String>
+  <!-- Callouts/Fire/OutdoorFires.cs -->
+  <String en="Extinguish all the ~r~fires~s~ in the area ({0})." note="{0} = CalloutPriorityExtensions.AlarmToDisplay(AlarmLevel)">Blus alle ~r~branden~s~ in het gebied ({0}).</String>
+  <String en="Vegetation fire spreading along the road. Protect nearby structures.">Natuurbrand die zich langs de weg uitbreidt. Bescherm de gebouwen in de buurt.</String>
+  <String en="Rubbish Fire">Afvalbrand</String>
+  <String en="Dumpster and trash fire behind a building, no exposures reported.">Container- en afvalbrand achter een gebouw, geen belendingen in gevaar.</String>
+  <String en="Industrial Fire">Industriebrand</String>
+  <String en="Fire at an industrial site, ~o~possible hazardous materials~s~. Approach from upwind.">Brand op een industrieterrein, ~o~mogelijk gevaarlijke stoffen~s~. Benader bovenwinds.</String>
+  <String en="Site manager">Bedrijfsleider</String>
+  <String en="Everyone on shift is out and accounted for.">Iedereen van de dienst is buiten en geteld.</String>
+  <String en="There are drums of solvent stored behind that building. Keep your people away from the smoke!">Achter dat gebouw staan vaten oplosmiddel. Hou je mensen uit de rook!</String>
+  <!-- Callouts/Fire/SpecialFires.cs -->
+  <String en="Electrical Fire">Elektrische brand</String>
+  <String en="~y~{0}~s~. Fire in the electrical room, ~o~power still on~s~." note="{0} = building.Name">~y~{0}~s~. Brand in de technische ruimte, ~o~stroom staat er nog op~s~.</String>
+  <String en="~o~Live electrics~s~: water will shock you. ~y~Isolate the power~s~ at the panel first, or use an extinguisher.">~o~Onder spanning~s~: water geeft je een schok. ~y~Schakel eerst de stroom uit~s~ bij de verdeelkast, of gebruik een blusser.</String>
+  <String en="Electric Vehicle Fire">Brand elektrisch voertuig</String>
+  <String en="An electric car is on fire, the battery is popping. ~o~Expect a long cooling job~s~.">Een elektrische auto staat in brand, de accu knalt. ~o~Reken op lang koelen~s~.</String>
+  <String en="It's electric! The battery started hissing and popping under the floor, and then it just went up.">Hij is elektrisch! De accu begon te sissen en te knallen onder de vloer, en toen vloog hij in brand.</String>
+  <String en="I got out right away. Every time you think it's out, it flares up again.">Ik ben er meteen uitgegaan. Elke keer als je denkt dat het uit is, laait het weer op.</String>
+  <String en="~o~Lithium battery fire~s~: foam doesn't help, it takes a lot of water and it keeps rekindling. Keep cooling until the thermal camera shows no hotspots.">~o~Brand in lithiumaccu~s~: schuim helpt niet, het kost veel water en het laait steeds weer op. Blijf koelen tot de warmtebeeldcamera geen hotspots meer toont.</String>
+  <!-- Callouts/Fire/VehicleFire.cs -->
+  <String en="Vehicle fully involved, the driver got out with ~r~burn injuries~s~.">Voertuig volledig in brand, de bestuurder is eruit met ~r~brandwonden~s~.</String>
+  <String en="A vehicle is on fire on the roadway, the driver reportedly got out.">Er staat een voertuig in brand op de weg, de bestuurder is er naar verluidt uit.</String>
+  <String en="I smelled something burning, so I pulled over. Then the smoke came out from under the hood.">Ik rook iets branderigs en ben gestopt. Toen kwam de rook onder de motorkap vandaan.</String>
+  <String en="Everything I own is in that car.">Alles wat ik heb ligt in die auto.</String>
+  <String en="Is it going to explode? There's a full tank in there.">Gaat hij ontploffen? De tank zit helemaal vol.</String>
+  <String en="I only just bought it!">Ik had hem net gekocht!</String>
+  <String en="Extinguish the burning ~r~vehicle~s~.">Blus het brandende ~r~voertuig~s~.</String>
+  <String en=" Treat the ~r~driver~s~."> Behandel de ~r~bestuurder~s~.</String>
+  <!-- Callouts/Medical/MedicalCalls.cs -->
+  <String en="The patient has ~r~no pulse~s~: start ~r~CPR~s~ right away and use an ~y~AED~s~ if you have one.">De patiënt heeft ~r~geen pols~s~: begin meteen met ~r~reanimeren~s~ en gebruik een ~y~AED~s~ als je die hebt.</String>
+  <String en="Assess and treat the ~r~patient~s~.">Beoordeel en behandel de ~r~patiënt~s~.</String>
+  <String en="{0} just grabbed {1} chest and went down! {2}'s not breathing!" note="{0} = He, {1} = his, {2} = He">{0} greep naar {1} borst en viel neer! {2} ademt niet!</String>
+  <String en="I tried to wake {0} up, nothing." note="{0} = him">Ik heb geprobeerd {0} wakker te krijgen, niets.</String>
+  <String en="The dispatcher told me to push on {0} chest, I did, I don't know if I did it right." note="{0} = his">De meldkamer zei dat ik op {0} borst moest drukken, dat heb ik gedaan, ik weet niet of het goed was.</String>
+  <String en="Please, is {0} going to be okay?" note="{0} = he">Alsjeblieft, komt {0} er weer bovenop?</String>
+  <String en="{0} said {1} felt dizzy, and then {2} just collapsed." note="{0} = He, {1} = he, {2} = he">{0} zei dat {1} duizelig was, en toen zakte {2} gewoon in elkaar.</String>
+  <String en="I think {0}'s diabetic, {1} skipped lunch." note="{0} = he, {1} = he">Ik denk dat {0} diabetes heeft, {1} heeft de lunch overgeslagen.</String>
+  <String en="{0} won't wake up, but {1}'s breathing." note="{0} = He, {1} = he">{0} wordt niet wakker, maar {1} ademt wel.</String>
+  <String en="{0} hit {1} head on the way down." note="{0} = He, {1} = his">{0} stootte {1} hoofd bij het vallen.</String>
+  <String en="{0} tripped off the curb and fell hard." note="{0} = He">{0} struikelde over de stoeprand en viel hard.</String>
+  <String en="{0} fell off a ladder, it was about three meters." note="{0} = He">{0} viel van een ladder, wel drie meter.</String>
+  <String en="Some guy on a bike knocked {0} over and just rode off." note="{0} = him">Een vent op een fiets reed {0} omver en reed gewoon door.</String>
+  <String en="{0} says {1} leg really hurts." note="{0} = He, {1} = his">{0} zegt dat {1} been erg pijn doet.</String>
+  <String en="{0} was bleeding a lot, I gave {1} my jacket." note="{0} = He, {1} = him">{0} bloedde heel erg, ik heb {1} mijn jas gegeven.</String>
+  <String en="~r~Patient deceased">~r~Patiënt overleden</String>
+  <String en="The patient could not be saved. Clear the call when you are ready.">De patiënt kon niet gered worden. Sluit de melding af als je klaar bent.</String>
+  <String en="Person collapsed, ~r~not breathing~s~. Bystander is on the phone.">Persoon in elkaar gezakt, ~r~ademt niet~s~. Een omstander is aan de telefoon.</String>
+  <String en="Unconscious Person">Bewusteloze persoon</String>
+  <String en="Person found unresponsive on the sidewalk, breathing status unknown.">Persoon niet aanspreekbaar op de stoep gevonden, ademhaling onbekend.</String>
+  <String en="Person fell from a ladder, possible leg fracture.">Persoon van een ladder gevallen, mogelijk beenbreuk.</String>
+  <String en="Cyclist fell, head injury reported.">Fietser gevallen, hoofdletsel gemeld.</String>
+  <String en="Assault victim with lacerations, police are on scene.">Slachtoffer van mishandeling met snijwonden, politie is ter plaatse.</String>
+  <String en="Elderly person fell down the stairs.">Oudere persoon van de trap gevallen.</String>
+  <String en="Injured Person">Gewonde persoon</String>
+  <!-- Callouts/ExampleCallouts.xml -->
+  <String en="Kitchen Fire">Keukenbrand</String>
+  <String en="Pan fire spreading to the cabinets, the occupant tried to put it out.">Pannenbrand die overslaat naar de keukenkastjes, de bewoner heeft geprobeerd te blussen.</String>
+  <String en="Put out the ~r~fire~s~ and treat the ~r~occupant~s~.">Blus de ~r~brand~s~ en behandel de ~r~bewoner~s~.</String>
+  <String en="Fire out and the occupant is being cared for.">Brand uit en de bewoner wordt verzorgd.</String>
+  <String en="Neighbor">Buurman</String>
+  <String en="I heard the smoke alarm and saw flames in the kitchen window.">Ik hoorde de rookmelder en zag vlammen achter het keukenraam.</String>
+  <String en="They tried to put it out with water. I think they burned their arms.">Ze probeerden het met water te blussen. Ik denk dat ze hun armen hebben verbrand.</String>
+  <String en="Gas Smell">Gaslucht</String>
+  <String en="Caller smells gas in their garage, a resident feels dizzy.">Melder ruikt gas in de garage, een bewoner is duizelig.</String>
+  <String en="Wear your ~b~SCBA~s~, take the ~y~gas detector~s~, find the leak and ventilate.">Draag je ~b~ademlucht~s~, pak de ~y~gasmeter~s~, zoek het lek en ventileer.</String>
+  <String en="measure with the ~y~gas detector">te meten met de ~y~gasmeter</String>
+  <String en="~o~High gas reading~s~ near the boiler.">~o~Hoge gaswaarde~s~ bij de cv-ketel.</String>
+  <String en="close the ~y~gas valve~s~ and ventilate">de ~y~gaskraan~s~ dicht te draaien en te ventileren</String>
+  <String en="Gas ~g~off~s~, the garage is airing out.">Gas ~g~dicht~s~, de garage wordt gelucht.</String>
+  <String en="Vehicle Into Pole">Auto tegen paal</String>
+  <String en="Car hit a pole, driver ~r~trapped~s~, the passenger got out.">Auto tegen een paal, bestuurder ~r~bekneld~s~, de passagier is eruit.</String>
+  <String en="Stabilize the car, extricate the ~r~driver~s~ and check the ~y~passenger~s~.">Stut de auto, bevrijd de ~r~bestuurder~s~ en controleer de ~y~passagier~s~.</String>
+</Language>

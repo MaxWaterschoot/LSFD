@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using LSFD.API;
 using Rage;
 
 namespace LSFD.Callouts
@@ -35,6 +37,14 @@ namespace LSFD.Callouts
             return Track(ped);
         }
 
+        /// <summary>A bystander with something to tell the player (see <see cref="Witnesses"/>).</summary>
+        public Ped SpawnCaller(Vector3 position, string label, string[] statement, Action onHeard = null)
+        {
+            Ped ped = SpawnBystander(position);
+            Witnesses.Add(ped, label, onHeard, statement);
+            return ped;
+        }
+
         public T Track<T>(T entity) where T : Entity
         {
             entities.Add(entity);
@@ -49,7 +59,10 @@ namespace LSFD.Callouts
                     continue;
 
                 if (entity is Ped ped)
+                {
+                    Witnesses.Remove(ped);
                     ped.BlockPermanentEvents = false;
+                }
                 entity.Dismiss();
             }
             entities.Clear();

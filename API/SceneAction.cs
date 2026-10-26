@@ -27,7 +27,7 @@ namespace LSFD.API
         public Action Completed { get; set; }
 
         public float HoldSeconds { get; set; } = 4f;
-        public string ProgressLabel { get; set; } = "WORKING";
+        public string ProgressLabel { get; set; } = L.T("WORKING");
         public float Radius { get; set; } = 1.6f;
         public bool ShowMarker { get; set; } = true;
 

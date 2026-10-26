@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.Media;
 using LSFD.Core;
 using LSFD.UI;
 using LSFD.Utils;
@@ -11,7 +9,7 @@ namespace LSFD.Safety
 {
     /// <summary>
     /// The player's SCBA: a cylinder of air that lasts <see cref="Settings.AirSupplySeconds"/>, a face piece to put on
-    /// before going into smoke and the low-air alarm. Cylinders are swapped at an apparatus that carries them.
+    /// before going into smoke, the low-air alarm and the PASS device. Cylinders are swapped at an apparatus that carries them.
     /// </summary>
     internal class BreathingApparatus
     {
@@ -25,12 +23,17 @@ namespace LSFD.Safety
         private const string MaskAnimationDictionary = "mp_masks@standard_car@ds@";
         private const string MaskAnimation = "put_on_mask";
 
-        // Drop a LowAir.wav in Plugins/LSFD/Audio/Alarms/ to replace the default beep with a real low-air bell.
-        private static readonly string LowAirSoundFile = Path.Combine(ModFolder.AlarmAudio, "LowAir.wav");
+        // Drop a LOW_AIR.wav in Plugins/LSFD/Audio/Alarms/ to replace the default beep with a real low-air bell.
+        private const string LowAirSound = "Alarms/LOW_AIR.wav";
+        private const string PassSound = "Alarms/PASS_ALARM.wav";
 
-        private SoundPlayer lowAirSound;
-        private bool lowAirSoundLoaded;
+        // The PASS device sounds when a firefighter hasn't moved for this long.
+        private const uint PassAlarmTime = 30000;
+        private const float StillSpeed = 0.3f;
+
         private bool lowAirWarned;
+        private uint stillSince;
+        private SoundHandle passAlarm;
         private bool emptyWarned;
         private uint nextAlarmAt;
 
@@ -72,8 +75,8 @@ namespace LSFD.Safety
                 player.Tasks.PlayAnimation(MaskAnimationDictionary, MaskAnimation, 4f, AnimationFlags.UpperBodyOnly | AnimationFlags.SecondaryTask);
 
             Game.DisplaySubtitle(on
-                ? $"~b~Face piece on.~s~ Breathing from your cylinder ({AirFraction:P0})."
-                : "Face piece off.", 2500);
+                ? L.F($"~b~Face piece on.~s~ Breathing from your cylinder ({AirFraction:P0}).")
+                : L.T("Face piece off."), 2500);
         }
 
         public void Process(bool onDuty)
@@ -82,6 +85,7 @@ namespace LSFD.Safety
             if (!onDuty || !player.Exists() || player.IsDead)
             {
                 IsMaskOn = false;
+                StopPassAlarm();
                 return;
             }
 
@@ -89,11 +93,39 @@ namespace LSFD.Safety
                 SetMask(!IsMaskOn);
 
             if (!IsMaskOn)
+            {
+                StopPassAlarm();
                 return;
+            }
 
             float use = player.IsSprinting ? SprintAirUse : player.IsRunning ? RunAirUse : 1f;
             Air = Math.Max(0f, Air - Game.FrameTime * use);
             ProcessAlarms();
+            ProcessPassDevice(player);
+        }
+
+        // Standing on the nozzle or working a tool counts as moving; lying still in the smoke doesn't.
+        private void ProcessPassDevice(Ped player)
+        {
+            bool still = player.Speed < StillSpeed && !player.IsInAnyVehicle(false) && !Lsfd.Hose.IsHolding && !Lsfd.Interactions.Progress.HasValue;
+            if (!still || !Settings.PassAlarm)
+            {
+                stillSince = Game.GameTime;
+                StopPassAlarm();
+                return;
+            }
+
+            if (passAlarm == null && Game.GameTime - stillSince >= PassAlarmTime)
+            {
+                passAlarm = Sound.PlayLooped(PassSound, Settings.AlarmVolume);
+                Game.DisplaySubtitle(L.T("~r~PASS alarm~s~: you haven't moved for 30 seconds. Move to reset it."), 4000);
+            }
+        }
+
+        private void StopPassAlarm()
+        {
+            passAlarm?.Stop();
+            passAlarm = null;
         }
 
         private void ProcessAlarms()
@@ -103,7 +135,7 @@ namespace LSFD.Safety
                 if (!emptyWarned)
                 {
                     emptyWarned = true;
-                    Notify.Warning("~r~Your SCBA cylinder is empty!~s~ Get out of the smoke and swap it at an engine.");
+                    Notify.Warning(L.T("~r~Your SCBA cylinder is empty!~s~ Get out of the smoke and swap it at an engine."));
                 }
                 return;
             }
@@ -114,7 +146,7 @@ namespace LSFD.Safety
             if (!lowAirWarned)
             {
                 lowAirWarned = true;
-                Notify.Warning($"~o~Low air~s~: {AirFraction:P0} left. Head out and swap your cylinder at an engine.");
+                Notify.Warning(L.F($"~o~Low air~s~: {AirFraction:P0} left. Head out and swap your cylinder at an engine."));
             }
 
             if (Game.GameTime < nextAlarmAt)
@@ -126,27 +158,7 @@ namespace LSFD.Safety
 
         private void PlayLowAirAlarm()
         {
-            if (!lowAirSoundLoaded)
-            {
-                lowAirSoundLoaded = true;
-                if (File.Exists(LowAirSoundFile))
-                {
-                    try
-                    {
-                        lowAirSound = new SoundPlayer(LowAirSoundFile);
-                        lowAirSound.Load();
-                    }
-                    catch (Exception e)
-                    {
-                        Game.LogTrivial($"LSFD: could not load {LowAirSoundFile}: {e.Message}");
-                        lowAirSound = null;
-                    }
-                }
-            }
-
-            if (lowAirSound != null)
-                lowAirSound.Play();
-            else
+            if (!Sound.Exists(LowAirSound) || Sound.Play(Settings.AlarmVolume, LowAirSound) == null)
                 NativeFunction.CallByName<uint>("PLAY_SOUND_FRONTEND", -1, "5_SEC_WARNING", "HUD_MINI_GAME_SOUNDSET", true);
         }
     }

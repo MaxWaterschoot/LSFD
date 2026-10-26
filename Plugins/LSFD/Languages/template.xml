@@ -1,0 +1,754 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LSFD language file. Translate the text between the tags, keep {0}, {1} and the ~colour~ codes.
+     See docs/TRANSLATING.md. Empty means the English text is shown. -->
+<Language Name="Language name" Culture="en-US" Translators="">
+  <!-- EntryPoint.cs -->
+  <String en="Not loaded: the ~r~Plugins/LSFD~s~ folder is missing or incomplete. Reinstall LSFD from the download." />
+  <String en="Loaded. Visit a ~r~fire station~s~ to go on duty. Tablet: ~b~{0}" note="{0} = Settings.TabletKey" />
+  <String en="Bug report saved to ~y~Plugins/LSFD/BugReport.txt~s~. Attach it to your report." />
+  <!-- Stations/FireStationManager.cs -->
+  <String en="open the ~r~{0}~s~ menu" note="{0} = station.Name" />
+  <!-- Stations/StationData.cs -->
+  <String en="Los Santos" />
+  <String en="Los Santos County" />
+  <String en="Blaine County" />
+  <String en="Airport" />
+  <String en="Military" />
+  <String en="Municipal" />
+  <!-- Stations/StationLife.cs -->
+  <String en="~r~Station alarm" />
+  <String en="{0}: turn out! Get to the ~y~{1}~s~." note="{0} = callout.CalloutMessage, {1} = firstDue.Definition.Name" />
+  <String en="Turnout time: {0}{1}:{2:00}" note="{0} = rating, {1} = (int)seconds / 60, {2} = (int)seconds % 60" />
+  <!-- UI/Hud.cs -->
+  <String en="TANK" />
+  <String en="WATER" />
+  <String en="NOZZLE" />
+  <String en="FOAM" />
+  <String en="PRESSURE" />
+  <String en="TOOL" />
+  <String en="FIRE" />
+  <String en="AIR" />
+  <String en="HEAT" />
+  <String en="~r~DANGER" />
+  <String en="TIC" />
+  <String en="AIR (MASK OFF)" />
+  <String en="1 victim" />
+  <String en="{0} victims" note="{0} = camera.VisibleVictims" />
+  <String en="1 hotspot" />
+  <String en="{0} hotspots" note="{0} = camera.VisibleHotspots" />
+  <String en="~b~HYDRANT" />
+  <String en="STRAIGHT" />
+  <String en="FOG" />
+  <String en=" · ~w~FOAM" />
+  <String en="CALL COMPLETED" />
+  <String en="CALL ENDED" />
+  <String en="{0} · Score {1} ({2})" note="{0} = report.Name, {1} = report.Score, {2} = CallScore.Grade(report.Score)" />
+  <String en="Call report: {0}" note="{0} = report.Name" />
+  <String en="Response: {0}~n~Water: ~b~{1:N0} L~s~ · On the call {2} min~n~Rescued ~g~{3}~s~ · Treated {4}" note="{0} = CallScore.Response(report), {1} = report.WaterUsed, {2} = report.Minutes, {3} = report.Rescued, {4} = report.Treated" />
+  <String en=" · Lost ~r~{0}~s~" note="{0} = report.Deceased" />
+  <String en="~n~Score: {0}" note="{0} = CallScore.Display(report.Score)" />
+  <String en=" · ~y~+{0}~s~ points" note="{0} = points" />
+  <String en="ON DUTY" />
+  <String en="Los Santos Fire Department" />
+  <String en="OFF DUTY" />
+  <String en="Thanks for your service" />
+  <!-- UI/MenuManager.cs -->
+  <String en="Fire station" />
+  <String en="Request apparatus" />
+  <String en="Locker room" />
+  <String en="Go off duty" />
+  <String en="Clock out and change back into your own clothes." />
+  <String en="Go on duty" />
+  <String en="Suit up in the locker room and clock in at this station." />
+  <String en="Have a vehicle and its crew brought out in front of the station." />
+  <String en="Choose the outfit you wear on duty (EUP outfits too)." />
+  <String en="Restock personal gear" />
+  <String en="A full SCBA cylinder, your health and a flashlight." />
+  <String en="Personal gear restocked." />
+  <String en="Water tank" />
+  <String en="Connect a supply line to a hydrant to refill the tank." />
+  <String en="~b~On hydrant" />
+  <String en="Foam tank" />
+  <String en="Switch the nozzle to foam with {0} for fuel and vehicle fires." note="{0} = Settings.FoamKey" />
+  <String en="Stow attack hose" />
+  <String en="Pull attack hose" />
+  <String en="{0:0} m line with an adjustable straight/fog nozzle." note="{0} = definition.HoseLength" />
+  <String en="Disconnect supply line" />
+  <String en="Return supply line" />
+  <String en="Take supply line" />
+  <String en="{0:0} m line to connect this apparatus to a fire hydrant." note="{0} = definition.SupplyLineLength" />
+  <String en="Swap SCBA cylinder" />
+  <String en="Replace the cylinder on your back with a full one." />
+  <String en="Full ~b~SCBA cylinder~s~ on your back." />
+  <String en="Put PPV fan back" />
+  <String en="Take PPV fan" />
+  <String en="Blows the smoke out of a building: set it up in the doorway, facing in. The fresh air also feeds the fire." />
+  <String en="Shows victims, flames and hotspots through the smoke. Turn it on with {0}." note="{0} = Settings.ThermalCameraKey" />
+  <String en="Rescue tools" />
+  <String en="Put it back in the compartment." />
+  <String en="Carry it in your hands." />
+  <String en="~g~In hand" />
+  <String en="Hand tools" />
+  <String en="Take it from or put it back in the compartment." />
+  <String en="Standard turnout gear" />
+  <String en="The default LSFD firefighter." />
+  <String en="~g~Wearing" />
+  <String en="Model {0}. Rename or edit it in Plugins/LSFD/Profiles/Outfits.xml." note="{0} = outfit.Model" />
+  <String en="Save what I'm wearing" />
+  <String en="Dress up with the EUP menu (or any outfit tool) first, then save it here as your duty outfit." />
+  <String en="Saved as ~y~{0}~s~ and selected. Rename it in Profiles/Outfits.xml." note="{0} = saved.Name" />
+  <String en="Wearing the ~y~standard turnout gear~s~." />
+  <String en="Wearing ~y~{0}~s~." note="{0} = outfit.Name" />
+  <String en="Fire apparatus" />
+  <String en="Support units" />
+  <String en="{0:N0} L tank, " note="{0} = definition.WaterCapacity" />
+  <String en="crew of {0}-{1}, " note="{0} = definition.MinCrew, {1} = definition.MaxCrew" />
+  <String en="{0}{1}carries: {2}." note="{0} = tank, {1} = crew, {2} = equipment" />
+  <!-- UI/Notify.cs -->
+  <String en="~r~Fire Department" />
+  <String en="LSFD Dispatch" />
+  <String en="~o~Attention" />
+  <!-- UI/Tablet.cs -->
+  <String en="LSFD Mobile Data Terminal" />
+  <String en="LOS SANTOS FIRE DEPARTMENT" />
+  <String en="Active Dispatch" />
+  <String en="Vehicle Control" />
+  <String en="Scene Management" />
+  <String en="Fire Stations" />
+  <String en="ON DUTY · {0}" note="{0} = duty.HomeStation.Name.ToUpperInvariant()" />
+  <String en="Off duty" />
+  <String en="Go on duty at a fire station to receive calls." />
+  <String en="Incoming call" />
+  <String en="Respond: {0}" note="{0} = offered.CalloutMessage" />
+  <String en="Details" />
+  <String en="Decline" />
+  <String en="Let dispatch assign another unit." />
+  <String en="Assigned call" />
+  <String en="~g~On scene" />
+  <String en="Set GPS to the scene" />
+  <String en="GPS set to the scene." />
+  <String en="Clear call" />
+  <String en="Report the call as handled or cancelled." />
+  <String en="Call cleared." />
+  <String en="Request additional units" />
+  <String en="Engine company" />
+  <String en="An AI engine with crew responds and works the scene." />
+  <String en="Ambulance" />
+  <String en="An AI ambulance crew responds and takes care of patients." />
+  <String en="No active calls" />
+  <String en="You are available. Dispatch will send you the next call." />
+  <String en="Request a call" />
+  <String en="Ask dispatch for a call right away." />
+  <String en="~o~No calls" />
+  <String en="There are no calls waiting right now." />
+  <String en="Other units" />
+  <String en="on scene" />
+  <String en="en route" />
+  <String en="Last call report: {0}" note="{0} = report.Name" />
+  <String en="Outcome" />
+  <String en="{0} · {1} min on the call." note="{0} = report.Location, {1} = report.Minutes" />
+  <String en="~g~Completed" />
+  <String en="~o~Not completed" />
+  <String en="Response time" />
+  <String en="From accepting the call to arriving on scene, against a target for the distance." />
+  <String en="Water used" />
+  <String en="Pumped by every apparatus on the call, from the tank or a hydrant." />
+  <String en="People rescued" />
+  <String en="Carried out of buildings." />
+  <String en="Patients treated" />
+  <String en="{0} resuscitated." note="{0} = report.Resuscitated" />
+  <String en="Patients lost" />
+  <String en="Alarms struck during the call" />
+  <String en="The fire grew to a bigger alarm." />
+  <String en="Score" />
+  <String en="Response time, lives lost, fire escalation and whether the call was completed; rescues earn extra. Completed calls add a tenth of the score to your career points." />
+  <String en="No apparatus" />
+  <String en="Request an apparatus at a fire station, or walk up to a fire truck." />
+  <String en=" · AI, other call" />
+  <String en=" · AI, en route" />
+  <String en=" · AI" />
+  <String en="Connect a supply line to a hydrant to refill." />
+  <String en="Pump engaged" />
+  <String en="Feeds water to the attack hose." />
+  <String en="Pump pressure" />
+  <String en="Discharge pressure to the attack hose." />
+  <String en="Emergency lights" />
+  <String en="Silent mode (lights only)" />
+  <String en="Return to station" />
+  <String en="Sends this apparatus and its crew back to quarters." />
+  <String en="~y~{0}~s~ is returning to quarters." note="{0} = unit.Definition.Name" />
+  <String en="Scene" />
+  <String en="Fire" />
+  <String en="Growing → burning → under control → knockdown → out." />
+  <String en="  Alarm" />
+  <String en="Goes up when the fire grows too big; every alarm brings another engine." />
+  <String en="  Burning spots" />
+  <String en="Spots with open flames." />
+  <String en="  Hotspots" />
+  <String en="Knocked down, but they rekindle unless you overhaul them with water. The thermal camera shows them." />
+  <String en="  Time since dispatch" />
+  <String en="  Fire class" />
+  <String en="Flammable: use foam. Electrical: isolate the power first. Battery: lots of water, keeps rekindling." />
+  <String en="  Power" />
+  <String en="Isolate it at the panel (yellow arrow) before using water." />
+  <String en="~g~Isolated" />
+  <String en="~r~LIVE" />
+  <String en="  Ventilation" />
+  <String en="A PPV fan in the doorway pushes the smoke out, but feeds the fire." />
+  <String en="~b~PPV running" />
+  <String en="None" />
+  <String en="Fires nearby" />
+  <String en="Fires within {0:0} m of you." note="{0} = SceneRadius" />
+  <String en="~g~None" />
+  <String en="Patients" />
+  <String en="Patients within the scene area." />
+  <String en="  Trapped in building" />
+  <String en="Carry them out to the staging area." />
+  <String en="  Cardiac arrest" />
+  <String en="Needs CPR now." />
+  <String en="  Awaiting treatment" />
+  <String en="Injured or unconscious." />
+  <String en="  Stable" />
+  <String en="Waiting for an ambulance to take them to hospital." />
+  <String en="  In transport" />
+  <String en="Being loaded or in the ambulance." />
+  <String en="Mass casualty incident: triage" />
+  <String en="  Red (immediate)" />
+  <String en="  Yellow (delayed)" />
+  <String en="  Green (minor)" />
+  <String en="  Black (expectant)" />
+  <String en="  Not triaged yet" />
+  <String en="Hold E at a patient, or order the crew to patient care." />
+  <String en="Crew ({0})" note="{0} = crew.Members.Count" />
+  <String en="No crew" />
+  <String en="Apparatus come with AI firefighters when requested at a station." />
+  <String en=" (AI unit)" />
+  <String en="Riding on the {0}." note="{0} = unit" />
+  <String en="Orders to your crew" />
+  <String en="Work the scene" />
+  <String en="Do what is most urgent: CPR, rescues, extrication, treatment, then the fire." />
+  <String en="Search and rescue" />
+  <String en="Carry victims out of buildings and extricate trapped occupants." />
+  <String en="Patient care" />
+  <String en="CPR and first aid for every patient on scene." />
+  <String en="Attack the fire" />
+  <String en="Stretch hose lines from the engines (extinguishers when none are left) and attack the closest fires." />
+  <String en="Operate the deck gun" />
+  <String en="One firefighter per engine works the roof-mounted water cannon." />
+  <String en="Follow me" />
+  <String en="Walk with you." />
+  <String en="Hold position" />
+  <String en="Stay where they are." />
+  <String en="Return to apparatus" />
+  <String en="Get back in the vehicles." />
+  <String en="Rank" />
+  <String en="{0} points to the next rank." note="{0} = next.Value - points" />
+  <String en="The top of the department." />
+  <String en="Points" />
+  <String en="Calls, fires, rescues and patients all count." />
+  <String en="Hours on duty" />
+  <String en="Average score" />
+  <String en="Of your last 10 call reports." />
+  <String en="Statistics" />
+  <String en="Calls completed" />
+  <String en="Fires put out" />
+  <String en="Carried out of burning buildings." />
+  <String en="Patients resuscitated" />
+  <String en="Patients transported" />
+  <String en="Recent calls" />
+  <String en="No calls yet" />
+  <String en="Accepted calls are logged here." />
+  <String en="{0}{1} · {2} · {3} min" note="{0} = CalloutCategoryExtensions.ToDisplayName(call.Category), {1} = (alarm != &quot;&quot; ? &quot; · &quot; + alarm : &quot;&quot;), {2} = call.Location, {3} = call.Minutes" />
+  <String en="~n~Response {0} · Water {1:N0} L · Rescued {2}" note="{0} = CallScore.Response(call), {1} = call.WaterUsed, {2} = call.Rescued" />
+  <String en=" · Lost {0}" note="{0} = call.Deceased" />
+  <String en="~o~Cancelled" />
+  <String en="{0} ({1}). Select to set a GPS waypoint." note="{0} = station.Data.Address, {1} = station.Data.Type.ToDisplayName()" />
+  <String en="GPS set to ~y~{0}~s~." note="{0} = station.Name" />
+  <!-- LivingWorld/OtherUnits.cs -->
+  <String en="Structure Fire" />
+  <String en="Vehicle Fire" />
+  <String en="Brush Fire" />
+  <String en="Automatic Fire Alarm" />
+  <String en="Smoke Investigation" />
+  <String en="Medical Aid" />
+  <String en="Cardiac Arrest" />
+  <String en="Traffic Collision" />
+  <String en="Elevator Rescue" />
+  <String en="Gas Leak" />
+  <String en="~o~Reassigned" />
+  <String en="~y~{0}~s~ took the call." note="{0} = incident.UnitNames" />
+  <String en="The call was given to another unit." />
+  <String en="~b~Other units" />
+  <String en="~y~{0}~s~ responding to ~o~{1}~s~, {2}." note="{0} = incident.UnitNames, {1} = incident.Name, {2} = incident.Street" />
+  <!-- LivingWorld/PoliceSupport.cs -->
+  <String en="Sheriff" />
+  <String en="Police" />
+  <!-- LivingWorld/TrafficControl.cs -->
+  <String en="pick up the ~y~traffic cone" />
+  <String en="All {0} ~y~traffic cones~s~ are out. Pick one up to place it elsewhere." note="{0} = MaxCones" />
+  <String en="place a ~y~traffic cone~s~ (traffic stops here)" />
+  <String en="PLACING" />
+  <!-- LivingWorld/WitnessManager.cs -->
+  <String en="ask the ~y~{0}~s~ again" note="{0} = near.Label.ToLowerInvariant()" />
+  <String en="talk to the ~y~{0}" note="{0} = near.Label.ToLowerInvariant()" />
+  <!-- Core/CalloutManager.cs -->
+  <String en="Call cancelled, you went off duty." />
+  <String en="Press ~b~{0}~s~ or use the tablet to respond." note="{0} = Settings.AcceptCalloutKey" />
+  <String en="~y~On view:~s~ {0}" note="{0} = callout.CalloutMessage ?? callout.FriendlyName" />
+  <String en="Press ~b~{0}~s~ to stop and handle it yourself." note="{0} = Settings.AcceptCalloutKey" />
+  <String en="You were incapacitated, another unit is taking over." />
+  <!-- Core/CalloutRegistry.cs -->
+  <String en="Could not read the callouts in ~y~{0}~s~, see RagePluginHook.log." note="{0} = file" />
+  <String en="Callout pack ~y~{0}~s~ was not loaded: it {1}" note="{0} = name, {1} = problem" />
+  <!-- Core/DutyManager.cs -->
+  <String en="~g~On duty~s~ at ~y~{0}~s~. Open the tablet with ~b~{1}~s~." note="{0} = station.Name, {1} = Settings.TabletKey" />
+  <String en="You are now ~b~off duty~s~." />
+  <!-- Core/Interaction.cs -->
+  <String en="WORKING" />
+  <!-- Core/InteractionRunner.cs -->
+  <String en="Hold ~b~{0}~s~ to {1}." note="{0} = Settings.InteractKey, {1} = interaction.Prompt" />
+  <String en="Press ~b~{0}~s~ to {1}." note="{0} = Settings.InteractKey, {1} = interaction.Prompt" />
+  <!-- Core/Lsfd.cs -->
+  <String en="~o~No units" />
+  <String en="There is no {0} available in Apparatus.xml." note="{0} = type" />
+  <String en="~r~Upgraded to {0}" note="{0} = alarm" />
+  <String en="The fire at ~y~{0}~s~ is spreading. Another engine company is responding." note="{0} = World.GetStreetName(incident.Origin)" />
+  <String en="Fire under control" />
+  <String en="Command reports the fire is ~y~under control~s~. Keep working it." />
+  <String en="Knockdown" />
+  <String en="No open flames left. ~o~Overhaul~s~: soak every hotspot, the thermal camera shows them." />
+  <String en="~g~Fire out" />
+  <String en="All hotspots are overhauled, the fire is out." />
+  <String en="~r~Rekindle!~s~ A hotspot burst into flames again." />
+  <!-- Core/SceneActionManager.cs -->
+  <String en="You need the ~y~{0}~s~ from an engine for this." note="{0} = action.RequiredEquipment.Value.ToDisplayName()" />
+  <String en="You can't do this yet." />
+  <!-- Water/HoseManager.cs -->
+  <String en="The hose was pulled out of your hands, it doesn't reach any further." />
+  <String en="~o~The hose is almost fully stretched out." />
+  <String en="~o~The {0} carries no foam." note="{0} = Source.Definition.Name" />
+  <String en="~o~The pump of the {0} is disengaged.~s~ Engage it on the tablet." note="{0} = Source.Definition.Name" />
+  <String en="The {0} is ~o~out of foam~s~, back to water." note="{0} = Source.Definition.Name" />
+  <String en="~r~The {0} is out of water.~s~ Connect it to a hydrant." note="{0} = Source.Definition.Name" />
+  <!-- Water/HydrantManager.cs -->
+  <String en="Bring the supply line of the ~y~{0}~s~ to a ~b~fire hydrant~s~ (max {1:0} m)." note="{0} = source.Definition.Name, {1} = source.Definition.SupplyLineLength" />
+  <String en="Supply line of the ~y~{0}~s~ disconnected and stowed." note="{0} = source.Definition.Name" />
+  <String en="connect the supply line to the ~b~hydrant" />
+  <String en="CONNECTING" />
+  <String en="disconnect the supply line" />
+  <String en="DISCONNECTING" />
+  <String en="The supply line doesn't reach that far, move the apparatus closer to a hydrant." />
+  <String en="~b~Hydrant connected.~s~ The ~y~{0}~s~ is now being supplied with water." note="{0} = source.Definition.Name" />
+  <!-- Firefighting/FireSystem.cs -->
+  <String en="isolate the ~y~power~s~ at the panel" />
+  <String en="Power ~g~isolated~s~. Water is safe to use now." />
+  <!-- Firefighting/ForcibleEntry.cs -->
+  <String en="The door is ~r~locked~s~. Force it with a ~y~halligan bar~s~ or ~y~axe~s~ from the engine." />
+  <String en="~r~force~s~ the door" />
+  <String en="FORCING" />
+  <String en="Door ~g~forced~s~." />
+  <!-- Firefighting/Ventilation.cs -->
+  <String en="Carrying the ~b~PPV fan~s~. Press ~b~{0}~s~ in the doorway, facing in, to set it up." note="{0} = Settings.InteractKey" />
+  <String en="set up the ~b~PPV fan~s~ here" />
+  <String en="pick up the ~b~PPV fan" />
+  <String en="~b~PPV fan~s~ running: the smoke is being pushed out. Mind the fire, it gets more air too." />
+  <String en="~b~PPV fan~s~ running, but it isn't blowing into a burning building." />
+  <!-- Crew/CrewManager.cs -->
+  <String en="~y~{0}~s~ crew: 1 firefighter on board." note="{0} = definition.Name" />
+  <String en="~y~{0}~s~ crew: {1} firefighters on board." note="{0} = definition.Name, {1} = count" />
+  <String en="~b~Crew:~s~ {0}" note="{0} = OrderToRadio(order)" />
+  <String en="Following" />
+  <String en="Holding" />
+  <String en="Search &amp; rescue" />
+  <String en="Working the scene" />
+  <String en="Returning" />
+  <String en="Deck gun" />
+  <String en="With apparatus" />
+  <String en="Extinguishing" />
+  <String en="Rescuing victim" />
+  <String en="Extricating" />
+  <String en="Performing CPR" />
+  <String en="Treating patient" />
+  <String en="Transporting patient" />
+  <String en="Forcing entry" />
+  <String en="Triage" />
+  <String en="Flowing a hose line" />
+  <String en="~b~{0}:~s~ Nothing left to do here, coming to you." note="{0} = member.Name" />
+  <String en="~b~{0}:~s~ Victim is out!" note="{0} = member.Name" />
+  <String en="~b~{0}:~s~ Patient is out of the vehicle." note="{0} = member.Name" />
+  <String en="~o~None of your apparatus has a deck gun." />
+  <String en="~b~{0}:~s~ Triage {1}" note="{0} = member.Name, {1} = PatientManager.TagToDisplay(patient.Triage)" />
+  <String en="~b~{0}:~s~ Door is open!" note="{0} = member.Name" />
+  <String en="~b~{0}:~s~ Stretching a line!" note="{0} = member.Name" />
+  <String en="On you, chief." />
+  <String en="Holding position." />
+  <String en="Grabbing extinguishers, attacking the fire." />
+  <String en="Starting search and rescue." />
+  <String en="Taking care of the patients." />
+  <String en="Copy, working the scene." />
+  <String en="Returning to the apparatus." />
+  <String en="Manning the deck gun." />
+  <String en="Copy." />
+  <!-- VehicleRescue/ExtricationManager.cs -->
+  <String en="extricate the ~r~patient" />
+  <String en="EXTRICATING" />
+  <String en="The door is ~r~jammed~s~. Get the ~y~hydraulic tools~s~ from an apparatus." />
+  <String en="stabilize the vehicle with ~y~cribbing" />
+  <String en="STABILIZING" />
+  <String en="~o~Stabilize the vehicle with cribbing~s~ before using hydraulic tools." />
+  <String en="force the door open" />
+  <String en="SPREADING" />
+  <String en="cut the door off" />
+  <String en="CUTTING" />
+  <String en="break the window" />
+  <String en="BREAKING" />
+  <String en="break the windscreen" />
+  <String en="Vehicle ~g~stabilized~s~. It is safe to use the hydraulic tools." />
+  <String en="Patient ~g~extricated~s~. Treat their injuries." />
+  <!-- VehicleRescue/ToolManager.cs -->
+  <String en="You are carrying the ~y~{0}~s~." note="{0} = type.ToDisplayName()" />
+  <!-- Safety/BreathingApparatus.cs -->
+  <String en="~b~Face piece on.~s~ Breathing from your cylinder ({0:P0})." note="{0} = AirFraction" />
+  <String en="Face piece off." />
+  <String en="~r~PASS alarm~s~: you haven't moved for 30 seconds. Move to reset it." />
+  <String en="~r~Your SCBA cylinder is empty!~s~ Get out of the smoke and swap it at an engine." />
+  <String en="~o~Low air~s~: {0:P0} left. Head out and swap your cylinder at an engine." note="{0} = AirFraction" />
+  <!-- Safety/HazardManager.cs -->
+  <String en="~r~Your cylinder is empty!~s~ Get out of the smoke." />
+  <String en="~r~You are breathing smoke!~s~ Put your face piece on with ~b~{0}~s~." note="{0} = Settings.MaskKey" />
+  <String en="~r~Electric shock!~s~ Isolate the power first, or use an extinguisher." />
+  <String en="~r~Too hot!~s~ Back off, or protect yourself with a ~b~fog~s~ pattern." />
+  <!-- Safety/ThermalCamera.cs -->
+  <String en="Thermal imaging camera taken. Press ~b~{0}~s~ to turn it on." note="{0} = Settings.ThermalCameraKey" />
+  <!-- Apparatus/ApparatusManager.cs -->
+  <String en="Vehicle model ~y~{0}~s~ does not exist, check Apparatus.xml." note="{0} = definition.Model" />
+  <String en="Your ~y~{0}~s~ is ready in front of the station." note="{0} = definition.Name" />
+  <String en="~b~Unit responding" />
+  <String en="~y~{0}~s~ from {1} is en route to the scene." note="{0} = definition.Name, {1} = station.Name" />
+  <String en="open the ~y~{0}~s~ compartments" note="{0} = nearby.Definition.Name" />
+  <!-- Apparatus/Equipment.cs -->
+  <String en="Attack hose" />
+  <String en="Supply line" />
+  <String en="Fire extinguisher" />
+  <String en="Axe" />
+  <String en="Halligan bar" />
+  <String en="Flashlight" />
+  <String en="Road flares" />
+  <String en="Window punch" />
+  <String en="Cribbing" />
+  <String en="Hydraulic spreader" />
+  <String en="Hydraulic cutter" />
+  <String en="AED" />
+  <String en="SCBA cylinders" />
+  <String en="Thermal imaging camera" />
+  <String en="PPV fan" />
+  <String en="Gas detector" />
+  <String en="Absorbent" />
+  <String en="Traffic cones" />
+  <!-- Apparatus/FireApparatus.cs -->
+  <String en="The supply line of your ~y~{0}~s~ snapped off the hydrant." note="{0} = Definition.Name" />
+  <!-- Medical/AmbulanceTransport.cs -->
+  <String en="~b~Ambulance requested" />
+  <String en="A patient is ready for transport, an ambulance is on its way." />
+  <String en="~b~{0}:~s~ Getting the stretcher." note="{0} = attendant.Name" />
+  <String en="Stretcher model ~y~{0}~s~ doesn't exist, check LSFD.ini." note="{0} = Settings.StretcherModel" />
+  <String en="~b~{0}:~s~ Patient is on the stretcher, moving to the ambulance." note="{0} = o.Attendant.Name" />
+  <String en="~b~Patient transport" />
+  <String en="~y~{0}~s~ is transporting a patient to {1}" note="{0} = o.Unit.Definition.Name, {1} = o.Hospital.name" />
+  <String en=" (~r~Code 3~s~)." />
+  <String en="~g~Patient handed over" />
+  <String en="The patient was handed over at {0}." note="{0} = o.Hospital.name" />
+  <!-- Medical/Hospitals.cs -->
+  <String en="Pillbox Hill Medical Center" />
+  <String en="Central Los Santos Medical Center" />
+  <String en="Mount Zonah Medical Center" />
+  <String en="St. Fiacre Hospital" />
+  <String en="Sandy Shores Medical Center" />
+  <String en="Paleto Bay Care Center" />
+  <!-- Medical/PatientManager.cs -->
+  <String en="~r~RED~s~ (immediate)" />
+  <String en="~y~YELLOW~s~ (delayed)" />
+  <String en="~g~GREEN~s~ (minor)" />
+  <String en="~c~BLACK~s~ (expectant)" />
+  <String en="burns" />
+  <String en="smoke inhalation" />
+  <String en="medical" />
+  <String en="trauma" />
+  <String en="A patient went into ~r~cardiac arrest~s~! Start CPR." />
+  <String en="A patient is ~o~deteriorating~s~ and lost consciousness." />
+  <String en="put the patient down" />
+  <String en="put the patient down (~o~still in danger~s~)" />
+  <String en="carry the ~r~victim~s~ out" />
+  <String en="LIFTING" />
+  <String en="~y~triage~s~ the patient" />
+  <String en="TRIAGE" />
+  <String en="Triage: {0} · {1}" note="{0} = TagToDisplay(patient.Triage), {1} = InjuryToDisplay(patient.Injury)" />
+  <String en="shock the patient with the ~y~AED" />
+  <String en="ANALYZING" />
+  <String en="perform ~r~CPR" />
+  <String en="CPR" />
+  <String en="treat the ~r~patient~s~ ({0})" note="{0} = InjuryToDisplay(patient.Injury)" />
+  <String en="The patient is ~g~stable~s~. The ~b~ambulance~s~ crew will take them to hospital." />
+  <String en="The patient is ~g~stable~s~." />
+  <String en="~o~No shock advised.~s~ Continue CPR." />
+  <String en="~o~Still no pulse.~s~ Keep going." />
+  <String en="~g~Pulse is back!~s~ The patient was resuscitated." />
+  <String en="Patient ~g~treated~s~ and stable." />
+  <String en="Victim ~g~rescued~s~ from the building. Treat them for smoke inhalation." />
+  <String en="A patient has ~r~died~s~." />
+  <!-- API/CalloutInfoAttribute.cs -->
+  <String en="Traffic" />
+  <String en="Medical" />
+  <String en="Rescue" />
+  <String en="Hazmat" />
+  <String en="Code 2" />
+  <String en="Code 3" />
+  <String en="1st Alarm" />
+  <String en="2nd Alarm" />
+  <String en="3rd Alarm" />
+  <String en="{0}th Alarm" note="{0} = alarmLevel" />
+  <!-- API/FireIncident.cs -->
+  <String en="~r~Growing" />
+  <String en="~o~Burning" />
+  <String en="~y~Under control" />
+  <String en="~b~Knockdown" />
+  <!-- API/Language.cs -->
+  <String en="Extinguish the fire." />
+  <String en="{0} patients" note="{0} = count" />
+  <!-- API/Witnesses.cs -->
+  <String en="Caller" />
+  <String en="Witness" />
+  <!-- Profiles/CallReport.cs -->
+  <String en="On view" />
+  <String en="{0}{1}~s~ (target {2})" note="{0} = color, {1} = Time(record.ResponseSeconds), {2} = Time(record.TargetSeconds)" />
+  <!-- Profiles/Profile.cs -->
+  <String en="Probationary Firefighter" />
+  <String en="Firefighter" />
+  <String en="Engineer" />
+  <String en="Lieutenant" />
+  <String en="Captain" />
+  <String en="Battalion Chief" />
+  <String en="Fire Chief" />
+  <!-- Profiles/ProfileManager.cs -->
+  <String en="~g~Promoted~s~ to ~y~{0}~s~!" note="{0} = after" />
+  <!-- Callouts/CallerLines.cs -->
+  <String en="son" />
+  <String en="husband" />
+  <String en="brother" />
+  <String en="dad" />
+  <String en="roommate|male" />
+  <String en="neighbor|male" />
+  <String en="daughter" />
+  <String en="wife" />
+  <String en="sister" />
+  <String en="mom" />
+  <String en="roommate|female" />
+  <String en="neighbor|female" />
+  <String en="he" />
+  <String en="she" />
+  <String en="him" />
+  <String en="her" />
+  <String en="his" />
+  <String en="her|possessive" />
+  <String en="on the ground floor" />
+  <String en="on the {0} floor" note="{0} = Ordinal(floor)" />
+  <String en="in the back" />
+  <String en="near the front" />
+  <String en="first" />
+  <String en="second" />
+  <String en="third" />
+  <String en="fourth" />
+  <String en="fifth" />
+  <String en="{0}th" note="{0} = number" />
+  <!-- Callouts/Traffic/RoadAccidents.cs -->
+  <String en="Head-on Collision" />
+  <String en="Two vehicles, one occupant ~r~trapped~s~. Extrication required." />
+  <String en="The car came right across the center line, hit them head on!" />
+  <String en="The driver isn't moving. I tried {0} door, it's jammed shut." note="{0} = CallerLines.His(driver)" />
+  <String en="Stabilize the vehicle with ~y~cribbing~s~, force or cut a door with the ~y~hydraulic tools~s~, extricate and treat the ~r~patient~s~." />
+  <String en="Minor Collision" />
+  <String en="Rear-end collision, one driver complaining of neck pain." />
+  <String en="They stopped all of a sudden and I couldn't brake in time. I'm so sorry." />
+  <String en="I'm fine, but the other driver says the neck hurts." />
+  <String en="Check the vehicles and treat the ~r~injured driver~s~." />
+  <String en="Vehicle Rollover" />
+  <String en="Single vehicle rolled over, driver ~r~trapped~s~ upside down." />
+  <String en="It clipped the curb and just flipped, it rolled over twice!" />
+  <String en="The driver's still hanging upside down in there. {0} was talking a minute ago." note="{0} = CallerLines.Capital(CallerLines.He(driver))" />
+  <String en="The vehicle is on its roof: stabilize it with ~y~cribbing~s~ before cutting the ~r~driver~s~ out." />
+  <String en="Motorcycle Accident" />
+  <String en="Motorcyclist down after a collision with a car." />
+  <String en="I pulled out, I just didn't see {0} coming!" note="{0} = CallerLines.Him(rider)" />
+  <String en="{0}'s not getting up. I didn't want to move {1}, {2} still has the helmet on." note="{0} = CallerLines.Capital(CallerLines.He(rider)), {1} = CallerLines.Him(rider), {2} = CallerLines.He(rider)" />
+  <String en="Assess the ~r~motorcyclist~s~ and start treatment." />
+  <String en="Pedestrian Struck" />
+  <String en="Pedestrian hit by a vehicle, driver stayed on scene." />
+  <String en="I didn't see {0}! {1} stepped out between the parked cars!" note="{0} = CallerLines.Him(pedestrian), {1} = CallerLines.Capital(CallerLines.He(pedestrian))" />
+  <String en="I was only doing thirty. {0} hit the windshield and landed over there." note="{0} = CallerLines.Capital(CallerLines.He(pedestrian))" />
+  <String en="Treat the ~r~pedestrian~s~. Start CPR if there is no pulse." />
+  <String en="Multi-Vehicle Collision" />
+  <String en="Pile-up with multiple patients and entrapment. ~o~Mass casualty incident~s~." />
+  <String en="~o~Mass casualty incident~s~: ~y~triage~s~ every patient first (hold E), then treat ~r~red~s~, ~y~yellow~s~ and ~g~green~s~ in that order. Black means expectant: CPR only once the others are cared for." />
+  <!-- Callouts/Hazmat/HazmatCalls.cs -->
+  <String en="place ~y~traffic cones~s~ for the cordon" />
+  <String en="Cordon ~g~in place~s~. Onlookers are moving back." />
+  <String en="Construction crew hit a gas main, ~o~strong smell of gas~s~. Approach from upwind, no ignition sources." />
+  <String en="We were digging for a water line and the excavator went right through the gas main." />
+  <String en="The shut-off valve is under a cover in the street, a few meters from the hole. You need a bar to turn it." />
+  <String en="close the ~y~gas valve~s~" />
+  <String en="The valve needs a ~y~halligan bar~s~ from the engine as a key." />
+  <String en="CLOSING VALVE" />
+  <String en="Set up a ~y~cordon~s~ with traffic cones, then close the ~y~gas valve~s~. Any spark can ignite the gas." />
+  <String en="Valve ~g~closed~s~. Let the gas clear and check the area with the gas detector." />
+  <String en="~y~measure~s~ for gas" />
+  <String en="Gas detector: ~g~0% LEL~s~. The gas company takes over." />
+  <String en="MEASURING" />
+  <String en="~r~Gas ignited!" />
+  <String en="The leak caught fire. Close the valve and protect the surroundings; don't put it out before the gas is off." />
+  <String en="Fuel Spill" />
+  <String en="Vehicle with a ruptured fuel tank, ~o~fuel all over the roadway~s~. No injuries reported." />
+  <String en="I hit something on the road and the tank split open. It's gasoline, it's everywhere." />
+  <String en="Nobody's hurt. I turned the engine off and got out." />
+  <String en="spread ~y~absorbent~s~ on the fuel" />
+  <String en="All fuel ~g~absorbed~s~. The road can be swept." />
+  <String en="ABSORBING" />
+  <String en="Cordon off the road with ~y~traffic cones~s~ and soak up the fuel with ~y~absorbent~s~ before it ignites." />
+  <String en="~r~Fuel ignited!" />
+  <String en="The spill caught fire. Use ~y~foam~s~ on the burning fuel." />
+  <!-- Callouts/Xml/XmlCallout.cs -->
+  <String en="~g~Scene handled" />
+  <String en="Everything is taken care of. Good work." />
+  <!-- Callouts/Fire/AlarmCalls.cs -->
+  <String en="~y~{0}~s~. The fire alarm system went off, no caller on the line. Investigate." note="{0} = building.Name" />
+  <String en="check the ~y~fire alarm panel" />
+  <String en="CHECKING" />
+  <String en="Go inside and check the ~y~fire alarm panel~s~ to find out which detector went off." />
+  <String en="Panel: ~y~detector fault~s~ in zone 3. No smoke, no fire." />
+  <String en="Panel: smoke detector in the ~y~kitchen~s~. Somebody burnt their lunch." />
+  <String en="~b~ventilate~s~ the kitchen" />
+  <String en="VENTILATING" />
+  <String en="~r~Working fire" />
+  <String en="Smoke and flames inside ~y~{0}~s~. Upgraded to a structure fire." note="{0} = Building.Name" />
+  <String en="~g~reset~s~ the fire alarm" />
+  <String en="Alarm ~g~reset~s~. Building handed back to the owner." />
+  <String en="RESETTING" />
+  <String en="Smell of Smoke" />
+  <String en="~y~{0}~s~. Staff smell something burning, no visible smoke. Locate the source." note="{0} = building.Name" />
+  <String en="search for the ~y~source~s~ of the smell" />
+  <String en="SEARCHING" />
+  <String en="Search the building. The ~y~thermal imaging camera~s~ shows heat behind walls." />
+  <String en="~r~Overheated wiring~s~ is smoldering behind the wall!" />
+  <String en="~r~Electrical fire" />
+  <String en="Isolate the power at the panel (~y~yellow arrow~s~) before you use water." />
+  <String en="Nothing here." />
+  <String en="Nothing found inside. Probably a barbecue next door." />
+  <String en="Carbon Monoxide Alarm" />
+  <String en="~y~{0}~s~. CO detector sounding, ~r~occupants feel dizzy~s~." note="{0} = building.Name" />
+  <String en="~y~{0}~s~. CO detector sounding, occupants are outside." note="{0} = building.Name" />
+  <String en="~y~measure~s~ the CO level" />
+  <String en="Carbon monoxide is invisible: put your ~b~SCBA~s~ on ({0}) and measure with the ~y~gas detector~s~." note="{0} = Settings.MaskKey" />
+  <String en="Gas detector: ~r~CO {0} ppm~s~. Get everyone out and ventilate!" note="{0} = ppm" />
+  <String en="~b~ventilate~s~ (open windows and doors)" />
+  <String en="Windows and doors open, the gas is clearing." />
+  <String en="~y~measure~s~ again" />
+  <String en="Gas detector: ~g~CO 0 ppm~s~. Tell the occupants to have the boiler checked." />
+  <!-- Callouts/Fire/BuildingFire.cs -->
+  <String en="Caller reports ~r~1 occupant trapped~s~ inside." />
+  <String en="Caller reports ~r~{0} occupants trapped~s~ inside." note="{0} = trappedCount" />
+  <String en="Occupants are reported out of the building." />
+  <String en="Talk to the ~y~caller~s~, search the building and ~r~carry the victims out~s~, then extinguish the ~r~fire~s~. Your crew can help from the tablet." />
+  <String en="Stretch a ~b~hose line~s~ into the building and extinguish the ~r~fire~s~. The ~y~caller~s~ is waiting out front." />
+  <String en=" Put your ~b~SCBA~s~ face piece on ({0}) before you go into the smoke." note="{0} = Settings.MaskKey" />
+  <String en="Everybody's out, I counted twice." />
+  <String en="We all got out, thank God. Nobody's inside." />
+  <String en="Please, help! My {0} is still inside, {1}!" note="{0} = CallerLines.Relation(victim), {1} = where" />
+  <String en="And my {0}, {1}. I think." note="{0} = CallerLines.Relation(victim), {1} = where" />
+  <String en="{0}'s not answering when I call {1}!" note="{0} = he, {1} = CallerLines.Him(victim)" />
+  <String en="{0} was screaming for help, now I can't hear {1} anymore!" note="{0} = he, {1} = CallerLines.Him(victim)" />
+  <String en="There's more people in there, I don't know where!" />
+  <String en="It smelled like gas right before it went up." />
+  <String en="It started in the kitchen, it spread so fast." />
+  <String en="I heard a bang and then there was smoke everywhere." />
+  <String en="The smoke alarm woke me up, the hallway was already full of smoke." />
+  <String en="Reported victim" />
+  <String en="~y~Caller" />
+  <String en="Where the caller last saw {0} is marked on your map." note="{0} = (reportedVictims.Count == 1 ? L.T(&quot;the victim&quot;) : L.T(&quot;the victims&quot;))" />
+  <String en="the victim" />
+  <String en="the victims" />
+  <String en="Commercial Structure Fire" />
+  <String en="Apartment Fire" />
+  <String en="Residential Structure Fire" />
+  <String en="Industrial Building Fire" />
+  <!-- Callouts/Fire/OutdoorFires.cs -->
+  <String en="Extinguish all the ~r~fires~s~ in the area ({0})." note="{0} = CalloutPriorityExtensions.AlarmToDisplay(AlarmLevel)" />
+  <String en="Vegetation fire spreading along the road. Protect nearby structures." />
+  <String en="Rubbish Fire" />
+  <String en="Dumpster and trash fire behind a building, no exposures reported." />
+  <String en="Industrial Fire" />
+  <String en="Fire at an industrial site, ~o~possible hazardous materials~s~. Approach from upwind." />
+  <String en="Site manager" />
+  <String en="Everyone on shift is out and accounted for." />
+  <String en="There are drums of solvent stored behind that building. Keep your people away from the smoke!" />
+  <!-- Callouts/Fire/SpecialFires.cs -->
+  <String en="Electrical Fire" />
+  <String en="~y~{0}~s~. Fire in the electrical room, ~o~power still on~s~." note="{0} = building.Name" />
+  <String en="~o~Live electrics~s~: water will shock you. ~y~Isolate the power~s~ at the panel first, or use an extinguisher." />
+  <String en="Electric Vehicle Fire" />
+  <String en="An electric car is on fire, the battery is popping. ~o~Expect a long cooling job~s~." />
+  <String en="It's electric! The battery started hissing and popping under the floor, and then it just went up." />
+  <String en="I got out right away. Every time you think it's out, it flares up again." />
+  <String en="~o~Lithium battery fire~s~: foam doesn't help, it takes a lot of water and it keeps rekindling. Keep cooling until the thermal camera shows no hotspots." />
+  <!-- Callouts/Fire/VehicleFire.cs -->
+  <String en="Vehicle fully involved, the driver got out with ~r~burn injuries~s~." />
+  <String en="A vehicle is on fire on the roadway, the driver reportedly got out." />
+  <String en="I smelled something burning, so I pulled over. Then the smoke came out from under the hood." />
+  <String en="Everything I own is in that car." />
+  <String en="Is it going to explode? There's a full tank in there." />
+  <String en="I only just bought it!" />
+  <String en="Extinguish the burning ~r~vehicle~s~." />
+  <String en=" Treat the ~r~driver~s~." />
+  <!-- Callouts/Medical/MedicalCalls.cs -->
+  <String en="The patient has ~r~no pulse~s~: start ~r~CPR~s~ right away and use an ~y~AED~s~ if you have one." />
+  <String en="Assess and treat the ~r~patient~s~." />
+  <String en="{0} just grabbed {1} chest and went down! {2}'s not breathing!" note="{0} = He, {1} = his, {2} = He" />
+  <String en="I tried to wake {0} up, nothing." note="{0} = him" />
+  <String en="The dispatcher told me to push on {0} chest, I did, I don't know if I did it right." note="{0} = his" />
+  <String en="Please, is {0} going to be okay?" note="{0} = he" />
+  <String en="{0} said {1} felt dizzy, and then {2} just collapsed." note="{0} = He, {1} = he, {2} = he" />
+  <String en="I think {0}'s diabetic, {1} skipped lunch." note="{0} = he, {1} = he" />
+  <String en="{0} won't wake up, but {1}'s breathing." note="{0} = He, {1} = he" />
+  <String en="{0} hit {1} head on the way down." note="{0} = He, {1} = his" />
+  <String en="{0} tripped off the curb and fell hard." note="{0} = He" />
+  <String en="{0} fell off a ladder, it was about three meters." note="{0} = He" />
+  <String en="Some guy on a bike knocked {0} over and just rode off." note="{0} = him" />
+  <String en="{0} says {1} leg really hurts." note="{0} = He, {1} = his" />
+  <String en="{0} was bleeding a lot, I gave {1} my jacket." note="{0} = He, {1} = him" />
+  <String en="~r~Patient deceased" />
+  <String en="The patient could not be saved. Clear the call when you are ready." />
+  <String en="Person collapsed, ~r~not breathing~s~. Bystander is on the phone." />
+  <String en="Unconscious Person" />
+  <String en="Person found unresponsive on the sidewalk, breathing status unknown." />
+  <String en="Person fell from a ladder, possible leg fracture." />
+  <String en="Cyclist fell, head injury reported." />
+  <String en="Assault victim with lacerations, police are on scene." />
+  <String en="Elderly person fell down the stairs." />
+  <String en="Injured Person" />
+  <!-- Callouts/ExampleCallouts.xml -->
+  <String en="Kitchen Fire" />
+  <String en="Pan fire spreading to the cabinets, the occupant tried to put it out." />
+  <String en="Put out the ~r~fire~s~ and treat the ~r~occupant~s~." />
+  <String en="Fire out and the occupant is being cared for." />
+  <String en="Neighbor" />
+  <String en="I heard the smoke alarm and saw flames in the kitchen window." />
+  <String en="They tried to put it out with water. I think they burned their arms." />
+  <String en="Gas Smell" />
+  <String en="Caller smells gas in their garage, a resident feels dizzy." />
+  <String en="Wear your ~b~SCBA~s~, take the ~y~gas detector~s~, find the leak and ventilate." />
+  <String en="measure with the ~y~gas detector" />
+  <String en="~o~High gas reading~s~ near the boiler." />
+  <String en="close the ~y~gas valve~s~ and ventilate" />
+  <String en="Gas ~g~off~s~, the garage is airing out." />
+  <String en="Vehicle Into Pole" />
+  <String en="Car hit a pole, driver ~r~trapped~s~, the passenger got out." />
+  <String en="Stabilize the car, extricate the ~r~driver~s~ and check the ~y~passenger~s~." />
+</Language>

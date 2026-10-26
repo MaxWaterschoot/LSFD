@@ -44,7 +44,7 @@ namespace LSFD.Apparatus
             Model model = definition.Model;
             if (!model.IsValid)
             {
-                Notify.Warning($"Vehicle model ~y~{definition.Model}~s~ does not exist, check Apparatus.xml.");
+                Notify.Warning(L.F($"Vehicle model ~y~{definition.Model}~s~ does not exist, check Apparatus.xml."));
                 return null;
             }
 
@@ -60,7 +60,7 @@ namespace LSFD.Apparatus
             apparatus.Add(spawned);
             Spawned?.Invoke(spawned);
 
-            Notify.Info($"Your ~y~{definition.Name}~s~ is ready in front of the station.");
+            Notify.Info(L.F($"Your ~y~{definition.Name}~s~ is ready in front of the station."));
             return spawned;
         }
 
@@ -86,7 +86,7 @@ namespace LSFD.Apparatus
             Spawned?.Invoke(unit);
 
             if (announce)
-                Notify.Dispatch("~b~Unit responding", $"~y~{definition.Name}~s~ from {station.Name} is en route to the scene.");
+                Notify.Dispatch(L.T("~b~Unit responding"), L.F($"~y~{definition.Name}~s~ from {station.Name} is en route to the scene."));
             return unit;
         }
 
@@ -139,7 +139,7 @@ namespace LSFD.Apparatus
             FireApparatus nearby = apparatus.FirstOrDefault(a => a.IsValid && a.RearPosition.DistanceTo(player.Position) <= CompartmentRadius);
             return nearby == null
                 ? null
-                : new Interaction($"open the ~y~{nearby.Definition.Name}~s~ compartments", () => CompartmentMenuRequested?.Invoke(nearby));
+                : new Interaction(L.F($"open the ~y~{nearby.Definition.Name}~s~ compartments"), () => CompartmentMenuRequested?.Invoke(nearby));
         }
 
         public void TakeEquipment(FireApparatus source, EquipmentType type)

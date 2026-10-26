@@ -43,7 +43,7 @@ namespace LSFD.Stations
             FireStation station = stationPlayerIsIn;
             return station == null
                 ? null
-                : new Interaction($"open the ~r~{station.Name}~s~ menu", () => StationMenuRequested?.Invoke(station));
+                : new Interaction(L.F($"open the ~r~{station.Name}~s~ menu"), () => StationMenuRequested?.Invoke(station));
         }
 
         /// <summary>Draws the markers and opens the station menu when the player steps into one, like any GTA mission marker.</summary>

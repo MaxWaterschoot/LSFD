@@ -1,4 +1,5 @@
 using LSFD.Apparatus;
+using LSFD.Core;
 using LSFD.UI;
 using Rage;
 
@@ -26,7 +27,7 @@ namespace LSFD.VehicleRescue
             source.SetTaken(type, true);
             AttachProp();
 
-            Notify.Info($"You are carrying the ~y~{type.ToDisplayName()}~s~.");
+            Notify.Info(L.F($"You are carrying the ~y~{type.ToDisplayName()}~s~."));
         }
 
         public void StowTool()

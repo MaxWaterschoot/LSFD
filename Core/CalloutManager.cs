@@ -30,6 +30,9 @@ namespace LSFD.Core
 
         public event Action<Callout> CalloutCompleted;
 
+        /// <summary>Raised when a call is offered to the player, dispatched or on view.</summary>
+        public event Action<Callout> CalloutOffered;
+
         /// <summary>Raised when the player accepts a call.</summary>
         public event Action<Callout> CalloutAccepted;
 
@@ -51,7 +54,7 @@ namespace LSFD.Core
             if (!duty.IsOnDuty)
             {
                 if (IsBusy)
-                    EndCurrent("Call cancelled, you went off duty.");
+                    EndCurrent(L.T("Call cancelled, you went off duty."));
                 return;
             }
 
@@ -111,7 +114,7 @@ namespace LSFD.Core
                 return false;
 
             Offer(callout, $"{callout.Priority.ToCode()} {callout.CalloutMessage ?? callout.FriendlyName}",
-                $"Press ~b~{Settings.AcceptCalloutKey}~s~ or use the tablet to respond.");
+                L.F($"Press ~b~{Settings.AcceptCalloutKey}~s~ or use the tablet to respond."));
             return true;
         }
 
@@ -144,8 +147,8 @@ namespace LSFD.Core
             }
 
             callout.IsAmbient = true;
-            Offer(callout, $"~y~On view:~s~ {callout.CalloutMessage ?? callout.FriendlyName}",
-                $"Press ~b~{Settings.AcceptCalloutKey}~s~ to stop and handle it yourself.");
+            Offer(callout, L.F($"~y~On view:~s~ {callout.CalloutMessage ?? callout.FriendlyName}"),
+                L.F($"Press ~b~{Settings.AcceptCalloutKey}~s~ to stop and handle it yourself."));
             return true;
         }
 
@@ -159,6 +162,7 @@ namespace LSFD.Core
             float distance = Game.LocalPlayer.Character.DistanceTo(position);
             Notify.Dispatch(title,
                 $"{Describe(callout)}~n~~y~{World.GetStreetName(position)}~s~ ({distance:0} m)~n~{callout.CalloutAdvisory}~n~{howToRespond}");
+            CalloutOffered?.Invoke(callout);
         }
 
         public void AcceptOffered()
@@ -214,7 +218,7 @@ namespace LSFD.Core
 
             if (Game.LocalPlayer.IsDead)
             {
-                EndCurrent("You were incapacitated, another unit is taking over.");
+                EndCurrent(L.T("You were incapacitated, another unit is taking over."));
                 return;
             }
 
@@ -235,7 +239,7 @@ namespace LSFD.Core
         public static string Describe(Callout callout)
         {
             string alarm = CalloutPriorityExtensions.AlarmToDisplay(callout.AlarmLevel);
-            return string.Join(" · ", new[] { callout.Category.ToString(), alarm, callout.Priority.ToResponse() }.Where(s => s != ""));
+            return string.Join(" · ", new[] { callout.Category.ToDisplayName(), alarm, callout.Priority.ToResponse() }.Where(s => s != ""));
         }
 
         private void ScheduleNext()

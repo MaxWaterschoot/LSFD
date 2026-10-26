@@ -19,13 +19,25 @@ namespace LSFD.Profiles
         private readonly string fileName;
         private uint lastSave = Game.GameTime;
         private uint dutyClockAt;
-        private Callout trackedCall;
-        private uint trackedCallStartedAt;
+        private CallTracker tracker;
 
         public Profile Profile { get; }
         public OutfitList Outfits { get; }
 
         public string Rank => Ranks.For(Profile.Points);
+
+        /// <summary>The report of the last call, or null when there wasn't one this session.</summary>
+        public CallRecord LastReport { get; private set; }
+
+        /// <summary>Raised with the report when an accepted call ends.</summary>
+        public event Action<CallRecord> ReportReady;
+
+        /// <summary>The average score of the last calls with a report, or null.</summary>
+        public int? AverageScore(int calls)
+        {
+            var scores = Profile.History.Where(c => c.HasReport).Take(calls).Select(c => c.Score).ToList();
+            return scores.Count == 0 ? (int?)null : (int)Math.Round(scores.Average());
+        }
 
         public ProfileManager()
         {
@@ -74,12 +86,13 @@ namespace LSFD.Profiles
 
             if (Game.GameTime - lastSave > AutoSaveInterval)
                 Save();
+
+            tracker?.Process();
         }
 
         public void OnCalloutAccepted(Callout callout)
         {
-            trackedCall = callout;
-            trackedCallStartedAt = Game.GameTime;
+            tracker = new CallTracker(callout);
             Profile.CallsAttended++;
         }
 
@@ -88,29 +101,40 @@ namespace LSFD.Profiles
             if (callout.IsCompleted)
                 Award(() => Profile.CallsCompleted++);
 
-            int minutes = trackedCall == callout ? (int)((Game.GameTime - trackedCallStartedAt) / 60000) : 0;
-            Profile.History.Insert(0, new CallRecord
-            {
-                Date = DateTime.Now,
-                Name = callout.CalloutMessage ?? callout.FriendlyName,
-                Category = callout.Category.ToString(),
-                Location = World.GetStreetName(callout.CalloutPosition),
-                AlarmLevel = callout.AlarmLevel,
-                Completed = callout.IsCompleted,
-                Minutes = minutes,
-            });
+            CallRecord record = tracker != null && tracker.Callout == callout ? tracker.Finish() : new CallTracker(callout).Finish();
+            tracker = null;
+
+            int points = CallScore.Points(record);
+            if (points > 0)
+                Award(() => Profile.ReportPoints += points);
+
+            Profile.History.Insert(0, record);
             if (Profile.History.Count > HistorySize)
                 Profile.History.RemoveRange(HistorySize, Profile.History.Count - HistorySize);
 
-            trackedCall = null;
+            LastReport = record;
             Save();
+            ReportReady?.Invoke(record);
         }
 
+        // Each counts for the career and for the report of the call that is running.
         public void OnFireOut() => Award(() => Profile.FiresExtinguished++);
-        public void OnPersonRescued() => Award(() => Profile.PeopleRescued++);
-        public void OnPatientTreated() => Award(() => Profile.PatientsTreated++);
-        public void OnPatientResuscitated() => Award(() => Profile.PatientsResuscitated++);
-        public void OnPatientTransported() => Award(() => Profile.PatientsTransported++);
+        public void OnPersonRescued() => Award(() => { Profile.PeopleRescued++; if (tracker != null) tracker.Rescued++; });
+        public void OnPatientTreated() => Award(() => { Profile.PatientsTreated++; if (tracker != null) tracker.Treated++; });
+        public void OnPatientResuscitated() => Award(() => { Profile.PatientsResuscitated++; if (tracker != null) tracker.Resuscitated++; });
+        public void OnPatientTransported() => Award(() => { Profile.PatientsTransported++; if (tracker != null) tracker.Transported++; });
+
+        public void OnPatientDied()
+        {
+            if (tracker != null)
+                tracker.Deceased++;
+        }
+
+        public void OnFireEscalated(Callout owner)
+        {
+            if (tracker != null && tracker.Callout == owner)
+                tracker.Escalations++;
+        }
 
         public void Save()
         {
@@ -133,7 +157,7 @@ namespace LSFD.Profiles
             string after = Rank;
             if (after != before)
             {
-                Notify.Info($"~g~Promoted~s~ to ~y~{after}~s~!");
+                Notify.Info(L.F($"~g~Promoted~s~ to ~y~{after}~s~!"));
                 Lsfd.Hud.ShowPromotion(after);
             }
         }

@@ -42,7 +42,7 @@ namespace LSFD.Firefighting
             Source = source;
             source.SetTaken(EquipmentType.PPVFan, true);
             Carry();
-            Notify.Info($"Carrying the ~b~PPV fan~s~. Press ~b~{Settings.InteractKey}~s~ in the doorway, facing in, to set it up.");
+            Notify.Info(L.F($"Carrying the ~b~PPV fan~s~. Press ~b~{Settings.InteractKey}~s~ in the doorway, facing in, to set it up."));
         }
 
         /// <summary>Puts the fan back in the compartment.</summary>
@@ -67,9 +67,9 @@ namespace LSFD.Firefighting
                 return null;
 
             if (IsCarried)
-                return new Interaction("set up the ~b~PPV fan~s~ here", Place);
+                return new Interaction(L.T("set up the ~b~PPV fan~s~ here"), Place);
             if (fan.DistanceTo(player.Position) <= Reach)
-                return new Interaction("pick up the ~b~PPV fan", Carry);
+                return new Interaction(L.T("pick up the ~b~PPV fan"), Carry);
             return null;
         }
 
@@ -118,8 +118,8 @@ namespace LSFD.Firefighting
             UpdateIncidents();
             bool helping = fire.Incidents.Any(i => i.IsVentilated);
             Game.DisplaySubtitle(helping
-                ? "~b~PPV fan~s~ running: the smoke is being pushed out. Mind the fire, it gets more air too."
-                : "~b~PPV fan~s~ running, but it isn't blowing into a burning building.", 4000);
+                ? L.T("~b~PPV fan~s~ running: the smoke is being pushed out. Mind the fire, it gets more air too.")
+                : L.T("~b~PPV fan~s~ running, but it isn't blowing into a burning building."), 4000);
         }
 
         public void Process()

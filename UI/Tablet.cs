@@ -33,11 +33,11 @@ namespace LSFD.UI
         private readonly Action<FireApparatus> returnApparatus;
         private readonly Func<ApparatusType, Vector3, bool> requestBackup;
 
-        private readonly TabView view = new TabView("LSFD Mobile Data Terminal") { Name = "LOS SANTOS FIRE DEPARTMENT", PauseGame = false };
-        private readonly TabInteractiveListItem dispatchTab = new TabInteractiveListItem("Active Dispatch", new List<UIMenuItem>());
-        private readonly TabInteractiveListItem vehicleTab = new TabInteractiveListItem("Vehicle Control", new List<UIMenuItem>());
-        private readonly TabInteractiveListItem sceneTab = new TabInteractiveListItem("Scene Management", new List<UIMenuItem>());
-        private readonly TabInteractiveListItem stationsTab = new TabInteractiveListItem("Fire Stations", new List<UIMenuItem>());
+        private readonly TabView view = new TabView(L.T("LSFD Mobile Data Terminal")) { Name = L.T("LOS SANTOS FIRE DEPARTMENT"), PauseGame = false };
+        private readonly TabInteractiveListItem dispatchTab = new TabInteractiveListItem(L.T("Active Dispatch"), new List<UIMenuItem>());
+        private readonly TabInteractiveListItem vehicleTab = new TabInteractiveListItem(L.T("Vehicle Control"), new List<UIMenuItem>());
+        private readonly TabInteractiveListItem sceneTab = new TabInteractiveListItem(L.T("Scene Management"), new List<UIMenuItem>());
+        private readonly TabInteractiveListItem stationsTab = new TabInteractiveListItem(L.T("Fire Stations"), new List<UIMenuItem>());
         private readonly TabInteractiveListItem profileTab = new TabInteractiveListItem("Profile", new List<UIMenuItem>());
         private readonly ProfileManager profiles;
         private readonly OtherUnits otherUnits;
@@ -97,7 +97,7 @@ namespace LSFD.UI
                 return;
 
             view.Money = World.TimeOfDay.ToString(@"hh\:mm");
-            view.MoneySubtitle = duty.IsOnDuty ? $"ON DUTY · {duty.HomeStation.Name.ToUpperInvariant()}" : "OFF DUTY";
+            view.MoneySubtitle = duty.IsOnDuty ? L.F($"ON DUTY · {duty.HomeStation.Name.ToUpperInvariant()}") : L.T("OFF DUTY");
             view.Update();
         }
 
@@ -128,7 +128,7 @@ namespace LSFD.UI
 
             if (!duty.IsOnDuty)
             {
-                items.Add(Info("Off duty", "Go on duty at a fire station to receive calls."));
+                items.Add(Info(L.T("Off duty"), L.T("Go on duty at a fire station to receive calls.")));
                 return items;
             }
 
@@ -137,52 +137,70 @@ namespace LSFD.UI
 
             if (offered != null)
             {
-                items.Add(Theme.CreateHeader("Incoming call"));
-                items.Add(Action(new UIMenuItem($"Respond: {offered.CalloutMessage}", Describe(offered)) { RightLabel = offered.Priority.ToCode() },
+                items.Add(Theme.CreateHeader(L.T("Incoming call")));
+                items.Add(Action(new UIMenuItem(L.F($"Respond: {offered.CalloutMessage}"), Describe(offered)) { RightLabel = offered.Priority.ToCode() },
                     callouts.AcceptOffered));
-                items.Add(Info("Details", CalloutManager.Describe(offered), Distance(offered.CalloutPosition)));
-                items.Add(Action(new UIMenuItem("Decline", "Let dispatch assign another unit."), callouts.DeclineOffered));
+                items.Add(Info(L.T("Details"), CalloutManager.Describe(offered), Distance(offered.CalloutPosition)));
+                items.Add(Action(new UIMenuItem(L.T("Decline"), L.T("Let dispatch assign another unit.")), callouts.DeclineOffered));
             }
             else if (current != null)
             {
-                items.Add(Theme.CreateHeader("Assigned call"));
+                items.Add(Theme.CreateHeader(L.T("Assigned call")));
                 items.Add(Info($"{current.Priority.ToCode()} {current.CalloutMessage}", Describe(current),
-                    current.HasArrived ? "~g~On scene" : Distance(current.CalloutPosition)));
-                items.Add(Info("Details", CalloutManager.Describe(current)));
-                items.Add(Action(new UIMenuItem("Set GPS to the scene"), () =>
+                    current.HasArrived ? L.T("~g~On scene") : Distance(current.CalloutPosition)));
+                items.Add(Info(L.T("Details"), CalloutManager.Describe(current)));
+                items.Add(Action(new UIMenuItem(L.T("Set GPS to the scene")), () =>
                 {
                     NativeFunction.CallByName<uint>("SET_NEW_WAYPOINT", current.CalloutPosition.X, current.CalloutPosition.Y);
-                    Notify.Info("GPS set to the scene.");
+                    Notify.Info(L.T("GPS set to the scene."));
                 }));
-                items.Add(Action(new UIMenuItem("Clear call", "Report the call as handled or cancelled."), () => callouts.EndCurrent("Call cleared.")));
+                items.Add(Action(new UIMenuItem(L.T("Clear call"), L.T("Report the call as handled or cancelled.")), () => callouts.EndCurrent(L.T("Call cleared."))));
 
-                items.Add(Theme.CreateHeader("Request additional units"));
-                items.Add(Action(new UIMenuItem("Engine company", "An AI engine with crew responds and works the scene."),
+                items.Add(Theme.CreateHeader(L.T("Request additional units")));
+                items.Add(Action(new UIMenuItem(L.T("Engine company"), L.T("An AI engine with crew responds and works the scene.")),
                     () => requestBackup(ApparatusType.Engine, current.StagingPosition)));
-                items.Add(Action(new UIMenuItem("Ambulance", "An AI ambulance crew responds and takes care of patients."),
+                items.Add(Action(new UIMenuItem(L.T("Ambulance"), L.T("An AI ambulance crew responds and takes care of patients.")),
                     () => requestBackup(ApparatusType.Ambulance, current.StagingPosition)));
             }
             else
             {
-                items.Add(Info("No active calls", "You are available. Dispatch will send you the next call."));
-                items.Add(Action(new UIMenuItem("Request a call", "Ask dispatch for a call right away."), () =>
+                items.Add(Info(L.T("No active calls"), L.T("You are available. Dispatch will send you the next call.")));
+                items.Add(Action(new UIMenuItem(L.T("Request a call"), L.T("Ask dispatch for a call right away.")), () =>
                 {
                     if (!callouts.DispatchRandom())
-                        Notify.Dispatch("~o~No calls", "There are no calls waiting right now.");
+                        Notify.Dispatch(L.T("~o~No calls"), L.T("There are no calls waiting right now."));
                 }));
+
+                if (profiles.LastReport != null)
+                    items.AddRange(BuildReport(profiles.LastReport));
             }
 
             if (otherUnits.Incidents.Count > 0)
             {
-                items.Add(Theme.CreateHeader("Other units"));
+                items.Add(Theme.CreateHeader(L.T("Other units")));
                 foreach (OtherIncident incident in otherUnits.Incidents)
                 {
-                    string units = string.Join(", ", incident.Units.Select(u => $"{u.Name} ({(u.OnScene ? "on scene" : "en route")})"));
+                    string units = string.Join(", ", incident.Units.Select(u => $"{u.Name} ({(u.OnScene ? L.T("on scene") : L.T("en route"))})"));
                     items.Add(Info(incident.Name, $"{incident.Street}~n~{units}", Distance(incident.Position)));
                 }
             }
 
             return items;
+        }
+
+        private static IEnumerable<UIMenuItem> BuildReport(CallRecord report)
+        {
+            yield return Theme.CreateHeader(L.F($"Last call report: {report.Name}"));
+            yield return Info(L.T("Outcome"), L.F($"{report.Location} · {report.Minutes} min on the call."), report.Completed ? L.T("~g~Completed") : L.T("~o~Not completed"));
+            yield return Info(L.T("Response time"), L.T("From accepting the call to arriving on scene, against a target for the distance."), CallScore.Response(report));
+            yield return Info(L.T("Water used"), L.T("Pumped by every apparatus on the call, from the tank or a hydrant."), $"{report.WaterUsed:N0} L");
+            yield return Info(L.T("People rescued"), L.T("Carried out of buildings."), $"{report.Rescued}");
+            yield return Info(L.T("Patients treated"), report.Resuscitated > 0 ? L.F($"{report.Resuscitated} resuscitated.") : "", $"{report.Treated + report.Resuscitated}");
+            if (report.Deceased > 0)
+                yield return Info(L.T("Patients lost"), "", $"~r~{report.Deceased}");
+            if (report.Escalations > 0)
+                yield return Info(L.T("Alarms struck during the call"), L.T("The fire grew to a bigger alarm."), $"~o~{report.Escalations}");
+            yield return Info(L.T("Score"), L.T("Response time, lives lost, fire escalation and whether the call was completed; rescues earn extra. Completed calls add a tenth of the score to your career points."), CallScore.Display(report.Score));
         }
 
         private List<UIMenuItem> BuildVehicleTab()
@@ -191,25 +209,25 @@ namespace LSFD.UI
 
             if (apparatus.All.Count == 0)
             {
-                items.Add(Info("No apparatus", "Request an apparatus at a fire station, or walk up to a fire truck."));
+                items.Add(Info(L.T("No apparatus"), L.T("Request an apparatus at a fire station, or walk up to a fire truck.")));
                 return items;
             }
 
             foreach (FireApparatus unit in apparatus.All.Where(a => a.IsValid))
             {
                 Vehicle vehicle = unit.Vehicle;
-                string role = unit.IsCommitted ? " · AI, other call" : unit.IsAiUnit ? (unit.ResponseDestination.HasValue ? " · AI, en route" : " · AI") : "";
+                string role = unit.IsCommitted ? L.T(" · AI, other call") : unit.IsAiUnit ? (unit.ResponseDestination.HasValue ? L.T(" · AI, en route") : L.T(" · AI")) : "";
                 items.Add(Theme.CreateHeader($"{unit.Definition.Name}{role} · {Distance(vehicle.Position)}"));
 
                 if (unit.Definition.HasPump)
                 {
-                    items.Add(Info("Water tank", "Connect a supply line to a hydrant to refill.",
-                        unit.IsSupplied ? "~b~On hydrant" : $"{unit.Water:N0} / {unit.Definition.WaterCapacity:N0} L"));
+                    items.Add(Info(L.T("Water tank"), L.T("Connect a supply line to a hydrant to refill."),
+                        unit.IsSupplied ? L.T("~b~On hydrant") : $"{unit.Water:N0} / {unit.Definition.WaterCapacity:N0} L"));
 
-                    var pump = new UIMenuCheckboxItem("Pump engaged", unit.PumpEngaged, "Feeds water to the attack hose.");
+                    var pump = new UIMenuCheckboxItem(L.T("Pump engaged"), unit.PumpEngaged, L.T("Feeds water to the attack hose."));
                     items.Add(Action(pump, () => unit.PumpEngaged = pump.Checked));
 
-                    var pressure = new UIMenuNumericScrollerItem<int>("Pump pressure", "Discharge pressure to the attack hose.", 20, 100, 10)
+                    var pressure = new UIMenuNumericScrollerItem<int>(L.T("Pump pressure"), L.T("Discharge pressure to the attack hose."), 20, 100, 10)
                     {
                         Value = (int)Math.Round(unit.PumpPressure * 100f),
                         Formatter = value => $"{value}%",
@@ -217,16 +235,16 @@ namespace LSFD.UI
                     items.Add(Action(pressure, () => unit.PumpPressure = pressure.Value / 100f));
                 }
 
-                var lights = new UIMenuCheckboxItem("Emergency lights", vehicle.IsSirenOn);
+                var lights = new UIMenuCheckboxItem(L.T("Emergency lights"), vehicle.IsSirenOn);
                 items.Add(Action(lights, () => vehicle.IsSirenOn = lights.Checked));
 
-                var silent = new UIMenuCheckboxItem("Silent mode (lights only)", vehicle.IsSirenSilent);
+                var silent = new UIMenuCheckboxItem(L.T("Silent mode (lights only)"), vehicle.IsSirenSilent);
                 items.Add(Action(silent, () => vehicle.IsSirenSilent = silent.Checked));
 
-                items.Add(Action(new UIMenuItem("Return to station", "Sends this apparatus and its crew back to quarters."), () =>
+                items.Add(Action(new UIMenuItem(L.T("Return to station"), L.T("Sends this apparatus and its crew back to quarters.")), () =>
                 {
                     returnApparatus(unit);
-                    Notify.Info($"~y~{unit.Definition.Name}~s~ is returning to quarters.");
+                    Notify.Info(L.F($"~y~{unit.Definition.Name}~s~ is returning to quarters."));
                 }));
             }
 
@@ -238,30 +256,30 @@ namespace LSFD.UI
             var items = new List<UIMenuItem>();
             Vector3 player = Game.LocalPlayer.Character.Position;
 
-            items.Add(Theme.CreateHeader("Scene"));
+            items.Add(Theme.CreateHeader(L.T("Scene")));
             FireIncident incident = fire.FindNearest(player, SceneRadius);
             if (incident != null)
             {
                 int minutes = (int)((Game.GameTime - incident.StartedAt) / 60000);
-                items.Add(Info("Fire", "Growing → burning → under control → knockdown → out.", incident.Status.ToDisplayName()));
-                items.Add(Info("  Alarm", "Goes up when the fire grows too big; every alarm brings another engine.",
+                items.Add(Info(L.T("Fire"), L.T("Growing → burning → under control → knockdown → out."), incident.Status.ToDisplayName()));
+                items.Add(Info(L.T("  Alarm"), L.T("Goes up when the fire grows too big; every alarm brings another engine."),
                     CalloutPriorityExtensions.AlarmToDisplay(incident.AlarmLevel)));
-                items.Add(Info("  Burning spots", "Spots with open flames.", incident.BurningPoints == 0 ? "~g~0" : $"~r~{incident.BurningPoints}"));
-                items.Add(Info("  Hotspots", "Knocked down, but they rekindle unless you overhaul them with water. The thermal camera shows them.",
+                items.Add(Info(L.T("  Burning spots"), L.T("Spots with open flames."), incident.BurningPoints == 0 ? "~g~0" : $"~r~{incident.BurningPoints}"));
+                items.Add(Info(L.T("  Hotspots"), L.T("Knocked down, but they rekindle unless you overhaul them with water. The thermal camera shows them."),
                     incident.Hotspots == 0 ? "~g~0" : $"~o~{incident.Hotspots}"));
-                items.Add(Info("  Time since dispatch", "", $"{minutes} min"));
+                items.Add(Info(L.T("  Time since dispatch"), "", $"{minutes} min"));
                 if (incident.Options.Class != FireClass.Ordinary)
-                    items.Add(Info("  Fire class", "Flammable: use foam. Electrical: isolate the power first. Battery: lots of water, keeps rekindling.",
+                    items.Add(Info(L.T("  Fire class"), L.T("Flammable: use foam. Electrical: isolate the power first. Battery: lots of water, keeps rekindling."),
                         incident.Options.Class.ToString()));
                 if (incident.Options.Class == FireClass.Electrical)
-                    items.Add(Info("  Power", "Isolate it at the panel (yellow arrow) before using water.", incident.IsPowerIsolated ? "~g~Isolated" : "~r~LIVE"));
+                    items.Add(Info(L.T("  Power"), L.T("Isolate it at the panel (yellow arrow) before using water."), incident.IsPowerIsolated ? L.T("~g~Isolated") : L.T("~r~LIVE")));
                 if (incident.Options.IsIndoor)
-                    items.Add(Info("  Ventilation", "A PPV fan in the doorway pushes the smoke out, but feeds the fire.", incident.IsVentilated ? "~b~PPV running" : "None"));
+                    items.Add(Info(L.T("  Ventilation"), L.T("A PPV fan in the doorway pushes the smoke out, but feeds the fire."), incident.IsVentilated ? L.T("~b~PPV running") : L.T("None")));
             }
             else
             {
                 int fires = Fires.CountFiresInRange(player, SceneRadius);
-                items.Add(Info("Fires nearby", $"Fires within {SceneRadius:0} m of you.", fires == 0 ? "~g~None" : $"~r~{fires}"));
+                items.Add(Info(L.T("Fires nearby"), L.F($"Fires within {SceneRadius:0} m of you."), fires == 0 ? L.T("~g~None") : $"~r~{fires}"));
             }
 
             var onScene = patients.All.Where(p => p.Ped.Exists() && p.Ped.DistanceTo(player) <= SceneRadius).ToList();
@@ -274,56 +292,56 @@ namespace LSFD.UI
                 int transported = onScene.Count(p => p.Transport != TransportState.None);
                 int deceased = onScene.Count(p => p.Condition == PatientCondition.Deceased);
 
-                items.Add(Info("Patients", "Patients within the scene area.", $"{onScene.Count}"));
+                items.Add(Info(L.T("Patients"), L.T("Patients within the scene area."), $"{onScene.Count}"));
                 if (trapped > 0)
-                    items.Add(Info("  Trapped in building", "Carry them out to the staging area.", $"~r~{trapped}"));
+                    items.Add(Info(L.T("  Trapped in building"), L.T("Carry them out to the staging area."), $"~r~{trapped}"));
                 if (critical > 0)
-                    items.Add(Info("  Cardiac arrest", "Needs CPR now.", $"~r~{critical}"));
+                    items.Add(Info(L.T("  Cardiac arrest"), L.T("Needs CPR now."), $"~r~{critical}"));
                 if (waiting > 0)
-                    items.Add(Info("  Awaiting treatment", "Injured or unconscious.", $"~o~{waiting}"));
+                    items.Add(Info(L.T("  Awaiting treatment"), L.T("Injured or unconscious."), $"~o~{waiting}"));
                 if (stable > 0)
-                    items.Add(Info("  Stable", "Waiting for an ambulance to take them to hospital.", $"~g~{stable}"));
+                    items.Add(Info(L.T("  Stable"), L.T("Waiting for an ambulance to take them to hospital."), $"~g~{stable}"));
                 if (transported > 0)
-                    items.Add(Info("  In transport", "Being loaded or in the ambulance.", $"~b~{transported}"));
+                    items.Add(Info(L.T("  In transport"), L.T("Being loaded or in the ambulance."), $"~b~{transported}"));
                 if (deceased > 0)
                     items.Add(Info("  Deceased", "", $"{deceased}"));
 
                 if (patients.IsMassCasualty(player))
                 {
                     int untagged = onScene.Count(p => p.NeedsTriage);
-                    items.Add(Theme.CreateHeader("Mass casualty incident: triage"));
-                    items.Add(Info("  Red (immediate)", "", $"~r~{onScene.Count(p => p.Triage == TriageTag.Red)}"));
-                    items.Add(Info("  Yellow (delayed)", "", $"~y~{onScene.Count(p => p.Triage == TriageTag.Yellow)}"));
-                    items.Add(Info("  Green (minor)", "", $"~g~{onScene.Count(p => p.Triage == TriageTag.Green)}"));
-                    items.Add(Info("  Black (expectant)", "", $"{onScene.Count(p => p.Triage == TriageTag.Black)}"));
+                    items.Add(Theme.CreateHeader(L.T("Mass casualty incident: triage")));
+                    items.Add(Info(L.T("  Red (immediate)"), "", $"~r~{onScene.Count(p => p.Triage == TriageTag.Red)}"));
+                    items.Add(Info(L.T("  Yellow (delayed)"), "", $"~y~{onScene.Count(p => p.Triage == TriageTag.Yellow)}"));
+                    items.Add(Info(L.T("  Green (minor)"), "", $"~g~{onScene.Count(p => p.Triage == TriageTag.Green)}"));
+                    items.Add(Info(L.T("  Black (expectant)"), "", $"{onScene.Count(p => p.Triage == TriageTag.Black)}"));
                     if (untagged > 0)
-                        items.Add(Info("  Not triaged yet", "Hold E at a patient, or order the crew to patient care.", $"~o~{untagged}"));
+                        items.Add(Info(L.T("  Not triaged yet"), L.T("Hold E at a patient, or order the crew to patient care."), $"~o~{untagged}"));
                 }
             }
 
-            items.Add(Theme.CreateHeader($"Crew ({crew.Members.Count})"));
+            items.Add(Theme.CreateHeader(L.F($"Crew ({crew.Members.Count})")));
             if (crew.Members.Count == 0)
             {
-                items.Add(Info("No crew", "Apparatus come with AI firefighters when requested at a station."));
+                items.Add(Info(L.T("No crew"), L.T("Apparatus come with AI firefighters when requested at a station.")));
                 return items;
             }
 
             foreach (CrewMember member in crew.Members)
             {
                 string status = CrewManager.JobToDisplayName(member.Job) ?? CrewManager.OrderToDisplayName(member.Order);
-                string unit = member.Apparatus.Definition.Name + (member.Apparatus.IsAiUnit ? " (AI unit)" : "");
-                items.Add(Info(member.Name, $"Riding on the {unit}.", status));
+                string unit = member.Apparatus.Definition.Name + (member.Apparatus.IsAiUnit ? L.T(" (AI unit)") : "");
+                items.Add(Info(member.Name, L.F($"Riding on the {unit}."), status));
             }
 
-            items.Add(Theme.CreateHeader("Orders to your crew"));
-            items.Add(CrewOrderItem("Work the scene", "Do what is most urgent: CPR, rescues, extrication, treatment, then the fire.", CrewOrder.WorkScene));
-            items.Add(CrewOrderItem("Search and rescue", "Carry victims out of buildings and extricate trapped occupants.", CrewOrder.RescueVictims));
-            items.Add(CrewOrderItem("Patient care", "CPR and first aid for every patient on scene.", CrewOrder.TreatPatients));
-            items.Add(CrewOrderItem("Attack the fire", "Stretch hose lines from the engines (extinguishers when none are left) and attack the closest fires.", CrewOrder.Extinguish));
-            items.Add(Action(new UIMenuItem("Operate the deck gun", "One firefighter per engine works the roof-mounted water cannon."), () => crew.CommandDeckGun()));
-            items.Add(CrewOrderItem("Follow me", "Walk with you.", CrewOrder.FollowPlayer));
-            items.Add(CrewOrderItem("Hold position", "Stay where they are.", CrewOrder.HoldPosition));
-            items.Add(CrewOrderItem("Return to apparatus", "Get back in the vehicles.", CrewOrder.ReturnToApparatus));
+            items.Add(Theme.CreateHeader(L.T("Orders to your crew")));
+            items.Add(CrewOrderItem(L.T("Work the scene"), L.T("Do what is most urgent: CPR, rescues, extrication, treatment, then the fire."), CrewOrder.WorkScene));
+            items.Add(CrewOrderItem(L.T("Search and rescue"), L.T("Carry victims out of buildings and extricate trapped occupants."), CrewOrder.RescueVictims));
+            items.Add(CrewOrderItem(L.T("Patient care"), L.T("CPR and first aid for every patient on scene."), CrewOrder.TreatPatients));
+            items.Add(CrewOrderItem(L.T("Attack the fire"), L.T("Stretch hose lines from the engines (extinguishers when none are left) and attack the closest fires."), CrewOrder.Extinguish));
+            items.Add(Action(new UIMenuItem(L.T("Operate the deck gun"), L.T("One firefighter per engine works the roof-mounted water cannon.")), () => crew.CommandDeckGun()));
+            items.Add(CrewOrderItem(L.T("Follow me"), L.T("Walk with you."), CrewOrder.FollowPlayer));
+            items.Add(CrewOrderItem(L.T("Hold position"), L.T("Stay where they are."), CrewOrder.HoldPosition));
+            items.Add(CrewOrderItem(L.T("Return to apparatus"), L.T("Get back in the vehicles."), CrewOrder.ReturnToApparatus));
 
             return items;
         }
@@ -337,28 +355,32 @@ namespace LSFD.UI
             var items = new List<UIMenuItem>
             {
                 Theme.CreateHeader(profile.Name),
-                Info("Rank", next.HasValue ? $"{next.Value - points} points to the next rank." : "The top of the department.", $"~y~{profiles.Rank}"),
-                Info("Points", "Calls, fires, rescues and patients all count.", $"{points}"),
-                Info("Hours on duty", "", $"{profile.HoursOnDuty:0.0}"),
-                Theme.CreateHeader("Statistics"),
-                Info("Calls completed", "", $"{profile.CallsCompleted} / {profile.CallsAttended}"),
-                Info("Fires put out", "", $"{profile.FiresExtinguished}"),
-                Info("People rescued", "Carried out of burning buildings.", $"{profile.PeopleRescued}"),
-                Info("Patients treated", "", $"{profile.PatientsTreated}"),
-                Info("Patients resuscitated", "", $"{profile.PatientsResuscitated}"),
-                Info("Patients transported", "", $"{profile.PatientsTransported}"),
-                Theme.CreateHeader("Recent calls"),
+                Info(L.T("Rank"), next.HasValue ? L.F($"{next.Value - points} points to the next rank.") : L.T("The top of the department."), $"~y~{profiles.Rank}"),
+                Info(L.T("Points"), L.T("Calls, fires, rescues and patients all count."), $"{points}"),
+                Info(L.T("Hours on duty"), "", $"{profile.HoursOnDuty:0.0}"),
+                Info(L.T("Average score"), L.T("Of your last 10 call reports."), profiles.AverageScore(10) is int average ? CallScore.Display(average) : "-"),
+                Theme.CreateHeader(L.T("Statistics")),
+                Info(L.T("Calls completed"), "", $"{profile.CallsCompleted} / {profile.CallsAttended}"),
+                Info(L.T("Fires put out"), "", $"{profile.FiresExtinguished}"),
+                Info(L.T("People rescued"), L.T("Carried out of burning buildings."), $"{profile.PeopleRescued}"),
+                Info(L.T("Patients treated"), "", $"{profile.PatientsTreated}"),
+                Info(L.T("Patients resuscitated"), "", $"{profile.PatientsResuscitated}"),
+                Info(L.T("Patients transported"), "", $"{profile.PatientsTransported}"),
+                Theme.CreateHeader(L.T("Recent calls")),
             };
 
             if (profile.History.Count == 0)
-                items.Add(Info("No calls yet", "Accepted calls are logged here."));
+                items.Add(Info(L.T("No calls yet"), L.T("Accepted calls are logged here.")));
 
             foreach (CallRecord call in profile.History.Take(15))
             {
                 string alarm = CalloutPriorityExtensions.AlarmToDisplay(call.AlarmLevel);
-                items.Add(Info($"{call.Date:dd/MM HH:mm}  {call.Name}",
-                    $"{call.Category}{(alarm != "" ? " · " + alarm : "")} · {call.Location} · {call.Minutes} min",
-                    call.Completed ? "~g~Completed" : "~o~Cancelled"));
+                string details = L.F($"{CalloutCategoryExtensions.ToDisplayName(call.Category)}{(alarm != "" ? " · " + alarm : "")} · {call.Location} · {call.Minutes} min");
+                if (call.HasReport)
+                    details += L.F($"~n~Response {CallScore.Response(call)} · Water {call.WaterUsed:N0} L · Rescued {call.Rescued}") +
+                        (call.Deceased > 0 ? L.F($" · Lost {call.Deceased}") : "");
+                string outcome = call.Completed ? L.T("~g~Completed") : L.T("~o~Cancelled");
+                items.Add(Info($"{call.Date:dd/MM HH:mm}  {call.Name}", details, call.HasReport ? $"{outcome}~s~ · {call.Score}" : outcome));
             }
 
             return items;
@@ -373,14 +395,14 @@ namespace LSFD.UI
                 items.Add(Theme.CreateHeader(area.Key.ToDisplayName()));
                 foreach (FireStation station in area)
                 {
-                    var item = new UIMenuItem(station.Name, $"{station.Data.Address} ({station.Data.Type}). Select to set a GPS waypoint.")
+                    var item = new UIMenuItem(station.Name, L.F($"{station.Data.Address} ({station.Data.Type.ToDisplayName()}). Select to set a GPS waypoint."))
                     {
                         RightLabel = Distance(station.Position),
                     };
                     items.Add(Action(item, () =>
                     {
                         NativeFunction.CallByName<uint>("SET_NEW_WAYPOINT", station.Position.X, station.Position.Y);
-                        Notify.Info($"GPS set to ~y~{station.Name}~s~.");
+                        Notify.Info(L.F($"GPS set to ~y~{station.Name}~s~."));
                     }));
                 }
             }

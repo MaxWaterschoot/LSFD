@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using LSFD.Core;
 using Rage;
 
 namespace LSFD.Stations
@@ -25,10 +26,20 @@ namespace LSFD.Stations
         {
             switch (area)
             {
-                case StationArea.LosSantos: return "Los Santos";
-                case StationArea.LosSantosCounty: return "Los Santos County";
-                case StationArea.BlaineCounty: return "Blaine County";
+                case StationArea.LosSantos: return L.T("Los Santos");
+                case StationArea.LosSantosCounty: return L.T("Los Santos County");
+                case StationArea.BlaineCounty: return L.T("Blaine County");
                 default: return area.ToString();
+            }
+        }
+
+        public static string ToDisplayName(this StationType type)
+        {
+            switch (type)
+            {
+                case StationType.Airport: return L.T("Airport");
+                case StationType.Military: return L.T("Military");
+                default: return L.T("Municipal");
             }
         }
     }

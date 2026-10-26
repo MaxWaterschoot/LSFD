@@ -116,7 +116,7 @@ namespace LSFD.Core
                 XmlCalloutFile callouts = XmlCalloutFile.Load(path);
                 if (callouts == null)
                 {
-                    Notify.Warning($"Could not read the callouts in ~y~{file}~s~, see RagePluginHook.log.");
+                    Notify.Warning(L.F($"Could not read the callouts in ~y~{file}~s~, see RagePluginHook.log."));
                     continue;
                 }
 
@@ -264,7 +264,7 @@ namespace LSFD.Core
                 return true;
 
             Game.LogTrivial($"LSFD: callout pack {name} was not loaded: it {problem}");
-            Notify.Warning($"Callout pack ~y~{name}~s~ was not loaded: it {problem}");
+            Notify.Warning(L.F($"Callout pack ~y~{name}~s~ was not loaded: it {problem}"));
             return false;
         }
 

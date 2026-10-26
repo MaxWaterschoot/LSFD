@@ -1,4 +1,5 @@
 ﻿using System;
+using LSFD.Core;
 
 namespace LSFD.API
 {
@@ -72,6 +73,26 @@ namespace LSFD.API
         }
     }
 
+    public static class CalloutCategoryExtensions
+    {
+        /// <summary>The category in the player's language.</summary>
+        public static string ToDisplayName(this CalloutCategory category) => ToDisplayName(category.ToString());
+
+        /// <summary>The category name as stored in the call history ("Fire", "Traffic", ...) in the player's language.</summary>
+        internal static string ToDisplayName(string category)
+        {
+            switch (category)
+            {
+                case nameof(CalloutCategory.Fire): return L.T("Fire");
+                case nameof(CalloutCategory.Traffic): return L.T("Traffic");
+                case nameof(CalloutCategory.Medical): return L.T("Medical");
+                case nameof(CalloutCategory.Rescue): return L.T("Rescue");
+                case nameof(CalloutCategory.Hazmat): return L.T("Hazmat");
+                default: return category;
+            }
+        }
+    }
+
     public static class CalloutPriorityExtensions
     {
         /// <summary>Short code shown in notifications and the tablet, e.g. "~r~P1".</summary>
@@ -87,7 +108,7 @@ namespace LSFD.API
 
         public static string ToResponse(this CalloutPriority priority)
         {
-            return priority == CalloutPriority.Priority3 ? "Code 2" : "Code 3";
+            return priority == CalloutPriority.Priority3 ? L.T("Code 2") : L.T("Code 3");
         }
 
         /// <summary>"1st Alarm", "2nd Alarm", ...; empty for 0.</summary>
@@ -96,10 +117,10 @@ namespace LSFD.API
             switch (alarmLevel)
             {
                 case 0: return "";
-                case 1: return "1st Alarm";
-                case 2: return "2nd Alarm";
-                case 3: return "3rd Alarm";
-                default: return $"{alarmLevel}th Alarm";
+                case 1: return L.T("1st Alarm");
+                case 2: return L.T("2nd Alarm");
+                case 3: return L.T("3rd Alarm");
+                default: return L.F($"{alarmLevel}th Alarm");
             }
         }
     }

@@ -83,14 +83,14 @@ namespace LSFD.LivingWorld
             Ped player = Game.LocalPlayer.Character;
             Cone near = cones.FirstOrDefault(c => c.Prop.Exists() && c.Prop.DistanceTo(player.Position) <= ConePickupDistance);
             if (near != null)
-                return new Interaction("pick up the ~y~traffic cone", () => Remove(near));
+                return new Interaction(L.T("pick up the ~y~traffic cone"), () => Remove(near));
 
             if (cones.Count >= MaxCones)
-                return Interaction.Hint($"All {MaxCones} ~y~traffic cones~s~ are out. Pick one up to place it elsewhere.");
+                return Interaction.Hint(L.F($"All {MaxCones} ~y~traffic cones~s~ are out. Pick one up to place it elsewhere."));
 
             ToolDefinition tool = tools.Held;
-            return new Interaction("place a ~y~traffic cone~s~ (traffic stops here)", () => Place(player.GetOffsetPositionFront(0.9f)),
-                tool.UseSeconds, "PLACING")
+            return new Interaction(L.T("place a ~y~traffic cone~s~ (traffic stops here)"), () => Place(player.GetOffsetPositionFront(0.9f)),
+                tool.UseSeconds, L.T("PLACING"))
             {
                 AnimationDictionary = tool.AnimDictionary,
                 AnimationName = tool.AnimName,

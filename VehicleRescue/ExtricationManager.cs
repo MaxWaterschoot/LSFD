@@ -143,14 +143,14 @@ namespace LSFD.VehicleRescue
                     continue;
 
                 if (IsDoorAccessible(vehicle, patient.Door))
-                    return new Interaction("extricate the ~r~patient", () => Extricate(patient), ExtricateSeconds, "EXTRICATING")
+                    return new Interaction(L.T("extricate the ~r~patient"), () => Extricate(patient), ExtricateSeconds, L.T("EXTRICATING"))
                     {
                         AnimationDictionary = "mini@repair",
                         AnimationName = "fixing_a_ped",
                     };
 
                 if (tools.Held == null)
-                    return Interaction.Hint("The door is ~r~jammed~s~. Get the ~y~hydraulic tools~s~ from an apparatus.");
+                    return Interaction.Hint(L.T("The door is ~r~jammed~s~. Get the ~y~hydraulic tools~s~ from an apparatus."));
             }
             return null;
         }
@@ -172,7 +172,7 @@ namespace LSFD.VehicleRescue
                 case EquipmentType.Cribbing:
                     if (IsStabilized(vehicle) || vehicle.DistanceTo(playerPosition) > CribbingReach)
                         return null;
-                    return WithAnimation(new Interaction("stabilize the vehicle with ~y~cribbing", () => Stabilize(vehicle), tool.UseSeconds, "STABILIZING"), tool);
+                    return WithAnimation(new Interaction(L.T("stabilize the vehicle with ~y~cribbing"), () => Stabilize(vehicle), tool.UseSeconds, L.T("STABILIZING")), tool);
 
                 case EquipmentType.HydraulicSpreader:
                 case EquipmentType.HydraulicCutter:
@@ -180,11 +180,11 @@ namespace LSFD.VehicleRescue
                     if (door < 0 || !vehicle.Doors[door].IsValid() || vehicle.Doors[door].IsDamaged)
                         return null;
                     if (needsCribbing)
-                        return Interaction.Hint("~o~Stabilize the vehicle with cribbing~s~ before using hydraulic tools.");
+                        return Interaction.Hint(L.T("~o~Stabilize the vehicle with cribbing~s~ before using hydraulic tools."));
 
                     return tool.Type == EquipmentType.HydraulicSpreader
-                        ? IsDoorAccessible(vehicle, door) ? null : WithAnimation(new Interaction("force the door open", () => ForceDoor(vehicle, door), tool.UseSeconds, "SPREADING"), tool)
-                        : WithAnimation(new Interaction("cut the door off", () => CutDoor(vehicle, door), tool.UseSeconds, "CUTTING"), tool);
+                        ? IsDoorAccessible(vehicle, door) ? null : WithAnimation(new Interaction(L.T("force the door open"), () => ForceDoor(vehicle, door), tool.UseSeconds, L.T("SPREADING")), tool)
+                        : WithAnimation(new Interaction(L.T("cut the door off"), () => CutDoor(vehicle, door), tool.UseSeconds, L.T("CUTTING")), tool);
 
                 default:
                     return null;
@@ -195,12 +195,12 @@ namespace LSFD.VehicleRescue
         {
             int window = VehicleParts.FindClosest(vehicle, VehicleParts.WindowBones, playerPosition, WindowReach, out _);
             if (window >= 0 && IsWindowIntact(vehicle, window))
-                return WithAnimation(new Interaction("break the window", () => SmashWindow(vehicle, window), tool.UseSeconds, "BREAKING"), tool);
+                return WithAnimation(new Interaction(L.T("break the window"), () => SmashWindow(vehicle, window), tool.UseSeconds, L.T("BREAKING")), tool);
 
             bool nearWindscreen = vehicle.HasBone(VehicleParts.WindscreenBone)
                 && vehicle.GetBonePosition(VehicleParts.WindscreenBone).DistanceTo(playerPosition) <= WindowReach + 0.6f;
             if (nearWindscreen && IsWindowIntact(vehicle, VehicleParts.WindscreenIndex))
-                return WithAnimation(new Interaction("break the windscreen", () => SmashWindow(vehicle, VehicleParts.WindscreenIndex), tool.UseSeconds * 2f, "BREAKING"), tool);
+                return WithAnimation(new Interaction(L.T("break the windscreen"), () => SmashWindow(vehicle, VehicleParts.WindscreenIndex), tool.UseSeconds * 2f, L.T("BREAKING")), tool);
 
             return null;
         }
@@ -218,7 +218,7 @@ namespace LSFD.VehicleRescue
         {
             NativeFunction.CallByName<uint>("FREEZE_ENTITY_POSITION", vehicle, true);
             stabilized.Add(vehicle);
-            Notify.Info("Vehicle ~g~stabilized~s~. It is safe to use the hydraulic tools.");
+            Notify.Info(L.T("Vehicle ~g~stabilized~s~. It is safe to use the hydraulic tools."));
         }
 
         private static void ForceDoor(Vehicle vehicle, int door)
@@ -258,7 +258,7 @@ namespace LSFD.VehicleRescue
             ped.Tasks.PlayAnimation("combat@damage@writhe", "writhe_loop", 1f, AnimationFlags.Loop);
 
             patient.Extricated = true;
-            Notify.Info("Patient ~g~extricated~s~. Treat their injuries.");
+            Notify.Info(L.T("Patient ~g~extricated~s~. Treat their injuries."));
             PatientExtricated?.Invoke(ped);
         }
 
