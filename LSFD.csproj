@@ -27,7 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="LSFD.ini" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The Plugins/LSFD/ folder ships with the download; LSFD won't start without it. -->
+    <None Update="Plugins\**" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Plugins\**\.gitkeep" CopyToOutputDirectory="Never" />
   </ItemGroup>
 
 </Project>

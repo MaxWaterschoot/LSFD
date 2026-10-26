@@ -1,5 +1,6 @@
 using System;
 using LSFD.API;
+using LSFD.Safety;
 using LSFD.Stations;
 using LSFD.UI;
 using Rage;
@@ -11,7 +12,13 @@ namespace LSFD.Core
         private const string FirefighterModel = "s_m_y_fireman_01";
         private const int FadeMilliseconds = 600;
 
+        private readonly BreathingApparatus scba;
         private Model? originalModel;
+
+        public DutyManager(BreathingApparatus scba)
+        {
+            this.scba = scba;
+        }
 
         public bool IsOnDuty { get; private set; }
         public FireStation HomeStation { get; private set; }
@@ -64,13 +71,16 @@ namespace LSFD.Core
             Functions.RaiseDutyStateChanged(false);
         }
 
-        /// <summary>Personal protective gear every firefighter carries; the rest comes from the apparatus.</summary>
+        /// <summary>
+        /// Personal protective gear every firefighter carries; the rest comes from the apparatus. Turnout gear is no
+        /// body armor: it keeps the flames off (see HazardManager), the smoke and heat are still dangerous.
+        /// </summary>
         public void RestockPersonalGear()
         {
             Ped player = Game.LocalPlayer.Character;
             player.Inventory.GiveFlashlight();
-            player.Armor = 100;
             player.Health = player.MaxHealth;
+            scba.Refill();
         }
 
         private static void ChangeClothes(Action change)

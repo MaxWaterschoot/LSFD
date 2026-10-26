@@ -1,5 +1,6 @@
 using LSFD.Apparatus;
 using LSFD.Core;
+using LSFD.Firefighting;
 using LSFD.UI;
 using LSFD.Utils;
 using Rage;
@@ -21,9 +22,14 @@ namespace LSFD.Water
             GameControl.WeaponWheelNext, GameControl.WeaponWheelPrev, GameControl.SelectNextWeapon, GameControl.SelectPrevWeapon,
         };
 
-        private readonly WaterStream stream = new WaterStream();
+        private readonly WaterStream stream;
         private HoseRope rope;
         private bool gaveNozzleWeapon;
+
+        public HoseManager(FireSystem fire)
+        {
+            stream = new WaterStream(fire);
+        }
 
         public Nozzle Nozzle { get; } = new Nozzle();
 

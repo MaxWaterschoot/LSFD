@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using LSFD.API;
 using LSFD.Apparatus;
+using LSFD.Firefighting;
 using LSFD.Medical;
 using LSFD.UI;
 using LSFD.VehicleRescue;
@@ -20,6 +21,7 @@ namespace LSFD.Crew
         private const float SceneRadius = 80f;
         private const float WorkDistance = 1.3f;
         private const float ExtinguishDistance = 3.5f;
+        private const float ExtinguisherCoolingPerSecond = 0.25f;
         private const int SprayMilliseconds = 2500;
         private const uint FullAutoFiringPattern = 0xC6EE6B4C;
         private const uint LeaveVehicleTimeout = 4000;
@@ -37,14 +39,16 @@ namespace LSFD.Crew
 
         private readonly PatientManager patients;
         private readonly ExtricationManager extrication;
+        private readonly FireSystem fire;
         private readonly List<CrewMember> crew = new List<CrewMember>();
 
         public IReadOnlyList<CrewMember> Members => crew;
 
-        public CrewManager(PatientManager patients, ExtricationManager extrication)
+        public CrewManager(PatientManager patients, ExtricationManager extrication, FireSystem fire)
         {
             this.patients = patients;
             this.extrication = extrication;
+            this.fire = fire;
         }
 
         public void SpawnCrew(FireApparatus apparatus)
@@ -234,7 +238,7 @@ namespace LSFD.Crew
             Vector3 position = member.Ped.Position;
             bool rescue = member.Order == CrewOrder.RescueVictims || member.Order == CrewOrder.WorkScene;
             bool care = member.Order == CrewOrder.TreatPatients || member.Order == CrewOrder.WorkScene;
-            bool fire = member.Order == CrewOrder.Extinguish || member.Order == CrewOrder.WorkScene;
+            bool fireAttack = member.Order == CrewOrder.Extinguish || member.Order == CrewOrder.WorkScene;
 
             if (care && TryClaimPatient(member, p => p.NeedsCare && p.Condition == PatientCondition.CardiacArrest, CrewJob.Cpr))
                 return true;
@@ -256,7 +260,7 @@ namespace LSFD.Crew
             if (care && TryClaimPatient(member, p => p.NeedsCare, CrewJob.Treat))
                 return true;
 
-            if (fire && FindFire(position) != null)
+            if (fireAttack && FindFire(position).HasValue)
             {
                 member.StartJob(CrewJob.Extinguish);
                 return true;
@@ -305,8 +309,8 @@ namespace LSFD.Crew
         private void DoExtinguish(CrewMember member)
         {
             Ped ped = member.Ped;
-            Fire fire = FindFire(ped.Position);
-            if (fire == null)
+            Vector3? target = FindFire(ped.Position);
+            if (!target.HasValue)
             {
                 StopJob(member);
                 return;
@@ -317,11 +321,17 @@ namespace LSFD.Crew
                 ped.Inventory.GiveNewWeapon(ExtinguisherWeapon, 2000, true);
             NativeFunction.CallByName<uint>("SET_CURRENT_PED_WEAPON", ped, extinguisher, true);
 
-            Vector3 target = fire.Position;
-            if (ped.DistanceTo(target) > ExtinguishDistance)
-                ped.Tasks.FollowNavigationMeshToPosition(target, 0f, 2f, ExtinguishDistance - 0.5f);
+            Vector3 spot = target.Value;
+            if (ped.DistanceTo(spot) > ExtinguishDistance)
+            {
+                ped.Tasks.FollowNavigationMeshToPosition(spot, 0f, 2f, ExtinguishDistance - 0.5f);
+            }
             else
-                NativeFunction.CallByName<uint>("TASK_SHOOT_AT_COORD", ped, target.X, target.Y, target.Z, SprayMilliseconds, FullAutoFiringPattern);
+            {
+                NativeFunction.CallByName<uint>("TASK_SHOOT_AT_COORD", ped, spot.X, spot.Y, spot.Z, SprayMilliseconds, FullAutoFiringPattern);
+                // Knocks down the flames and overhauls the hotspot they are aiming at.
+                fire.ApplyCooling(spot, 1.5f, ExtinguisherCoolingPerSecond * ThinkInterval / 1000f);
+            }
         }
 
         private void DoCarry(CrewMember member)
@@ -465,12 +475,18 @@ namespace LSFD.Crew
                 member.Ped.Tasks.Clear();
         }
 
-        private static Fire FindFire(Vector3 position)
+        /// <summary>The incident's flames and hotspots come first, then any other GTA fire.</summary>
+        private Vector3? FindFire(Vector3 position)
         {
-            return World.GetAllFires()
+            Vector3? spot = fire.FindNearestTarget(position, SceneRadius);
+            if (spot.HasValue)
+                return spot;
+
+            Fire nearest = World.GetAllFires()
                 .Where(f => f.IsValid() && f.Position.DistanceTo(position) <= SceneRadius)
                 .OrderBy(f => f.Position.DistanceTo(position))
                 .FirstOrDefault();
+            return nearest?.Position;
         }
 
         private static void TaskOnce(CrewMember member, Action giveTask)

@@ -3,6 +3,8 @@ using System.Linq;
 using LSFD.API;
 using LSFD.Apparatus;
 using LSFD.Core;
+using LSFD.Firefighting;
+using LSFD.Safety;
 using LSFD.VehicleRescue;
 using LSFD.Water;
 using RAGENativeUI;
@@ -15,6 +17,7 @@ namespace LSFD.UI
     internal class Hud
     {
         private const float LowWaterFraction = 0.2f;
+        private const float FireStatusRange = 120f;
 
         private readonly TimerBarPool timerBars = new TimerBarPool();
         private readonly List<TimerBarBase> shownBars = new List<TimerBarBase>();
@@ -24,6 +27,10 @@ namespace LSFD.UI
         private readonly TextTimerBar nozzleBar = new TextTimerBar("NOZZLE", "");
         private readonly BarTimerBar pressureBar = new BarTimerBar("PRESSURE") { ForegroundColor = Theme.Highlight, BackgroundColor = Theme.BarBackground };
         private readonly TextTimerBar toolBar = new TextTimerBar("TOOL", "");
+        private readonly TextTimerBar fireBar = new TextTimerBar("FIRE", "");
+        private readonly BarTimerBar airBar = new BarTimerBar("AIR") { BackgroundColor = Theme.BarBackground };
+        private readonly TextTimerBar heatBar = new TextTimerBar("HEAT", "~r~DANGER");
+        private readonly TextTimerBar cameraBar = new TextTimerBar("TIC", "");
         private readonly BarTimerBar progressBar = new BarTimerBar("") { ForegroundColor = Theme.Highlight, BackgroundColor = Theme.BarBackground };
 
         private readonly InstructionalButtons hoseButtons = new InstructionalButtons();
@@ -38,9 +45,36 @@ namespace LSFD.UI
             hoseButtons.Update();
         }
 
-        public void Process(HoseManager hose, HydrantManager hydrants, ApparatusManager apparatus, ToolManager tools, InteractionRunner interactions)
+        public void Process(HoseManager hose, HydrantManager hydrants, ApparatusManager apparatus, ToolManager tools, InteractionRunner interactions,
+            FireSystem fire, BreathingApparatus scba, HazardManager hazards, ThermalCamera camera, bool onDuty)
         {
             var bars = new List<TimerBarBase>();
+            Vector3 player = Game.LocalPlayer.Character.Position;
+
+            FireIncident incident = fire.FindNearest(player, FireStatusRange);
+            if (incident != null)
+            {
+                fireBar.Text = $"{incident.Status.ToDisplayName()}~s~ · {CalloutPriorityExtensions.AlarmToDisplay(incident.AlarmLevel)}";
+                bars.Add(fireBar);
+            }
+
+            // The cylinder only matters once it is in use or no longer full.
+            if (onDuty && (scba.IsMaskOn || scba.AirFraction < 0.999f || hazards.Smoke > 0f))
+            {
+                airBar.Label = scba.IsMaskOn ? "AIR" : "AIR (MASK OFF)";
+                airBar.Percentage = scba.AirFraction;
+                airBar.ForegroundColor = scba.IsLowOnAir ? Theme.WaterLow : Theme.Water;
+                bars.Add(airBar);
+            }
+
+            if (hazards.IsInDangerousHeat)
+                bars.Add(heatBar);
+
+            if (camera.IsActive)
+            {
+                cameraBar.Text = $"{camera.VisibleVictims} victim{(camera.VisibleVictims == 1 ? "" : "s")} · {camera.VisibleHotspots} hotspot{(camera.VisibleHotspots == 1 ? "" : "s")}";
+                bars.Add(cameraBar);
+            }
 
             FireApparatus focus = hose.Source ?? hydrants.CarryingFrom ?? apparatus.Current;
             if (focus != null && focus.Definition.HasPump)

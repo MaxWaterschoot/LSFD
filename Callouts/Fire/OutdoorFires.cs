@@ -1,21 +1,25 @@
-using System.Collections.Generic;
 using LSFD.API;
 using Rage;
 
 namespace LSFD.Callouts
 {
-    /// <summary>A fire in the open: spread out over an area, bigger with each alarm.</summary>
+    /// <summary>A fire in the open: spread out over an area, bigger with each alarm, and it keeps spreading until it is fought.</summary>
     internal abstract class OutdoorFire : Callout
     {
-        private readonly List<int> fires = new List<int>();
         private readonly Scene scene = new Scene();
         private Vector3 center;
-        private uint arrivedAt;
+        private FireIncident fire;
 
         protected abstract string Title { get; }
         protected abstract string Advisory { get; }
         protected virtual bool IsGasFire => false;
         protected virtual int SecondAlarmChance => 20;
+
+        /// <summary>The fire never escalates beyond this alarm.</summary>
+        protected virtual int MaxAlarmLevel => 3;
+
+        /// <summary>Seconds between spreads; vegetation goes quicker than a trash pile.</summary>
+        protected virtual float SpreadSeconds => 40f;
 
         /// <summary>Where the fire is; return null to cancel the call.</summary>
         protected virtual Vector3? FindLocation() => Functions.GetRandomCalloutLocation();
@@ -25,7 +29,8 @@ namespace LSFD.Callouts
         {
         }
 
-        private float Spread => 4f + 6f * AlarmLevel;
+        // Room to grow into a higher alarm.
+        private float MaxSpread => 4f + 6f * MaxAlarmLevel;
 
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -42,28 +47,34 @@ namespace LSFD.Callouts
             return true;
         }
 
+        public override bool OnCalloutAccepted()
+        {
+            fire = StartFireIncident(center, new FireIncidentOptions
+            {
+                IsGasFire = IsGasFire,
+                InitialPoints = 1 + 2 * AlarmLevel,
+                SpreadRadius = MaxSpread,
+                SpreadSeconds = SpreadSeconds,
+                PointsPerAlarm = 5,
+                MaxAlarmLevel = MaxAlarmLevel,
+            });
+            return true;
+        }
+
         protected override void OnArrival()
         {
-            arrivedAt = Game.GameTime;
-
-            int count = 2 + 3 * AlarmLevel;
-            for (int i = 0; i < count; i++)
-                fires.Add(Fires.StartFire(center.Around2D(1f, Spread), 10 + 5 * AlarmLevel, IsGasFire));
-
             DressScene(scene, center);
             Game.DisplayHelp($"Extinguish all the ~r~fires~s~ in the area ({CalloutPriorityExtensions.AlarmToDisplay(AlarmLevel)}).");
         }
 
         public override void Process()
         {
-            if (HasArrived && Game.GameTime - arrivedAt > 5000 && Fires.CountFiresInRange(center, Spread + 15f) == 0)
+            if (HasArrived && fire.IsOut)
                 Complete();
         }
 
         protected override void OnEnd()
         {
-            foreach (int fire in fires)
-                Fires.RemoveFire(fire);
             scene.Dismiss();
         }
     }
@@ -74,6 +85,7 @@ namespace LSFD.Callouts
         protected override string Title => "Brush Fire";
         protected override string Advisory => "Vegetation fire spreading along the road. Protect nearby structures.";
         protected override int SecondAlarmChance => 30;
+        protected override float SpreadSeconds => 25f;
     }
 
     [CalloutInfo("Trash Fire", CalloutProbability.Medium, Category = CalloutCategory.Fire, Priority = CalloutPriority.Priority3)]
@@ -82,6 +94,8 @@ namespace LSFD.Callouts
         protected override string Title => "Rubbish Fire";
         protected override string Advisory => "Dumpster and trash fire behind a building, no exposures reported.";
         protected override int SecondAlarmChance => 0;
+        protected override int MaxAlarmLevel => 1;
+        protected override float SpreadSeconds => 60f;
 
         protected override void DressScene(Scene scene, Vector3 center)
         {

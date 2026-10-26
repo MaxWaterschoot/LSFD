@@ -4,7 +4,7 @@ using Rage;
 namespace ExampleCallouts.Callouts
 {
     // Everything needed for a callout: inherit from Callout and add [CalloutInfo].
-    // Build it, drop the DLL in GTA V/Plugins/LSFD/ and LSFD picks it up on the next load.
+    // Build it, drop the DLL in GTA V/Plugins/LSFD/Callouts/ and LSFD picks it up on the next load.
     [CalloutInfo("Dumpster Fire", CalloutProbability.Medium, Category = CalloutCategory.Fire, Priority = CalloutPriority.Priority3)]
     public class DumpsterFire : Callout
     {

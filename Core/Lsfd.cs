@@ -4,7 +4,9 @@ using LSFD.API;
 using LSFD.Apparatus;
 using LSFD.Buildings;
 using LSFD.Crew;
+using LSFD.Firefighting;
 using LSFD.Medical;
+using LSFD.Safety;
 using LSFD.Stations;
 using LSFD.UI;
 using LSFD.VehicleRescue;
@@ -16,6 +18,10 @@ namespace LSFD.Core
     /// <summary>Creates all systems, wires them together and runs them every tick.</summary>
     internal static class Lsfd
     {
+        public static FireSystem Fire { get; private set; }
+        public static BreathingApparatus Scba { get; private set; }
+        public static ThermalCamera ThermalCamera { get; private set; }
+        public static HazardManager Hazards { get; private set; }
         public static FireStationManager Stations { get; private set; }
         public static DutyManager Duty { get; private set; }
         public static ApparatusManager Apparatus { get; private set; }
@@ -42,14 +48,18 @@ namespace LSFD.Core
 
             Stations = new FireStationManager();
             Stations.LoadFireStations();
-            Duty = new DutyManager();
+            Fire = new FireSystem();
+            Scba = new BreathingApparatus();
+            Duty = new DutyManager(Scba);
             Apparatus = new ApparatusManager();
-            Hose = new HoseManager();
+            Hose = new HoseManager(Fire);
             Hydrants = new HydrantManager(Apparatus);
             Tools = new ToolManager();
             Extrication = new ExtricationManager(Tools, Apparatus);
             Patients = new PatientManager(Tools);
-            Crew = new CrewManager(Patients, Extrication);
+            Crew = new CrewManager(Patients, Extrication, Fire);
+            ThermalCamera = new ThermalCamera(Fire, Patients);
+            Hazards = new HazardManager(Fire, Scba, ThermalCamera, Hose);
             FireLocations = new FireLocationRepository();
 
             Registry = new CalloutRegistry();
@@ -60,8 +70,8 @@ namespace LSFD.Core
             // In order of priority: the first one with something to offer gets the interact key.
             Interactions = new InteractionRunner(Patients, Hydrants, Extrication, Apparatus, Stations);
 
-            Menus = new MenuManager(Duty, Apparatus, Hose, Hydrants, Tools);
-            Tablet = new Tablet(Duty, Callouts, Apparatus, Crew, Stations, Patients, ReturnApparatus, RequestBackup);
+            Menus = new MenuManager(Duty, Apparatus, Hose, Hydrants, Tools, Scba, ThermalCamera);
+            Tablet = new Tablet(Duty, Callouts, Apparatus, Crew, Stations, Patients, Fire, ReturnApparatus, RequestBackup);
             Hud = new Hud();
 
             Stations.StationMenuRequested += Menus.OpenStationMenu;
@@ -72,6 +82,9 @@ namespace LSFD.Core
             Callouts.CalloutEnded += OnCalloutEnded;
             Duty.DutyStateChanged += OnDutyStateChanged;
             Extrication.PatientExtricated += ped => Patients.Register(ped, PatientCondition.Injured);
+            Fire.Escalated += OnFireEscalated;
+            Fire.StatusChanged += OnFireStatusChanged;
+            Fire.Rekindled += OnFireRekindled;
         }
 
         public static void Tick()
@@ -86,16 +99,20 @@ namespace LSFD.Core
             Apparatus.Process();
             Crew.Process();
             Hose.Process();
+            Fire.Process(ExtinguisherUsers());
             Hydrants.Process();
             Tools.Process();
             Extrication.Process();
             Patients.Process();
             Callouts.Process();
+            Scba.Process(Duty.IsOnDuty);
+            ThermalCamera.Process(Duty.IsOnDuty);
+            Hazards.Process(Duty.IsOnDuty, uiOpen);
 
             if (!uiOpen)
                 Interactions.Process();
 
-            Hud.Process(Hose, Hydrants, Apparatus, Tools, Interactions);
+            Hud.Process(Hose, Hydrants, Apparatus, Tools, Interactions, Fire, Scba, Hazards, ThermalCamera, Duty.IsOnDuty);
         }
 
         public static void Shutdown()
@@ -105,6 +122,9 @@ namespace LSFD.Core
             Callouts?.EndCurrent(null);
             Duty?.GoOffDuty();
             ReturnAllApparatus();
+            Fire?.RemoveAll();
+            ThermalCamera?.Stow();
+            Hazards?.Reset();
             Stations?.CleanupFireStations();
             Registry?.Shutdown();
         }
@@ -119,6 +139,8 @@ namespace LSFD.Core
             Hydrants.Disconnect(apparatus, false);
             if (Tools.HeldFrom == apparatus)
                 Tools.StowTool();
+            if (ThermalCamera.Source == apparatus)
+                ThermalCamera.Stow();
 
             Crew.Dismiss(apparatus);
             Apparatus.Dismiss(apparatus);
@@ -154,6 +176,50 @@ namespace LSFD.Core
                 RequestBackup(ApparatusType.Ambulance, scene);
         }
 
+        // The player's own extinguisher; the hose nozzle is an extinguisher as well but cools through its water stream.
+        // AI crews cool the spot they work on themselves.
+        private static IEnumerable<Ped> ExtinguisherUsers()
+        {
+            Ped player = Game.LocalPlayer.Character;
+            if (!Hose.IsHolding && player.Exists())
+                yield return player;
+        }
+
+        private static void OnFireEscalated(FireIncident incident)
+        {
+            string alarm = CalloutPriorityExtensions.AlarmToDisplay(incident.AlarmLevel);
+            Notify.Dispatch($"~r~Upgraded to {alarm}", $"The fire at ~y~{World.GetStreetName(incident.Origin)}~s~ is spreading. Another engine company is responding.");
+
+            if (incident.Owner != null && incident.Owner == Callouts.Current)
+                RequestBackup(ApparatusType.Engine, incident.Owner.StagingPosition);
+        }
+
+        private static void OnFireStatusChanged(FireIncident incident, FireStatus status)
+        {
+            if (incident.Owner == null || incident.Owner != Callouts.Current)
+                return;
+
+            switch (status)
+            {
+                case FireStatus.UnderControl:
+                    Notify.Dispatch("Fire under control", "Command reports the fire is ~y~under control~s~. Keep working it.");
+                    break;
+                case FireStatus.Knockdown:
+                    Notify.Dispatch("Knockdown", "No open flames left. ~o~Overhaul~s~: soak every hotspot, the thermal camera shows them.");
+                    break;
+                case FireStatus.Out:
+                    Notify.Dispatch("~g~Fire out", "All hotspots are overhauled, the fire is out.");
+                    break;
+            }
+        }
+
+        private static void OnFireRekindled(FireIncident incident)
+        {
+            bool wasBeaten = incident.Status == FireStatus.UnderControl || incident.Status == FireStatus.Knockdown;
+            if (wasBeaten && incident.Owner != null && incident.Owner == Callouts.Current)
+                Notify.Warning("~r~Rekindle!~s~ A hotspot burst into flames again.");
+        }
+
         private static void OnCalloutEnded(Callout callout)
         {
             foreach (FireApparatus unit in sceneUnits.Where(u => Apparatus.All.Contains(u)).ToList())
@@ -174,10 +240,16 @@ namespace LSFD.Core
         {
             Hud.ShowDutyChanged(onDuty);
 
-            if (!onDuty)
+            if (onDuty)
+            {
+                Scba.Refill();
+            }
+            else
             {
                 Interactions.Cancel();
                 ReturnAllApparatus();
+                ThermalCamera.Stow();
+                Scba.SetMask(false);
             }
         }
     }

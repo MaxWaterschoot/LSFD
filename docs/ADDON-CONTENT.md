@@ -18,7 +18,7 @@ Most fire apparatus are released as *add-on* DLC packs:
 
 1. Install the vehicle as its readme says (usually into `mods/update/x64/dlcpacks/` with OpenIV, plus an entry in `dlclist.xml`).
 2. Find its spawn name in the readme (e.g. `ladder1`).
-3. Add it to `Plugins/LSFD/Apparatus.xml`:
+3. Add it to `Plugins/LSFD/Data/Apparatus.xml`:
 
 ```xml
 <Vehicle Name="Ladder 1" Model="ladder1" Type="Ladder" WaterCapacity="1500" PumpRate="25"
@@ -38,7 +38,7 @@ someone who doesn't have every vehicle.
 
 ## Tool props
 
-Rescue tools are set in `Plugins/LSFD/Tools.xml`. To use an add-on spreader or rescue saw prop, set its model name and
+Rescue tools are set in `Plugins/LSFD/Data/Tools.xml`. To use an add-on spreader or rescue saw prop, set its model name and
 how it sits in the hand:
 
 ```xml

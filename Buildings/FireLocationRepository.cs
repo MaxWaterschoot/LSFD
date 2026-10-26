@@ -6,7 +6,7 @@ using Rage;
 
 namespace LSFD.Buildings
 {
-    /// <summary>Loads Plugins/LSFD/FireLocations.xml; add your own with the LSFD_AddFireLocation console command.</summary>
+    /// <summary>Loads Plugins/LSFD/Data/FireLocations.xml; add your own with the LSFD_AddFireLocation console command.</summary>
     internal class FireLocationRepository
     {
         private const string FileName = "FireLocations.xml";

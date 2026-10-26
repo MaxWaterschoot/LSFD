@@ -10,7 +10,7 @@ using Rage;
 
 namespace LSFD.Core
 {
-    /// <summary>Keeps the available callouts, including the ones from callout DLLs in Plugins/LSFD/.</summary>
+    /// <summary>Keeps the available callouts, including the ones from callout DLLs in Plugins/LSFD/Callouts/.</summary>
     internal class CalloutRegistry
     {
         private class Entry
@@ -64,16 +64,16 @@ namespace LSFD.Core
             }
         }
 
-        /// <summary>Loads every DLL in Plugins/LSFD/ and registers the callouts in it.</summary>
+        /// <summary>Loads every DLL in Plugins/LSFD/Callouts/ and registers the callouts in it.</summary>
         public void LoadCalloutAssemblies()
         {
-            if (!Directory.Exists(XmlStore.DataFolder))
+            if (!Directory.Exists(ModFolder.Callouts))
                 return;
 
             // Callout DLLs reference LSFD.dll; make sure they bind to this already loaded copy.
             AppDomain.CurrentDomain.AssemblyResolve += ResolveLsfd;
 
-            foreach (string path in Directory.GetFiles(XmlStore.DataFolder, "*.dll"))
+            foreach (string path in Directory.GetFiles(ModFolder.Callouts, "*.dll"))
             {
                 try
                 {

@@ -40,6 +40,20 @@ namespace LSFD.Utils
                 NativeFunction.CallByName<uint>("SET_PARTICLE_FX_LOOPED_OFFSETS", handle, position.X, position.Y, position.Z, rotation.Pitch, rotation.Roll, rotation.Yaw);
         }
 
+        /// <summary>Tints the effect; 1, 1, 1 is its normal color.</summary>
+        public void SetColor(float r, float g, float b)
+        {
+            if (IsActive)
+                NativeFunction.CallByName<uint>("SET_PARTICLE_FX_LOOPED_COLOUR", handle, r, g, b, false);
+        }
+
+        /// <summary>How far away the effect is still drawn, in meters.</summary>
+        public void SetDrawDistance(float distance)
+        {
+            if (IsActive)
+                NativeFunction.CallByName<uint>("SET_PARTICLE_FX_LOOPED_FAR_CLIP_DIST", handle, distance);
+        }
+
         public void Stop()
         {
             if (!IsActive)

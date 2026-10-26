@@ -12,10 +12,13 @@ I'll be working on this with a friend.
 - **Mutual aid**: 2nd and 3rd alarms bring extra AI engine companies, medical and traffic calls an AI ambulance; request more units from the tablet
 - **Patients**: injured, unconscious and cardiac arrest patients; treat them, perform CPR (an AED improves the odds) and carry victims out of burning buildings
 - **Attack hose**: a physics rope from the back of the apparatus to the nozzle in your hand, straight/fog pattern and adjustable pressure, using water from the tank; it snaps loose when you walk too far
+- **Fire behavior**: fires grow and spread over time, escalate to a higher alarm (with extra engines) when you are late, report *under control*, *knockdown* and *fire out*, and rekindle from hotspots you didn't overhaul; a smoke column shows the fire from far away
+- **Smoke, heat and SCBA**: smoke blinds you and hurts without your face piece, heat near the flames hurts through your turnout gear, and your air cylinder runs out (low-air alarm, swap cylinders at an engine)
+- **Thermal imaging camera**: see through the smoke, find victims and the hotspots left to overhaul
 - **Hydrants**: run a supply line (also a rope) to a fire hydrant to refill and supply the tank
 - **Vehicle rescue**: window punch, cribbing, hydraulic spreader and cutter; extricate trapped patients from wrecks
 - **Tablet (MDT)**: Active Dispatch, Vehicle Control (pump, pressure, lights), Scene Management (crew orders) and Fire Stations
-- **Callouts**: 17 call types with a real-world priority (P1-P3), category and alarm level (see below), plus your own callouts from DLLs in `Plugins/LSFD/` (see [docs/CALLOUTS.md](docs/CALLOUTS.md))
+- **Callouts**: 17 call types with a real-world priority (P1-P3), category and alarm level (see below), plus your own callouts from DLLs in `Plugins/LSFD/Callouts/` (see [docs/CALLOUTS.md](docs/CALLOUTS.md))
 - **Enable All Interiors**: detected automatically; callouts that need locked interiors only run when it is installed
 - **Add-on content**: vehicles and tool props are set in XML, so add-on models work (see [docs/ADDON-CONTENT.md](docs/ADDON-CONTENT.md))
 
@@ -55,16 +58,23 @@ fire with more people trapped, and brings one extra AI engine company per alarm.
 
 ## Installation
 
-Copy into your GTA V folder:
+Copy the `Plugins` folder from the download into your GTA V folder:
 
 ```
-Plugins/LSFD.dll
-Plugins/LSFD.ini
+Plugins/
+  LSFD.dll
+  LSFD/
+    Audio/          dispatch and radio audio, sirens, alarms (Dispatch/, Radio/, Sirens/, Alarms/)
+    Data/           Stations.xml, Apparatus.xml, Tools.xml, FireLocations.xml
+    Callouts/       callout DLLs
+    Profiles/       player profiles
+    LSFD.ini        settings
+    Keys.ini        key bindings
 ```
 
-Start the game with RAGE Plugin Hook and run `LoadPlugin LSFD.dll` in the console (F4).
-On first load LSFD creates `Stations.xml`, `Apparatus.xml`, `Tools.xml` and `FireLocations.xml` in `Plugins/LSFD/`.
-Callout DLLs go in that folder too. Delete a file to have it recreated with the latest defaults.
+LSFD needs the `Plugins/LSFD/` folder and won't load without it. Start the game with RAGE Plugin Hook and run
+`LoadPlugin LSFD.dll` in the console (F4). XML files missing from `Data/` are created with the defaults on first load;
+delete one to have it recreated with the latest defaults.
 
 ## How to play
 
@@ -76,9 +86,12 @@ Callout DLLs go in that folder too. Delete a file to have it recreated with the 
    force a door with the **spreader** or cut it off with the **cutter**, then hold **E** at the open door to extricate the patient.
 6. Patients: hold **E** next to them to treat them, or to do CPR when they have no pulse (carry the **AED** for better odds).
    In a building fire, hold **E** to pick up a victim, carry them outside and press **E** to put them down.
-7. Accept calls with **Y**, or open the tablet with **F7** for dispatch, extra units, pump control, crew orders and GPS to stations.
+7. Smoke inside a burning building: press **K** to put your SCBA face piece on before you go in, and watch the AIR bar.
+   Swap an empty cylinder at the compartments of an engine. Take the **thermal imaging camera** there too and press **T** to use it.
+   After *knockdown*, soak every hotspot (orange on the camera), or it rekindles.
+8. Accept calls with **Y**, or open the tablet with **F7** for dispatch, extra units, pump control, crew orders and GPS to stations.
 
-All keys can be changed in `LSFD.ini`.
+All keys can be changed in `Keys.ini`.
 
 ## Configuration
 
@@ -118,11 +131,14 @@ Station positions are approximate. Stand at the right spot in-game and use the c
 ## Project structure
 
 ```
+Plugins/LSFD/   The mod folder that ships with the download (audio, data, profiles, ini files)
 API/            Public API for callout authors (Callout, Functions, Fires, Rescue, Interiors)
 Apparatus/      Vehicle definitions, tanks and equipment
 Buildings/      Enable All Interiors support and structure fire locations
 Callouts/       Built-in calls, per category (written against the public API)
 Core/           Plugin loop, settings, duty, interactions and callout management
+Firefighting/   Fire incidents: growth, spread, escalation, overhaul and smoke columns
+Safety/         SCBA, thermal imaging camera, smoke and heat exposure
 Crew/           AI firefighters, their orders and AI units driving to calls
 Medical/        Patients, CPR, treatment and carrying victims
 Stations/       Fire stations and Stations.xml

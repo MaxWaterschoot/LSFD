@@ -14,7 +14,7 @@ namespace LSFD.API
         /// <summary>Raised when the player goes on or off duty.</summary>
         public static event DutyStateChangedEventHandler OnDutyStateChanged;
 
-        /// <summary>Registers a callout type. Only needed for callouts outside of Plugins/LSFD/, those are registered automatically.</summary>
+        /// <summary>Registers a callout type. Only needed for callouts outside of Plugins/LSFD/Callouts/, those are registered automatically.</summary>
         public static bool RegisterCallout(Type calloutType) => Lsfd.Registry.Register(calloutType);
 
         public static string[] GetRegisteredCallouts() => Lsfd.Registry.Names.ToArray();

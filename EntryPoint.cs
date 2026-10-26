@@ -5,6 +5,7 @@ using LSFD.Buildings;
 using LSFD.Core;
 using LSFD.Stations;
 using LSFD.UI;
+using LSFD.Utils;
 using Rage;
 using Rage.Attributes;
 
@@ -17,6 +18,15 @@ namespace LSFD
         public static void Main()
         {
             Game.LogTrivial($"LSFD {typeof(EntryPoint).Assembly.GetName().Version} is loading.");
+
+            var missing = ModFolder.FindMissingFolders();
+            if (missing.Count > 0)
+            {
+                Game.LogTrivial($"LSFD is not installed correctly, missing: {string.Join(", ", missing)}. " +
+                    "Copy the Plugins folder from the download into your GTA V folder.");
+                Notify.Warning("Not loaded: the ~r~Plugins/LSFD~s~ folder is missing or incomplete. Reinstall LSFD from the download.");
+                return;
+            }
 
             Lsfd.Initialize();
             Game.AddConsoleCommands();
@@ -121,7 +131,22 @@ namespace LSFD
             Game.LogTrivial($"Added fire location '{location.Name}'{(location.RequiresOpenInteriors ? " (needs Enable All Interiors)" : "")}.");
         }
 
-        [ConsoleCommand("Reloads Plugins/LSFD/Stations.xml.")]
+        [ConsoleCommand("Starts a growing fire 10 m in front of you to test the fire system, SCBA and thermal camera. Indoor fills the interior with smoke.")]
+        private static void LSFD_StartFire(bool indoor = false, int alarmLevel = 1)
+        {
+            Ped player = Game.LocalPlayer.Character;
+            Vector3 position = indoor ? player.Position : player.GetOffsetPositionFront(10f);
+            Lsfd.Fire.Start(position, new FireIncidentOptions { IsIndoor = indoor, InitialPoints = 1 + alarmLevel }, alarmLevel, null);
+            Game.LogTrivial($"Started a {(indoor ? "indoor" : "outdoor")} fire at {position}. Remove all with LSFD_RemoveFires.");
+        }
+
+        [ConsoleCommand("Removes every fire started by LSFD.")]
+        private static void LSFD_RemoveFires()
+        {
+            Lsfd.Fire.RemoveAll();
+        }
+
+        [ConsoleCommand("Reloads Plugins/LSFD/Data/Stations.xml.")]
         private static void LSFD_ReloadStations()
         {
             Lsfd.Stations.ReloadFireStations();

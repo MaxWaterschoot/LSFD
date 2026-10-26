@@ -22,6 +22,10 @@ namespace LSFD.Apparatus
         HydraulicCutter,
         /// <summary>Automated external defibrillator; greatly improves the odds of CPR.</summary>
         AED,
+        /// <summary>Spare SCBA cylinders to swap an empty one for a full one.</summary>
+        SCBA,
+        /// <summary>Thermal imaging camera to find victims and hotspots in the smoke.</summary>
+        ThermalCamera,
     }
 
     public static class EquipmentTypeExtensions
@@ -64,6 +68,8 @@ namespace LSFD.Apparatus
                 case EquipmentType.HydraulicSpreader: return "Hydraulic spreader";
                 case EquipmentType.HydraulicCutter: return "Hydraulic cutter";
                 case EquipmentType.AED: return "AED";
+                case EquipmentType.SCBA: return "SCBA cylinders";
+                case EquipmentType.ThermalCamera: return "Thermal imaging camera";
                 default: return type.ToString();
             }
         }

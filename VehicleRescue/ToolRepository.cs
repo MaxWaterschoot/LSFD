@@ -5,7 +5,7 @@ using LSFD.Utils;
 
 namespace LSFD.VehicleRescue
 {
-    /// <summary>Loads Plugins/LSFD/Tools.xml.</summary>
+    /// <summary>Loads Plugins/LSFD/Data/Tools.xml.</summary>
     internal class ToolRepository
     {
         private const string FileName = "Tools.xml";

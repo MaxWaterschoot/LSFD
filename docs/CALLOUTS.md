@@ -1,6 +1,6 @@
 # Making your own LSFD callouts
 
-LSFD loads callouts from any DLL in `GTA V/Plugins/LSFD/`, the same way LSPDFR loads callout packs.
+LSFD loads callouts from any DLL in `GTA V/Plugins/LSFD/Callouts/`, the same way LSPDFR loads callout packs.
 A working example lives in [`Examples/ExampleCallouts`](../Examples/ExampleCallouts).
 
 ## Project setup
@@ -99,6 +99,54 @@ the callout without dispatching it randomly; it can still be started with `Funct
 | `Fires.SetOnFire(entity)` | Sets a vehicle, ped or object on fire. |
 | `Fires.CountFiresInRange(position, radius)` | Fires the player still has to put out. |
 | `Fires.ExtinguishInRange(position, radius)` | |
+| `StartFireIncident(origin, options)` (in your callout) | A fire that grows, spreads and escalates; see below. |
+
+## Fire incidents: fires that grow
+
+`Fires.StartFire` gives you a plain GTA fire: it may go out or move on its own and never grows. For a real fire, start
+a `FireIncident` with `StartFireIncident` in `OnCalloutAccepted`, so it already burns while the player responds:
+
+```csharp
+private FireIncident fire;
+
+public override bool OnCalloutAccepted()
+{
+    fire = StartFireIncident(CalloutPosition, new FireIncidentOptions
+    {
+        IsIndoor = true,          // stays on the floor, no spreading through walls, the interior fills with smoke
+        InitialPoints = 1 + AlarmLevel,
+        SpreadRadius = 10f,
+        SmokeColumnHeight = 8f,   // where the smoke column rises, e.g. the roof
+    });
+    return true;
+}
+
+public override void Process()
+{
+    if (HasArrived && fire.IsOut) Complete();
+}
+```
+
+LSFD removes the incident when the callout ends. What it does on its own:
+
+- **Growth and spread**: every spot gets more intense over time and spreads to a new spot every `SpreadSeconds`
+  (scaled by `GrowthMultiplier` in `LSFD.ini`), until water stops it.
+- **Escalation**: when the fire burns as big as three quarters of `PointsPerAlarm` × the alarm level, it goes to the next
+  alarm (up to `MaxAlarmLevel`), raises your `AlarmLevel` and dispatch sends another engine.
+- **Status**: `fire.Status` goes Growing → Burning → UnderControl → Knockdown → Out. `fire.StatusChanged` tells you when.
+- **Overhaul**: after knockdown the spots become hotspots that rekindle unless they are soaked. The fire is only `Out`
+  when every hotspot is cold.
+- **Smoke**: a column above the fire you can see from afar (black while it grows, white steam after knockdown) and,
+  for indoor fires, smoke inside that hurts without an SCBA mask.
+
+| Option | Default | |
+| --- | --- | --- |
+| `InitialPoints` / `InitialIntensity` | 2 / 0.5 | Spots burning at the start, intensity 0-1. |
+| `SpreadRadius` | 8 | How far from the origin it can spread (m). |
+| `SpreadSeconds` | 50 | Seconds between spreads. |
+| `PointsPerAlarm` / `MaxAlarmLevel` | 6 / 3 | Escalation, see above. |
+| `IsIndoor` / `IsGasFire` | false | |
+| `SmokeColumnHeight` | 1 | Meters above the origin. |
 
 ## Vehicle rescue
 
@@ -168,7 +216,7 @@ public class MyPack : CalloutPack
 
 ## Testing
 
-Put your DLL in `GTA V/Plugins/LSFD/`, reload LSFD (`ReloadPlugin LSFD.dll` in the RPH console) and go on duty. Then:
+Put your DLL in `GTA V/Plugins/LSFD/Callouts/`, reload LSFD (`ReloadPlugin LSFD.dll` in the RPH console) and go on duty. Then:
 
 - `LSFD_ListCallouts` lists every registered callout (check yours is there, otherwise read `RagePluginHook.log`).
 - `LSFD_Dispatch "Dumpster Fire"` offers your callout right away.

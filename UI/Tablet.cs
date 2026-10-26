@@ -5,6 +5,7 @@ using LSFD.API;
 using LSFD.Apparatus;
 using LSFD.Core;
 using LSFD.Crew;
+using LSFD.Firefighting;
 using LSFD.Medical;
 using LSFD.Stations;
 using RAGENativeUI;
@@ -26,6 +27,7 @@ namespace LSFD.UI
         private readonly CrewManager crew;
         private readonly FireStationManager stations;
         private readonly PatientManager patients;
+        private readonly FireSystem fire;
         private readonly Action<FireApparatus> returnApparatus;
         private readonly Func<ApparatusType, Vector3, bool> requestBackup;
 
@@ -41,9 +43,10 @@ namespace LSFD.UI
         public bool IsOpen => view.Visible;
 
         public Tablet(DutyManager duty, CalloutManager callouts, ApparatusManager apparatus, CrewManager crew,
-            FireStationManager stations, PatientManager patients, Action<FireApparatus> returnApparatus,
+            FireStationManager stations, PatientManager patients, FireSystem fire, Action<FireApparatus> returnApparatus,
             Func<ApparatusType, Vector3, bool> requestBackup)
         {
+            this.fire = fire;
             this.patients = patients;
             this.requestBackup = requestBackup;
             this.duty = duty;
@@ -217,9 +220,24 @@ namespace LSFD.UI
             var items = new List<UIMenuItem>();
             Vector3 player = Game.LocalPlayer.Character.Position;
 
-            int fires = Fires.CountFiresInRange(player, SceneRadius);
             items.Add(Theme.CreateHeader("Scene"));
-            items.Add(Info("Fires nearby", $"Fires within {SceneRadius:0} m of you.", fires == 0 ? "~g~None" : $"~r~{fires}"));
+            FireIncident incident = fire.FindNearest(player, SceneRadius);
+            if (incident != null)
+            {
+                int minutes = (int)((Game.GameTime - incident.StartedAt) / 60000);
+                items.Add(Info("Fire", "Growing → burning → under control → knockdown → out.", incident.Status.ToDisplayName()));
+                items.Add(Info("  Alarm", "Goes up when the fire grows too big; every alarm brings another engine.",
+                    CalloutPriorityExtensions.AlarmToDisplay(incident.AlarmLevel)));
+                items.Add(Info("  Burning spots", "Spots with open flames.", incident.BurningPoints == 0 ? "~g~0" : $"~r~{incident.BurningPoints}"));
+                items.Add(Info("  Hotspots", "Knocked down, but they rekindle unless you overhaul them with water. The thermal camera shows them.",
+                    incident.Hotspots == 0 ? "~g~0" : $"~o~{incident.Hotspots}"));
+                items.Add(Info("  Time since dispatch", "", $"{minutes} min"));
+            }
+            else
+            {
+                int fires = Fires.CountFiresInRange(player, SceneRadius);
+                items.Add(Info("Fires nearby", $"Fires within {SceneRadius:0} m of you.", fires == 0 ? "~g~None" : $"~r~{fires}"));
+            }
 
             var onScene = patients.All.Where(p => p.Ped.Exists() && p.Ped.DistanceTo(player) <= SceneRadius).ToList();
             if (onScene.Count > 0)

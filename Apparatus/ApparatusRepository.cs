@@ -6,7 +6,7 @@ using Rage;
 
 namespace LSFD.Apparatus
 {
-    /// <summary>Loads Plugins/LSFD/Apparatus.xml. Add-on vehicles can be added there.</summary>
+    /// <summary>Loads Plugins/LSFD/Data/Apparatus.xml. Add-on vehicles can be added there.</summary>
     internal class ApparatusRepository
     {
         private const string FileName = "Apparatus.xml";
@@ -51,7 +51,7 @@ namespace LSFD.Apparatus
                         EquipmentType.AttackHose, EquipmentType.SupplyLine, EquipmentType.FireExtinguisher,
                         EquipmentType.Axe, EquipmentType.Crowbar, EquipmentType.Flashlight,
                         EquipmentType.WindowPunch, EquipmentType.Cribbing, EquipmentType.HydraulicSpreader, EquipmentType.HydraulicCutter,
-                        EquipmentType.AED,
+                        EquipmentType.AED, EquipmentType.SCBA, EquipmentType.ThermalCamera,
                     },
                 },
                 new ApparatusDefinition

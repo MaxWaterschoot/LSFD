@@ -5,7 +5,7 @@ using Rage;
 
 namespace LSFD.Stations
 {
-    /// <summary>Loads and saves Plugins/LSFD/Stations.xml.</summary>
+    /// <summary>Loads and saves Plugins/LSFD/Data/Stations.xml.</summary>
     internal class StationRepository
     {
         private const string FileName = "Stations.xml";

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LSFD.Firefighting;
 using LSFD.Utils;
 using Rage;
 using Rage.Native;
@@ -22,11 +23,17 @@ namespace LSFD.Water
         private const TraceFlags StreamTraceFlags =
             TraceFlags.IntersectWorld | TraceFlags.IntersectVehicles | TraceFlags.IntersectObjects | TraceFlags.IntersectPeds;
 
+        private readonly FireSystem fire;
         private readonly LoopedParticle particle = new LoopedParticle("core");
         private readonly Dictionary<(int, int, int), float> fireCooling = new Dictionary<(int, int, int), float>();
         private readonly Dictionary<uint, float> entityCooling = new Dictionary<uint, float>();
         private readonly List<Vector3> path = new List<Vector3>();
         private uint lastImpactPush;
+
+        public WaterStream(FireSystem fire)
+        {
+            this.fire = fire;
+        }
 
         /// <summary>Where the stream lands, while spraying.</summary>
         public Vector3? Impact { get; private set; }
@@ -101,6 +108,9 @@ namespace LSFD.Water
         private void CoolFires(Vector3 origin, Vector3 direction, Vector3 impact, Nozzle nozzle)
         {
             float cooling = nozzle.CoolingPerSecond * Game.FrameTime;
+
+            // The incident's own fire points; the GTA flames below are only what they look like.
+            this.fire.ApplyWater(position => IsInStream(position, origin, direction, impact, nozzle), cooling);
 
             foreach (Fire fire in World.GetAllFires())
             {

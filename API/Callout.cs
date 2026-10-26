@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Drawing;
+using LSFD.Core;
 using Rage;
 
 namespace LSFD.API
@@ -13,7 +15,7 @@ namespace LSFD.API
 
     /// <summary>
     /// Base class for every LSFD callout. Inherit from it, add a <see cref="CalloutInfoAttribute"/>
-    /// and put the compiled DLL in GTA V/Plugins/LSFD/ to have LSFD load it.
+    /// and put the compiled DLL in GTA V/Plugins/LSFD/Callouts/ to have LSFD load it.
     /// </summary>
     /// <remarks>
     /// The life cycle is: <see cref="OnBeforeCalloutDisplayed"/> → (player accepts) <see cref="OnCalloutAccepted"/>
@@ -24,6 +26,7 @@ namespace LSFD.API
     {
         private static readonly Color AreaColor = Color.FromArgb(150, 230, 70, 30);
 
+        private readonly List<FireIncident> fireIncidents = new List<FireIncident>();
         private Blip areaBlip;
         private Blip routeBlip;
 
@@ -112,7 +115,32 @@ namespace LSFD.API
 
             State = CalloutState.Ended;
             DeleteBlips();
-            OnEnd();
+            try
+            {
+                OnEnd();
+            }
+            finally
+            {
+                RemoveFireIncidents();
+            }
+        }
+
+        /// <summary>
+        /// Starts a fire that grows, spreads and escalates on its own (see <see cref="FireIncident"/>). Start it in
+        /// <see cref="OnCalloutAccepted"/> so it keeps growing while the player responds: the later they are, the bigger
+        /// the fire. The incident uses and raises this callout's <see cref="AlarmLevel"/>, and is removed when the callout ends.
+        /// </summary>
+        protected FireIncident StartFireIncident(Vector3 origin, FireIncidentOptions options = null)
+        {
+            FireIncident incident = Lsfd.Fire.Start(origin, options, AlarmLevel, this);
+            fireIncidents.Add(incident);
+            return incident;
+        }
+
+        internal void RaiseAlarmLevel(int level)
+        {
+            if (level > AlarmLevel)
+                AlarmLevel = level;
         }
 
         internal void Initialize(string friendlyName, CalloutCategory category, CalloutPriority priority)
@@ -148,7 +176,14 @@ namespace LSFD.API
         {
             State = CalloutState.Ended;
             DeleteBlips();
-            OnCalloutNotAccepted();
+            try
+            {
+                OnCalloutNotAccepted();
+            }
+            finally
+            {
+                RemoveFireIncidents();
+            }
         }
 
         internal void Tick()
@@ -163,6 +198,13 @@ namespace LSFD.API
 
             if (State == CalloutState.Accepted)
                 Process();
+        }
+
+        private void RemoveFireIncidents()
+        {
+            foreach (FireIncident incident in fireIncidents)
+                incident.Remove();
+            fireIncidents.Clear();
         }
 
         private void DeleteBlips()

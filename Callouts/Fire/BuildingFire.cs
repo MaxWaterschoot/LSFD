@@ -2,23 +2,24 @@ using System.Collections.Generic;
 using System.Linq;
 using LSFD.API;
 using LSFD.Buildings;
+using LSFD.Core;
 using Rage;
 
 namespace LSFD.Callouts
 {
     /// <summary>
-    /// A fire inside a building from FireLocations.xml. The alarm level decides how big the fire is and how many
-    /// occupants are trapped; they have to be carried out and treated before the call is over.
+    /// A fire inside a building from FireLocations.xml. The alarm level decides how big the fire starts and how many
+    /// occupants are trapped; they have to be carried out and treated before the call is over. The fire starts burning
+    /// when the call is accepted, so a slow response means a bigger fire and maybe a higher alarm.
     /// </summary>
     internal abstract class BuildingFire : Callout
     {
-        private readonly List<int> fires = new List<int>();
         private readonly List<Ped> victims = new List<Ped>();
         private readonly Scene scene = new Scene();
 
         private BuildingInfo building;
+        private FireIncident fire;
         private int trappedCount;
-        private uint arrivedAt;
 
         protected abstract FireLocationKind[] Kinds { get; }
         protected abstract string Title { get; }
@@ -27,8 +28,6 @@ namespace LSFD.Callouts
         protected virtual int BaseOccupants => 1;
 
         protected virtual bool IsGasFire => false;
-
-        private float SceneRadius => 8f + 4f * AlarmLevel;
 
         public override bool OnBeforeCalloutDisplayed()
         {
@@ -48,14 +47,22 @@ namespace LSFD.Callouts
             return true;
         }
 
+        public override bool OnCalloutAccepted()
+        {
+            fire = StartFireIncident(building.Position, new FireIncidentOptions
+            {
+                IsIndoor = true,
+                IsGasFire = IsGasFire,
+                InitialPoints = 1 + AlarmLevel,
+                SpreadRadius = 6f + 3f * AlarmLevel,
+                SmokeColumnHeight = 8f,
+            });
+            return true;
+        }
+
         protected override void OnArrival()
         {
-            arrivedAt = Game.GameTime;
             Interiors.PrepareInterior(building.Position);
-
-            int fireCount = 3 + 3 * AlarmLevel;
-            for (int i = 0; i < fireCount; i++)
-                fires.Add(Fires.StartFire(building.Position.Around2D(0.5f, 2f + 2f * AlarmLevel), 15 + 5 * AlarmLevel, IsGasFire));
 
             for (int i = 0; i < trappedCount; i++)
             {
@@ -67,25 +74,20 @@ namespace LSFD.Callouts
             for (int i = 0; i < bystanders; i++)
                 scene.SpawnBystander(building.Staging.Around2D(3f, 8f));
 
-            Game.DisplayHelp(trappedCount > 0
+            Game.DisplayHelp((trappedCount > 0
                 ? "Search the building and ~r~carry the victims out~s~, then extinguish the ~r~fire~s~. Your crew can help from the tablet."
-                : "Stretch a ~b~hose line~s~ into the building and extinguish the ~r~fire~s~.");
+                : "Stretch a ~b~hose line~s~ into the building and extinguish the ~r~fire~s~.")
+                + $" Put your ~b~SCBA~s~ face piece on ({Settings.MaskKey}) before you go into the smoke.");
         }
 
         public override void Process()
         {
-            if (!HasArrived || Game.GameTime - arrivedAt < 5000)
-                return;
-
-            if (Fires.CountFiresInRange(building.Position, SceneRadius) == 0 && Patients.AreAllHandled(victims.ToArray()))
+            if (HasArrived && fire.IsOut && Patients.AreAllHandled(victims.ToArray()))
                 Complete();
         }
 
         protected override void OnEnd()
         {
-            foreach (int fire in fires)
-                Fires.RemoveFire(fire);
-
             foreach (Ped victim in victims.Where(v => v.Exists()))
             {
                 Patients.Release(victim);

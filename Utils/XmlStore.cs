@@ -8,7 +8,7 @@ namespace LSFD.Utils
     /// <summary>Reads and writes the plugin's XML data files, creating them with defaults when missing.</summary>
     internal static class XmlStore
     {
-        public const string DataFolder = "Plugins/LSFD";
+        public static readonly string DataFolder = ModFolder.Data;
 
         public static T Load<T>(string fileName, Func<T> createDefault)
         {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using LSFD.Apparatus;
 using LSFD.Core;
+using LSFD.Safety;
 using LSFD.Stations;
 using LSFD.VehicleRescue;
 using LSFD.Water;
@@ -19,6 +20,8 @@ namespace LSFD.UI
         private readonly HoseManager hose;
         private readonly HydrantManager hydrants;
         private readonly ToolManager tools;
+        private readonly BreathingApparatus scba;
+        private readonly ThermalCamera thermalCamera;
 
         private readonly MenuPool pool = new MenuPool();
 
@@ -31,8 +34,11 @@ namespace LSFD.UI
 
         private FireStation currentStation;
 
-        public MenuManager(DutyManager duty, ApparatusManager apparatus, HoseManager hose, HydrantManager hydrants, ToolManager tools)
+        public MenuManager(DutyManager duty, ApparatusManager apparatus, HoseManager hose, HydrantManager hydrants, ToolManager tools,
+            BreathingApparatus scba, ThermalCamera thermalCamera)
         {
+            this.scba = scba;
+            this.thermalCamera = thermalCamera;
             this.duty = duty;
             this.apparatus = apparatus;
             this.hose = hose;
@@ -97,7 +103,7 @@ namespace LSFD.UI
             stationMenu.BindMenuToItem(requestApparatusMenu, requestItem);
             BuildRequestApparatusMenu();
 
-            Add(stationMenu, new UIMenuItem("Restock personal gear", "Refills your armor, health and flashlight."), () =>
+            Add(stationMenu, new UIMenuItem("Restock personal gear", "A full SCBA cylinder, your health and a flashlight."), () =>
             {
                 duty.RestockPersonalGear();
                 Notify.Info("Personal gear restocked.");
@@ -122,6 +128,7 @@ namespace LSFD.UI
             }
 
             AddHoseItems(source);
+            AddSafetyItems(source);
             AddHandToolItems(source);
             AddWeaponToolItems(source);
 
@@ -164,6 +171,39 @@ namespace LSFD.UI
                     else
                         hydrants.TakeSupplyLine(source);
                     pool.CloseAllMenus();
+                });
+            }
+        }
+
+        private void AddSafetyItems(FireApparatus source)
+        {
+            ApparatusDefinition definition = source.Definition;
+
+            if (definition.Carries(EquipmentType.SCBA))
+            {
+                var item = new UIMenuItem("Swap SCBA cylinder", "Replace the cylinder on your back with a full one.")
+                {
+                    RightLabel = $"{(scba.IsLowOnAir ? "~r~" : "")}{scba.AirFraction:P0}",
+                };
+                Add(compartmentMenu, item, () =>
+                {
+                    scba.Refill();
+                    Notify.Info("Full ~b~SCBA cylinder~s~ on your back.");
+                    pool.CloseAllMenus();
+                });
+            }
+
+            if (definition.Carries(EquipmentType.ThermalCamera))
+            {
+                bool carryingThis = thermalCamera.Source == source;
+                var item = new UIMenuCheckboxItem(EquipmentType.ThermalCamera.ToDisplayName(), carryingThis,
+                    $"Shows victims, flames and hotspots through the smoke. Turn it on with {Settings.ThermalCameraKey}.");
+                Add(compartmentMenu, item, () =>
+                {
+                    if (item.Checked)
+                        thermalCamera.Take(source);
+                    else
+                        thermalCamera.Stow();
                 });
             }
         }
