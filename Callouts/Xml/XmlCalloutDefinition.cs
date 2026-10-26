@@ -43,6 +43,9 @@ namespace LSFD.Callouts.Xml
         [XmlAttribute] public CalloutCategory Category { get; set; } = CalloutCategory.Fire;
         [XmlAttribute] public CalloutPriority Priority { get; set; } = CalloutPriority.Priority2;
 
+        /// <summary>Can also be an incident the player comes across on the road ahead; needs a random location.</summary>
+        [XmlAttribute] public bool Ambient { get; set; }
+
         /// <summary>Title of the dispatch notification; the name when left out.</summary>
         public string Message { get; set; }
         public string Advisory { get; set; }
@@ -82,6 +85,8 @@ namespace LSFD.Callouts.Xml
             if (badTask != null)
                 return $"task equipment '{badTask.Equipment}' does not exist";
 
+            if (Ambient && Location.Positions.Count > 0)
+                return "an Ambient call needs a random location, remove the Position elements";
             if (Location.Positions.Count == 0 && Location.MinDistance > Location.MaxDistance)
                 return "Location MinDistance is bigger than MaxDistance";
             return null;

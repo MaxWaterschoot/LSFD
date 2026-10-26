@@ -5,6 +5,7 @@ using LSFD.Apparatus;
 using LSFD.Buildings;
 using LSFD.Crew;
 using LSFD.Firefighting;
+using LSFD.LivingWorld;
 using LSFD.Medical;
 using LSFD.Profiles;
 using LSFD.Safety;
@@ -46,6 +47,11 @@ namespace LSFD.Core
         public static Tablet Tablet { get; private set; }
         public static Hud Hud { get; private set; }
         public static StationLife StationLife { get; private set; }
+        public static GameDispatch GameDispatch { get; private set; }
+        public static TrafficControl Traffic { get; private set; }
+        public static PoliceSupport Police { get; private set; }
+        public static AmbientIncidents Ambient { get; private set; }
+        public static OtherUnits OtherUnits { get; private set; }
 
         // AI units sent to the current call; they go back to quarters when it ends.
         private static readonly List<FireApparatus> sceneUnits = new List<FireApparatus>();
@@ -82,12 +88,18 @@ namespace LSFD.Core
             Registry.LoadXmlCallouts();
             Callouts = new CalloutManager(Registry, Duty);
 
+            GameDispatch = new GameDispatch();
+            Traffic = new TrafficControl(Callouts, Apparatus, Tools);
+            Police = new PoliceSupport();
+            Ambient = new AmbientIncidents(Registry, Callouts, Duty);
+            OtherUnits = new OtherUnits(Apparatus, Stations, Callouts, ReturnApparatus);
+
             // In order of priority: the first one with something to offer gets the interact key.
             SceneActions = new SceneActionManager(Tools);
-            Interactions = new InteractionRunner(Patients, SceneActions, Fire, Entry, Ventilation, Hydrants, Extrication, Apparatus, Stations);
+            Interactions = new InteractionRunner(Patients, SceneActions, Fire, Entry, Ventilation, Hydrants, Extrication, Apparatus, Stations, Traffic);
 
             Menus = new MenuManager(Duty, Apparatus, Hose, Hydrants, Tools, Scba, ThermalCamera, Ventilation, Profiles);
-            Tablet = new Tablet(Duty, Callouts, Apparatus, Crew, Stations, Patients, Fire, Profiles, ReturnApparatus, RequestBackup);
+            Tablet = new Tablet(Duty, Callouts, Apparatus, Crew, Stations, Patients, Fire, Profiles, OtherUnits, ReturnApparatus, RequestBackup);
             Hud = new Hud();
 
             Stations.StationMenuRequested += Menus.OpenStationMenu;
@@ -107,6 +119,9 @@ namespace LSFD.Core
             Fire.Escalated += OnFireEscalated;
             Fire.StatusChanged += OnFireStatusChanged;
             Fire.Rekindled += OnFireRekindled;
+            Callouts.CalloutAccepted += Police.Respond;
+            Callouts.CalloutEnded += callout => Police.ReleaseAll();
+            Callouts.CalloutDeclined += OtherUnits.TakeOver;
 
             // The public events for add-ons.
             Callouts.CalloutAccepted += Events.RaiseCalloutAccepted;
@@ -146,6 +161,11 @@ namespace LSFD.Core
             Hazards.Process(Duty.IsOnDuty, uiOpen);
             Profiles.Process(Duty.IsOnDuty);
             StationLife.Process();
+            GameDispatch.Process(Duty.IsOnDuty);
+            Traffic.Process(Duty.IsOnDuty);
+            Police.Process();
+            Ambient.Process();
+            OtherUnits.Process(Duty.IsOnDuty);
 
             if (!uiOpen)
                 Interactions.Process();
@@ -158,6 +178,10 @@ namespace LSFD.Core
             Menus?.CloseAll();
             Tablet?.Close();
             Callouts?.EndCurrent(null);
+            Police?.RemoveAll();
+            Traffic?.Clear();
+            OtherUnits?.Clear();
+            GameDispatch?.Restore();
             Transport?.Shutdown();
             Duty?.GoOffDuty();
             ReturnAllApparatus();
@@ -194,7 +218,8 @@ namespace LSFD.Core
         public static bool RequestBackup(ApparatusType type, Vector3 destination)
         {
             ApparatusDefinition definition = Apparatus.FindDefinition(type);
-            FireStation station = Stations.GetNearestStation(destination);
+            // Units out on other calls can't come; when every station is busy, the nearest one sends what it has.
+            FireStation station = OtherUnits.FindAvailableStation(type, destination) ?? Stations.GetNearestStation(destination);
             if (definition == null || station == null)
             {
                 Notify.Dispatch("~o~No units", $"There is no {type} available in Apparatus.xml.");
@@ -323,6 +348,7 @@ namespace LSFD.Core
             else
             {
                 Interactions.Cancel();
+                Police.RemoveAll();
                 Transport.Shutdown();
                 ReturnAllApparatus();
                 ThermalCamera.Stow();

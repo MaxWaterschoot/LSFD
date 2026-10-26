@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using LSFD.API;
 using LSFD.UI;
@@ -10,6 +10,9 @@ namespace LSFD.Core
     internal class CalloutManager
     {
         private const int DispatchAttempts = 3;
+
+        // A callout may nudge the ambient spot a little (e.g. onto the sidewalk), but not move somewhere else.
+        private const float AmbientTolerance = 40f;
 
         private readonly CalloutRegistry registry;
         private readonly DutyManager duty;
@@ -32,6 +35,9 @@ namespace LSFD.Core
 
         /// <summary>Raised when an accepted call ends, completed or not.</summary>
         public event Action<Callout> CalloutEnded;
+
+        /// <summary>Raised when the player declines an offered call or lets it time out.</summary>
+        public event Action<Callout> CalloutDeclined;
 
         public CalloutManager(CalloutRegistry registry, DutyManager duty)
         {
@@ -104,16 +110,55 @@ namespace LSFD.Core
             if (!display)
                 return false;
 
+            Offer(callout, $"{callout.Priority.ToCode()} {callout.CalloutMessage ?? callout.FriendlyName}",
+                $"Press ~b~{Settings.AcceptCalloutKey}~s~ or use the tablet to respond.");
+            return true;
+        }
+
+        /// <summary>
+        /// Offers an incident the player comes across at <paramref name="spot"/> on the road ahead. Returns false when
+        /// the callout cancelled itself or chose a location of its own.
+        /// </summary>
+        public bool DispatchAmbient(Callout callout, Vector3 spot)
+        {
+            if (IsBusy)
+                return false;
+
+            bool display = false;
+            Functions.AmbientLocation = spot;
+            try
+            {
+                Safely(callout, () => display = callout.OnBeforeCalloutDisplayed());
+            }
+            finally
+            {
+                Functions.AmbientLocation = null;
+            }
+
+            if (!display || callout.State == CalloutState.Ended)
+                return false;
+            if (callout.CalloutPosition.DistanceTo2D(spot) > AmbientTolerance)
+            {
+                Safely(callout, callout.Decline);
+                return false;
+            }
+
+            callout.IsAmbient = true;
+            Offer(callout, $"~y~On view:~s~ {callout.CalloutMessage ?? callout.FriendlyName}",
+                $"Press ~b~{Settings.AcceptCalloutKey}~s~ to stop and handle it yourself.");
+            return true;
+        }
+
+        private void Offer(Callout callout, string title, string howToRespond)
+        {
             callout.Display();
             Offered = callout;
             offeredAt = Game.GameTime;
 
             Vector3 position = callout.CalloutPosition;
             float distance = Game.LocalPlayer.Character.DistanceTo(position);
-            Notify.Dispatch($"{callout.Priority.ToCode()} {callout.CalloutMessage ?? callout.FriendlyName}",
-                $"{Describe(callout)}~n~~y~{World.GetStreetName(position)}~s~ ({distance:0} m)~n~{callout.CalloutAdvisory}~n~" +
-                $"Press ~b~{Settings.AcceptCalloutKey}~s~ or use the tablet to respond.");
-            return true;
+            Notify.Dispatch(title,
+                $"{Describe(callout)}~n~~y~{World.GetStreetName(position)}~s~ ({distance:0} m)~n~{callout.CalloutAdvisory}~n~{howToRespond}");
         }
 
         public void AcceptOffered()
@@ -133,14 +178,22 @@ namespace LSFD.Core
                 return;
             }
 
-            Game.LogTrivial($"LSFD: accepted callout '{callout.FriendlyName}'.");
+            // The player is driving up to it, so the scene has to be there already.
+            if (callout.IsAmbient)
+                Safely(callout, callout.Arrive);
+
+            Game.LogTrivial($"LSFD: accepted callout '{callout.FriendlyName}'{(callout.IsAmbient ? " (on view)" : "")}.");
             CalloutAccepted?.Invoke(callout);
         }
 
         public void DeclineOffered()
         {
-            if (Offered != null)
-                EndCurrent(null);
+            Callout declined = Offered;
+            if (declined == null)
+                return;
+
+            EndCurrent(null);
+            CalloutDeclined?.Invoke(declined);
         }
 
         private void ProcessOffered()
@@ -151,8 +204,7 @@ namespace LSFD.Core
             }
             else if (Game.GameTime - offeredAt > Settings.AcceptTimeoutSeconds * 1000)
             {
-                EndCurrent(null);
-                Notify.Dispatch("~o~Reassigned", "No response, the call was given to another unit.");
+                DeclineOffered();
             }
         }
 

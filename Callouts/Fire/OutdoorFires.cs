@@ -1,4 +1,4 @@
-using LSFD.API;
+﻿using LSFD.API;
 using Rage;
 
 namespace LSFD.Callouts
@@ -79,7 +79,7 @@ namespace LSFD.Callouts
         }
     }
 
-    [CalloutInfo("Brush Fire", CalloutProbability.High, Category = CalloutCategory.Fire, Priority = CalloutPriority.Priority2)]
+    [CalloutInfo("Brush Fire", CalloutProbability.High, Category = CalloutCategory.Fire, Priority = CalloutPriority.Priority2, AllowAmbient = true)]
     internal class BrushFire : OutdoorFire
     {
         protected override string Title => "Brush Fire";
@@ -88,7 +88,7 @@ namespace LSFD.Callouts
         protected override float SpreadSeconds => 25f;
     }
 
-    [CalloutInfo("Trash Fire", CalloutProbability.Medium, Category = CalloutCategory.Fire, Priority = CalloutPriority.Priority3)]
+    [CalloutInfo("Trash Fire", CalloutProbability.Medium, Category = CalloutCategory.Fire, Priority = CalloutPriority.Priority3, AllowAmbient = true)]
     internal class TrashFire : OutdoorFire
     {
         protected override string Title => "Rubbish Fire";

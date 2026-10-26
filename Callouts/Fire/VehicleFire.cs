@@ -1,9 +1,9 @@
-using LSFD.API;
+﻿using LSFD.API;
 using Rage;
 
 namespace LSFD.Callouts
 {
-    [CalloutInfo("Vehicle Fire", CalloutProbability.Medium, Category = CalloutCategory.Fire, Priority = CalloutPriority.Priority2)]
+    [CalloutInfo("Vehicle Fire", CalloutProbability.Medium, Category = CalloutCategory.Fire, Priority = CalloutPriority.Priority2, AllowAmbient = true)]
     internal class VehicleFire : Callout
     {
         private const float SceneRadius = 15f;

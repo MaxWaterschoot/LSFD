@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace LSFD.API
 {
@@ -57,6 +57,13 @@ namespace LSFD.API
         /// It is then only dispatched when <see cref="Interiors.AreInteriorsUnlocked"/> is true.
         /// </summary>
         public bool RequiresOpenInteriors { get; set; }
+
+        /// <summary>
+        /// Set to true when the incident can also be one the player comes across while driving around. LSFD then picks a
+        /// spot on the road ahead of the player, so the callout must take its location from
+        /// <see cref="Functions.GetRandomCalloutLocation"/>. Added in API version 2.
+        /// </summary>
+        public bool AllowAmbient { get; set; }
 
         public CalloutInfoAttribute(string name, CalloutProbability probability)
         {

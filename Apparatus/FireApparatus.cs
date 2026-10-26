@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using LSFD.Core;
 using LSFD.UI;
@@ -19,6 +19,9 @@ namespace LSFD.Apparatus
 
         /// <summary>Driven by AI and responding on its own (mutual aid / backup), instead of being the player's vehicle.</summary>
         public bool IsAiUnit { get; set; }
+
+        /// <summary>Out on a call of another station (see LivingWorld.OtherUnits); it doesn't help at the player's scene.</summary>
+        public bool IsCommitted { get; set; }
 
         /// <summary>Where an AI unit is responding to, or null once it has arrived.</summary>
         public Vector3? ResponseDestination { get; set; }

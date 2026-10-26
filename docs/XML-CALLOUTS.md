@@ -71,6 +71,7 @@ You can put colours in all texts:
 | `Probability` | `Never`, `VeryLow`, `Low`, `Medium`, `High`, `VeryHigh`. With `Never`, the call is only offered through `LSFD_Dispatch`. | `Medium` |
 | `Category` | `Fire`, `Traffic`, `Medical`, `Rescue`, `Hazmat`. Players can turn off categories in `LSFD.ini`, and `Traffic` and `Medical` calls get an ambulance automatically. | `Fire` |
 | `Priority` | `Priority1` (Code 3), `Priority2` (Code 3), `Priority3` (Code 2) | `Priority2` |
+| `Ambient` | `true`: the call can also happen on the road ahead while you drive around on duty, as an incident you come across. It then needs a random location, without `Position` elements. | `false` |
 
 | Child element | What it is |
 |---|---|

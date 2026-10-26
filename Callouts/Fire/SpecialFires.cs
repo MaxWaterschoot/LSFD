@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using LSFD.API;
 using LSFD.Buildings;
 using Rage;
@@ -52,7 +52,7 @@ namespace LSFD.Callouts
         }
     }
 
-    [CalloutInfo("Electric Vehicle Fire", CalloutProbability.Low, Category = CalloutCategory.Fire, Priority = CalloutPriority.Priority2)]
+    [CalloutInfo("Electric Vehicle Fire", CalloutProbability.Low, Category = CalloutCategory.Fire, Priority = CalloutPriority.Priority2, AllowAmbient = true)]
     internal class ElectricVehicleFire : Callout
     {
         private static readonly string[] ElectricModels = { "surge", "voltic", "dilettante", "cyclone", "neon", "raiden", "imorgon", "khamelion" };

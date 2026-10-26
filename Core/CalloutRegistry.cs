@@ -26,6 +26,7 @@ namespace LSFD.Core
             public string Name;
             public CalloutProbability Probability;
             public bool RequiresOpenInteriors;
+            public bool AllowAmbient;
             public CalloutCategory Category;
             public CalloutPriority Priority;
 
@@ -56,7 +57,7 @@ namespace LSFD.Core
 
             Add(new Entry { Factory = () => (Callout)Activator.CreateInstance(type), Source = $"{type.FullName} ({type.Assembly.GetName().Name})",
                 Name = info.Name, Probability = info.Probability, RequiresOpenInteriors = info.RequiresOpenInteriors,
-                Category = info.Category, Priority = info.Priority });
+                AllowAmbient = info.AllowAmbient, Category = info.Category, Priority = info.Priority });
             return true;
         }
 
@@ -75,7 +76,7 @@ namespace LSFD.Core
             }
 
             Add(new Entry { Factory = () => new XmlCallout(definition), Source = file, IsXml = true, Name = definition.Name, Probability = definition.Probability,
-                RequiresOpenInteriors = false, Category = definition.Category, Priority = definition.Priority });
+                RequiresOpenInteriors = false, AllowAmbient = definition.Ambient, Category = definition.Category, Priority = definition.Priority });
             return true;
         }
 
@@ -153,9 +154,14 @@ namespace LSFD.Core
             }
         }
 
-        public Callout CreateRandom()
+        public Callout CreateRandom() => CreateRandom(e => true);
+
+        /// <summary>A random callout that can also be an incident the player comes across.</summary>
+        public Callout CreateRandomAmbient() => CreateRandom(e => e.AllowAmbient);
+
+        private Callout CreateRandom(Func<Entry, bool> filter)
         {
-            var available = entries.Where(e => e.IsAvailable && e.Probability != CalloutProbability.Never).ToList();
+            var available = entries.Where(e => e.IsAvailable && e.Probability != CalloutProbability.Never && filter(e)).ToList();
             int total = available.Sum(e => (int)e.Probability);
             if (total == 0)
                 return null;

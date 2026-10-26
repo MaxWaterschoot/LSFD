@@ -27,6 +27,12 @@ I'll be working on this with a friend.
 - **Vehicle rescue**: window punch, cribbing, hydraulic spreader and cutter; extricate trapped patients from wrecks
 - **Tablet (MDT)**: Active Dispatch, Vehicle Control (pump, pressure, lights), Scene Management (crew orders) and Fire Stations
 - **Callouts**: 24 call types with a real-world priority (P1-P3), category and alarm level (see below), plus your own callouts from DLLs in `Plugins/LSFD/Callouts/` (see [docs/CALLOUTS.md](docs/CALLOUTS.md)) or from XML files, without programming (see [docs/XML-CALLOUTS.md](docs/XML-CALLOUTS.md))
+- **A living world**:
+  - GTA's own fire trucks and ambulances stay away while you're on duty.
+  - Now and then you come across an incident on the road ahead.
+  - Other stations handle their own calls: you see them on the map and the tablet, and busy units aren't sent as your backup.
+  - AI police block the road at crashes and bigger fires, with cones and an officer directing traffic.
+  - Traffic slows down around your scene and your parked apparatus, and stops at the cones you place.
 - **API for add-ons**: events (calls accepted and ended, fire out, patients rescued, stabilized and transported, apparatus spawned) and a versioned API, so packs built for an older LSFD keep working after an update
 - **Enable All Interiors**: detected automatically; callouts that need locked interiors only run when it is installed
 - **Add-on content**: vehicles and tool props are set in XML, so add-on models work (see [docs/ADDON-CONTENT.md](docs/ADDON-CONTENT.md))
@@ -143,6 +149,18 @@ Station positions are approximate. Stand at the right spot in-game and use the c
 | `LSFD_ListStations` / `LSFD_ReloadStations` | |
 | `LSFD_AddFireLocation name [kind]` | Adds a building fire location where you stand (kind: Store, Commercial, Office, Apartment, House, Industrial, Public) |
 | `LSFD_ListCallouts` / `LSFD_Dispatch [name]` | |
+| `LSFD_AmbientIncident` | Puts an incident on the road ahead, as if you came across it |
+| `LSFD_OtherUnitsIncident` | Sends other AI units to a random call elsewhere |
+
+### LSFD.ini, `[World]`
+
+| Setting | |
+| --- | --- |
+| `DisableGameFireDispatch` | GTA's own fire trucks and ambulances are off while you're on duty |
+| `TrafficControl` | Traffic slows down around the scene and parked apparatus with lights on; cones you place stop traffic |
+| `PoliceAtScene` | A police or sheriff unit closes the road at crashes, hazmat calls and fires of a 2nd alarm or more; the models are set here too |
+| `AmbientIncidents` | Incidents on the road ahead while you drive around, every 5 to 15 minutes by default |
+| `OtherUnitsIncidents` | Other stations handle calls of their own, and take over calls you decline |
 
 ## Project structure
 
@@ -157,6 +175,7 @@ Firefighting/   Fire incidents (growth, spread, escalation, overhaul, smoke), fo
 Profiles/       Player profile, statistics, ranks and outfits (EUP)
 Safety/         SCBA, thermal imaging camera, smoke and heat exposure
 Crew/           AI firefighters, their orders and AI units driving to calls
+LivingWorld/    GTA dispatch off, traffic control and cones, AI police, ambient incidents and other units' calls
 Medical/        Patients, CPR, treatment and carrying victims
 Stations/       Fire stations and Stations.xml
 UI/             Station/compartment menus, tablet, HUD, notifications and theme

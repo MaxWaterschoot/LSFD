@@ -24,6 +24,8 @@
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />
+    <!-- For NativeFunction.Natives, the only way RPH calls natives with out parameters. -->
+    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
   <ItemGroup>

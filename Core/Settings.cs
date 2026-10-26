@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using LSFD.API;
@@ -60,6 +60,21 @@ namespace LSFD.Core
         public static int MaxSecondsBetweenCallouts { get; private set; } = 240;
         public static int AcceptTimeoutSeconds { get; private set; } = 20;
 
+        public static bool DisableGameFireDispatch { get; private set; } = true;
+        public static bool TrafficControl { get; private set; } = true;
+        public static bool PoliceAtScene { get; private set; } = true;
+        public static string PoliceVehicle { get; private set; } = "police";
+        public static string PoliceOfficerModel { get; private set; } = "s_m_y_cop_01";
+        public static string SheriffVehicle { get; private set; } = "sheriff";
+        public static string SheriffOfficerModel { get; private set; } = "s_m_y_sheriff_01";
+        public static bool AmbientIncidents { get; private set; } = true;
+        public static int MinSecondsBetweenAmbientIncidents { get; private set; } = 300;
+        public static int MaxSecondsBetweenAmbientIncidents { get; private set; } = 900;
+        public static bool OtherUnitsIncidents { get; private set; } = true;
+        public static int MinSecondsBetweenOtherIncidents { get; private set; } = 120;
+        public static int MaxSecondsBetweenOtherIncidents { get; private set; } = 360;
+        public static bool OtherUnitsNotifications { get; private set; } = true;
+
         public static bool IsCategoryEnabled(CalloutCategory category)
         {
             return !EnabledCategories.TryGetValue(category, out bool enabled) || enabled;
@@ -119,6 +134,23 @@ namespace LSFD.Core
 
             if (MaxSecondsBetweenCallouts < MinSecondsBetweenCallouts)
                 MaxSecondsBetweenCallouts = MinSecondsBetweenCallouts;
+
+            DisableGameFireDispatch = ini.ReadBoolean("World", "DisableGameFireDispatch", DisableGameFireDispatch);
+            TrafficControl = ini.ReadBoolean("World", "TrafficControl", TrafficControl);
+            PoliceAtScene = ini.ReadBoolean("World", "PoliceAtScene", PoliceAtScene);
+            PoliceVehicle = ini.ReadString("World", "PoliceVehicle", PoliceVehicle);
+            PoliceOfficerModel = ini.ReadString("World", "PoliceOfficerModel", PoliceOfficerModel);
+            SheriffVehicle = ini.ReadString("World", "SheriffVehicle", SheriffVehicle);
+            SheriffOfficerModel = ini.ReadString("World", "SheriffOfficerModel", SheriffOfficerModel);
+            AmbientIncidents = ini.ReadBoolean("World", "AmbientIncidents", AmbientIncidents);
+            MinSecondsBetweenAmbientIncidents = Math.Max(30, ini.ReadInt32("World", "MinSecondsBetweenAmbientIncidents", MinSecondsBetweenAmbientIncidents));
+            MaxSecondsBetweenAmbientIncidents = Math.Max(MinSecondsBetweenAmbientIncidents,
+                ini.ReadInt32("World", "MaxSecondsBetweenAmbientIncidents", MaxSecondsBetweenAmbientIncidents));
+            OtherUnitsIncidents = ini.ReadBoolean("World", "OtherUnitsIncidents", OtherUnitsIncidents);
+            MinSecondsBetweenOtherIncidents = Math.Max(30, ini.ReadInt32("World", "MinSecondsBetweenOtherIncidents", MinSecondsBetweenOtherIncidents));
+            MaxSecondsBetweenOtherIncidents = Math.Max(MinSecondsBetweenOtherIncidents,
+                ini.ReadInt32("World", "MaxSecondsBetweenOtherIncidents", MaxSecondsBetweenOtherIncidents));
+            OtherUnitsNotifications = ini.ReadBoolean("World", "OtherUnitsNotifications", OtherUnitsNotifications);
 
             Game.LogTrivial($"LSFD settings loaded (tablet: {TabletKey}, interact: {InteractKey}, callouts: {CalloutsEnabled}).");
         }

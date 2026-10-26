@@ -81,6 +81,20 @@ namespace LSFD
                 Game.LogTrivial($"Could not dispatch a call. Registered calls: {string.Join(", ", Functions.GetRegisteredCallouts())}");
         }
 
+        [ConsoleCommand("Puts an incident on the road ahead of you, as if you came across it (you must be on duty and free).")]
+        private static void LSFD_AmbientIncident()
+        {
+            if (!Functions.IsPlayerOnDuty() || !Lsfd.Ambient.TryStart())
+                Game.LogTrivial("No incident: go on duty, finish your call first, and make sure there is a road ahead with calls marked AllowAmbient/Ambient.");
+        }
+
+        [ConsoleCommand("Sends other AI units to a random call elsewhere in the city (you must be on duty).")]
+        private static void LSFD_OtherUnitsIncident()
+        {
+            if (!Functions.IsPlayerOnDuty() || !Lsfd.OtherUnits.StartRandom())
+                Game.LogTrivial("No incident: go on duty first, or no station had a free unit.");
+        }
+
         [ConsoleCommand("Reloads the XML calls in Plugins/LSFD/Callouts/ after you edited them.")]
         private static void LSFD_ReloadXmlCallouts()
         {

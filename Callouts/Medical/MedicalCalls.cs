@@ -1,4 +1,4 @@
-using LSFD.API;
+﻿using LSFD.API;
 using Rage;
 
 namespace LSFD.Callouts
@@ -67,7 +67,7 @@ namespace LSFD.Callouts
         }
     }
 
-    [CalloutInfo("Cardiac Arrest", CalloutProbability.Medium, Category = CalloutCategory.Medical, Priority = CalloutPriority.Priority1)]
+    [CalloutInfo("Cardiac Arrest", CalloutProbability.Medium, Category = CalloutCategory.Medical, Priority = CalloutPriority.Priority1, AllowAmbient = true)]
     internal class CardiacArrest : MedicalCall
     {
         protected override string Title => "Cardiac Arrest";
@@ -75,7 +75,7 @@ namespace LSFD.Callouts
         protected override PatientCondition InitialCondition => PatientCondition.CardiacArrest;
     }
 
-    [CalloutInfo("Unconscious Person", CalloutProbability.Medium, Category = CalloutCategory.Medical, Priority = CalloutPriority.Priority2)]
+    [CalloutInfo("Unconscious Person", CalloutProbability.Medium, Category = CalloutCategory.Medical, Priority = CalloutPriority.Priority2, AllowAmbient = true)]
     internal class UnconsciousPerson : MedicalCall
     {
         protected override string Title => "Unconscious Person";
@@ -84,7 +84,7 @@ namespace LSFD.Callouts
             MathHelper.GetRandomInteger(4) == 0 ? PatientCondition.CardiacArrest : PatientCondition.Unconscious;
     }
 
-    [CalloutInfo("Injured Person", CalloutProbability.High, Category = CalloutCategory.Medical, Priority = CalloutPriority.Priority2)]
+    [CalloutInfo("Injured Person", CalloutProbability.High, Category = CalloutCategory.Medical, Priority = CalloutPriority.Priority2, AllowAmbient = true)]
     internal class InjuredPerson : MedicalCall
     {
         private static readonly string[] Reasons =

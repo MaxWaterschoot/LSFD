@@ -34,8 +34,9 @@
           DoneMessage="Gas ~g~off~s~, the garage is airing out." ClearsToxicAtmosphere="true" />
   </Callout>
 
-  <!-- A crash: a trapped driver, a walking wounded passenger and an extra ambulance. -->
-  <Callout Name="Car Into Pole" Probability="Low" Category="Traffic" Priority="Priority1">
+  <!-- A crash: a trapped driver, a walking wounded passenger and an extra ambulance.
+       Ambient="true": you can also come across it on the road ahead while driving around. -->
+  <Callout Name="Car Into Pole" Probability="Low" Category="Traffic" Priority="Priority1" Ambient="true">
     <Message>Vehicle Into Pole</Message>
     <Advisory>Car hit a pole, driver ~r~trapped~s~, the passenger got out.</Advisory>
     <ArrivalHelp>Stabilize the car, extricate the ~r~driver~s~ and check the ~y~passenger~s~.</ArrivalHelp>

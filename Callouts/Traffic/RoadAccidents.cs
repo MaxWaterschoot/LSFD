@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using LSFD.API;
 using Rage;
@@ -93,7 +93,7 @@ namespace LSFD.Callouts
         }
     }
 
-    [CalloutInfo("Vehicle Collision", CalloutProbability.High, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1)]
+    [CalloutInfo("Vehicle Collision", CalloutProbability.High, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1, AllowAmbient = true)]
     internal class VehicleCollision : RoadAccident
     {
         protected override string Title => "Head-on Collision";
@@ -112,7 +112,7 @@ namespace LSFD.Callouts
         }
     }
 
-    [CalloutInfo("Minor Collision", CalloutProbability.High, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority3)]
+    [CalloutInfo("Minor Collision", CalloutProbability.High, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority3, AllowAmbient = true)]
     internal class MinorCollision : RoadAccident
     {
         protected override string Title => "Minor Collision";
@@ -129,7 +129,7 @@ namespace LSFD.Callouts
         }
     }
 
-    [CalloutInfo("Vehicle Rollover", CalloutProbability.Medium, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1)]
+    [CalloutInfo("Vehicle Rollover", CalloutProbability.Medium, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1, AllowAmbient = true)]
     internal class VehicleRollover : RoadAccident
     {
         protected override string Title => "Vehicle Rollover";
@@ -146,7 +146,7 @@ namespace LSFD.Callouts
         }
     }
 
-    [CalloutInfo("Motorcycle Accident", CalloutProbability.Medium, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1)]
+    [CalloutInfo("Motorcycle Accident", CalloutProbability.Medium, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1, AllowAmbient = true)]
     internal class MotorcycleAccident : RoadAccident
     {
         protected override string Title => "Motorcycle Accident";
@@ -165,7 +165,7 @@ namespace LSFD.Callouts
         }
     }
 
-    [CalloutInfo("Pedestrian Struck", CalloutProbability.Medium, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1)]
+    [CalloutInfo("Pedestrian Struck", CalloutProbability.Medium, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1, AllowAmbient = true)]
     internal class PedestrianStruck : RoadAccident
     {
         protected override string Title => "Pedestrian Struck";
@@ -180,7 +180,7 @@ namespace LSFD.Callouts
         }
     }
 
-    [CalloutInfo("Multi-Vehicle Collision", CalloutProbability.Low, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1)]
+    [CalloutInfo("Multi-Vehicle Collision", CalloutProbability.Low, Category = CalloutCategory.Traffic, Priority = CalloutPriority.Priority1, AllowAmbient = true)]
     internal class MultiVehicleCollision : RoadAccident
     {
         private bool vehicleOnFire;

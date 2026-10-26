@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using LSFD.API;
@@ -6,6 +6,7 @@ using LSFD.Apparatus;
 using LSFD.Core;
 using LSFD.Crew;
 using LSFD.Firefighting;
+using LSFD.LivingWorld;
 using LSFD.Medical;
 using LSFD.Profiles;
 using LSFD.Stations;
@@ -39,6 +40,7 @@ namespace LSFD.UI
         private readonly TabInteractiveListItem stationsTab = new TabInteractiveListItem("Fire Stations", new List<UIMenuItem>());
         private readonly TabInteractiveListItem profileTab = new TabInteractiveListItem("Profile", new List<UIMenuItem>());
         private readonly ProfileManager profiles;
+        private readonly OtherUnits otherUnits;
 
         // Items are rebuilt on every refresh; these map them back to what they do.
         private readonly Dictionary<UIMenuItem, Action> actions = new Dictionary<UIMenuItem, Action>();
@@ -46,9 +48,10 @@ namespace LSFD.UI
         public bool IsOpen => view.Visible;
 
         public Tablet(DutyManager duty, CalloutManager callouts, ApparatusManager apparatus, CrewManager crew,
-            FireStationManager stations, PatientManager patients, FireSystem fire, ProfileManager profiles, Action<FireApparatus> returnApparatus,
-            Func<ApparatusType, Vector3, bool> requestBackup)
+            FireStationManager stations, PatientManager patients, FireSystem fire, ProfileManager profiles, OtherUnits otherUnits,
+            Action<FireApparatus> returnApparatus, Func<ApparatusType, Vector3, bool> requestBackup)
         {
+            this.otherUnits = otherUnits;
             this.profiles = profiles;
             this.fire = fire;
             this.patients = patients;
@@ -169,6 +172,16 @@ namespace LSFD.UI
                 }));
             }
 
+            if (otherUnits.Incidents.Count > 0)
+            {
+                items.Add(Theme.CreateHeader("Other units"));
+                foreach (OtherIncident incident in otherUnits.Incidents)
+                {
+                    string units = string.Join(", ", incident.Units.Select(u => $"{u.Name} ({(u.OnScene ? "on scene" : "en route")})"));
+                    items.Add(Info(incident.Name, $"{incident.Street}~n~{units}", Distance(incident.Position)));
+                }
+            }
+
             return items;
         }
 
@@ -185,7 +198,7 @@ namespace LSFD.UI
             foreach (FireApparatus unit in apparatus.All.Where(a => a.IsValid))
             {
                 Vehicle vehicle = unit.Vehicle;
-                string role = unit.IsAiUnit ? (unit.ResponseDestination.HasValue ? " · AI, en route" : " · AI") : "";
+                string role = unit.IsCommitted ? " · AI, other call" : unit.IsAiUnit ? (unit.ResponseDestination.HasValue ? " · AI, en route" : " · AI") : "";
                 items.Add(Theme.CreateHeader($"{unit.Definition.Name}{role} · {Distance(vehicle.Position)}"));
 
                 if (unit.Definition.HasPump)

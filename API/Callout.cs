@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using LSFD.Core;
 using Rage;
@@ -71,6 +71,12 @@ namespace LSFD.API
 
         public CalloutState State { get; private set; } = CalloutState.Displayed;
         public bool HasArrived { get; private set; }
+
+        /// <summary>
+        /// True when the player came across the incident while driving around instead of being dispatched to it
+        /// (see <see cref="CalloutInfoAttribute.AllowAmbient"/>). <see cref="OnArrival"/> then runs right after acceptance.
+        /// </summary>
+        public bool IsAmbient { get; internal set; }
 
         /// <summary>Whether the callout ended through <see cref="Complete"/>.</summary>
         public bool IsCompleted { get; private set; }
@@ -197,15 +203,22 @@ namespace LSFD.API
         internal void Tick()
         {
             if (!HasArrived && Game.LocalPlayer.Character.DistanceTo(CalloutPosition) <= ArrivalDistance)
-            {
-                HasArrived = true;
-                if (routeBlip.Exists())
-                    routeBlip.Delete();
-                OnArrival();
-            }
+                Arrive();
 
             if (State == CalloutState.Accepted)
                 Process();
+        }
+
+        /// <summary>Spawns the scene now, e.g. for an incident the player is driving up to.</summary>
+        internal void Arrive()
+        {
+            if (HasArrived)
+                return;
+
+            HasArrived = true;
+            if (routeBlip.Exists())
+                routeBlip.Delete();
+            OnArrival();
         }
 
         private void RemoveFireIncidents()

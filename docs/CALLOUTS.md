@@ -85,6 +85,21 @@ If your callout throws an exception, LSFD logs it to `RagePluginHook.log`, ends 
 `CalloutProbability` is a weight: a `High` (8) callout is picked twice as often as a `Medium` (4) one. `Never` registers
 the callout without dispatching it randomly; it can still be started with `Functions.StartCallout`.
 
+### Incidents the player comes across
+
+With `AllowAmbient = true`, the callout can also be an incident that happens on the road ahead while the player drives
+around on duty, such as a crash or a car fire:
+
+```csharp
+[CalloutInfo("Car Fire", CalloutProbability.Medium, Category = CalloutCategory.Fire, AllowAmbient = true)]
+```
+
+- **Location:** LSFD picks a spot on the road ahead. Take your location from `Functions.GetRandomCalloutLocation()`;
+  it returns that spot. If the callout picks a place of its own instead, LSFD doesn't use it for this.
+- **Spawning:** `IsAmbient` is true, and `OnArrival` runs as soon as the player accepts, because the player is already
+  close.
+- **Requirement:** spawn things around `CalloutPosition` and don't rely on interiors.
+
 ## Useful API
 
 | Member | What it does |
@@ -285,7 +300,7 @@ To check at runtime, `Functions.InstalledApiVersion` gives the version of the ru
 | Version | Added |
 |---|---|
 | 1 | The first public API. |
-| 2 | `Events`, `CalloutPack.ApiVersion`, XML callouts. |
+| 2 | `Events`, `CalloutPack.ApiVersion`, XML callouts, `CalloutInfo.AllowAmbient` and `Callout.IsAmbient`. |
 
 ### Events
 

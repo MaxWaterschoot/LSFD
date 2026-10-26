@@ -138,7 +138,7 @@ namespace LSFD.Medical
             if (waiting.Count == 0)
                 return;
 
-            var ambulances = apparatus.All.Where(a => a.IsValid && a.IsAiUnit && a.Definition.Type == ApparatusType.Ambulance).ToList();
+            var ambulances = apparatus.All.Where(a => a.IsValid && a.IsAiUnit && !a.IsCommitted && a.Definition.Type == ApparatusType.Ambulance).ToList();
             int available = ambulances.Count(a => !IsBusy(a) && Covers(a, waiting[0].Ped.Position));
             if (available >= waiting.Count || ambulances.Count >= MaxAmbulancesAtOnce)
                 return;
@@ -159,7 +159,7 @@ namespace LSFD.Medical
 
         private IEnumerable<FireApparatus> OnSceneAmbulances()
         {
-            return apparatus.All.Where(a => a.IsValid && a.IsAiUnit && a.Definition.Type == ApparatusType.Ambulance && !a.ResponseDestination.HasValue);
+            return apparatus.All.Where(a => a.IsValid && a.IsAiUnit && !a.IsCommitted && a.Definition.Type == ApparatusType.Ambulance && !a.ResponseDestination.HasValue);
         }
 
         private void Start(FireApparatus unit, CrewMember attendant, CrewMember driver, Patient patient)

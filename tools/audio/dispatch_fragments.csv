@@ -1,0 +1,75 @@
+category,key,file,text
+Phrases,Attention,Phrases/attention.wav,Attention.
+Phrases,Respond,Phrases/respond.wav,Respond
+Phrases,Caller reports,Phrases/caller_reports.wav,Caller reports
+Phrases,Be advised,Phrases/be_advised.wav,Be advised.
+Phrases,Copy,Phrases/copy.wav,Copy.
+Phrases,Additional units en route,Phrases/additional_units_en_route.wav,Additional units are en route.
+Phrases,Ambulance en route,Phrases/ambulance_en_route.wav,An ambulance is en route.
+Phrases,Call reassigned,Phrases/call_reassigned.wav,"No response, call reassigned to another unit."
+Phrases,Call cancelled,Phrases/call_cancelled.wav,"Call cancelled, return to quarters."
+Phrases,Call completed,Phrases/call_completed.wav,"Copy, call completed. Return to quarters."
+Phrases,On duty,Phrases/on_duty.wav,You are now in service.
+Phrases,Off duty,Phrases/off_duty.wav,You are now out of service.
+Advisories,Occupants trapped,Advisories/occupants_trapped.wav,occupants trapped inside.
+Advisories,Occupants out,Advisories/occupants_out.wav,occupants are reported out of the building.
+Advisories,Patient trapped,Advisories/patient_trapped.wav,a patient trapped in the vehicle.
+Advisories,Multiple patients,Advisories/multiple_patients.wav,multiple patients.
+Advisories,Not breathing,Advisories/not_breathing.wav,a patient not breathing.
+Advisories,Smoke showing,Advisories/smoke_showing.wav,smoke showing.
+Advisories,Odor of gas,Advisories/odor_of_gas.wav,a strong odor of gas.
+Units,Engine,Units/engine.wav,Engine
+Units,Ladder,Units/ladder.wav,Truck
+Units,Rescue,Units/rescue.wav,Rescue
+Units,Brush,Units/brush.wav,Brush
+Units,AirportCrash,Units/airportcrash.wav,Crash
+Units,Ambulance,Units/ambulance.wav,Medic
+Units,Lifeguard,Units/lifeguard.wav,Lifeguard
+Units,Command,Units/command.wav,Battalion
+Numbers,1,Numbers/01.wav,One
+Numbers,2,Numbers/02.wav,Two
+Numbers,3,Numbers/03.wav,Three
+Numbers,4,Numbers/04.wav,Four
+Numbers,5,Numbers/05.wav,Five
+Numbers,6,Numbers/06.wav,Six
+Numbers,7,Numbers/07.wav,Seven
+Numbers,8,Numbers/08.wav,Eight
+Numbers,9,Numbers/09.wav,Nine
+Numbers,10,Numbers/10.wav,Ten
+Callouts,Commercial Structure Fire,Callouts/commercial_structure_fire.wav,Commercial Structure Fire.
+Callouts,Apartment Fire,Callouts/apartment_fire.wav,Apartment Fire.
+Callouts,Residential Structure Fire,Callouts/residential_structure_fire.wav,Residential Structure Fire.
+Callouts,Industrial Building Fire,Callouts/industrial_building_fire.wav,Industrial Building Fire.
+Callouts,Industrial Fire,Callouts/industrial_fire.wav,Industrial Fire.
+Callouts,Brush Fire,Callouts/brush_fire.wav,Brush Fire.
+Callouts,Vehicle Fire,Callouts/vehicle_fire.wav,Vehicle Fire.
+Callouts,Electric Vehicle Fire,Callouts/electric_vehicle_fire.wav,Electric Vehicle Fire.
+Callouts,Electrical Fire,Callouts/electrical_fire.wav,Electrical Fire.
+Callouts,Rubbish Fire,Callouts/rubbish_fire.wav,Rubbish Fire.
+Callouts,Automatic Fire Alarm,Callouts/automatic_fire_alarm.wav,Automatic Fire Alarm.
+Callouts,Smell of Smoke,Callouts/smell_of_smoke.wav,Smell of Smoke.
+Callouts,Carbon Monoxide Alarm,Callouts/carbon_monoxide_alarm.wav,Carbon Monoxide Alarm.
+Callouts,Gas Leak,Callouts/gas_leak.wav,Gas Leak.
+Callouts,Fuel Spill,Callouts/fuel_spill.wav,Fuel Spill.
+Callouts,Head-on Collision,Callouts/head_on_collision.wav,Head-on Collision.
+Callouts,Minor Collision,Callouts/minor_collision.wav,Minor Collision.
+Callouts,Vehicle Rollover,Callouts/vehicle_rollover.wav,Vehicle Rollover.
+Callouts,Motorcycle Accident,Callouts/motorcycle_accident.wav,Motorcycle Accident.
+Callouts,Pedestrian Struck,Callouts/pedestrian_struck.wav,Pedestrian Struck.
+Callouts,Multi-Vehicle Collision,Callouts/multi_vehicle_collision.wav,Multi-Vehicle Collision.
+Callouts,Cardiac Arrest,Callouts/cardiac_arrest.wav,Cardiac Arrest.
+Callouts,Unconscious Person,Callouts/unconscious_person.wav,Unconscious Person.
+Callouts,Injured Person,Callouts/injured_person.wav,Injured Person.
+Categories,Fire,Categories/fire.wav,Fire call.
+Categories,Traffic,Categories/traffic.wav,Traffic collision.
+Categories,Medical,Categories/medical.wav,Medical call.
+Categories,Rescue,Categories/rescue.wav,Rescue call.
+Categories,Hazmat,Categories/hazmat.wav,Hazardous materials call.
+Response,Priority1,Response/priority1.wav,Priority one.
+Response,Priority2,Response/priority2.wav,Priority two.
+Response,Priority3,Response/priority3.wav,Priority three.
+Response,Code 3,Response/code_3.wav,Code three.
+Response,Code 2,Response/code_2.wav,Code two.
+Alarms,1,Alarms/alarm_1.wav,First alarm.
+Alarms,2,Alarms/alarm_2.wav,Second alarm.
+Alarms,3,Alarms/alarm_3.wav,Third alarm.

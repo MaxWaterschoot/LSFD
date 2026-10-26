@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using LSFD.Core;
@@ -64,8 +64,11 @@ namespace LSFD.Apparatus
             return spawned;
         }
 
-        /// <summary>Sends an AI-driven unit with its crew from <paramref name="station"/> to <paramref name="destination"/>.</summary>
-        public FireApparatus SpawnResponding(ApparatusDefinition definition, FireStation station, Vector3 destination)
+        /// <summary>
+        /// Sends an AI-driven unit with its crew from <paramref name="station"/> to <paramref name="destination"/>;
+        /// <paramref name="announce"/> tells the player it is on its way to their scene.
+        /// </summary>
+        public FireApparatus SpawnResponding(ApparatusDefinition definition, FireStation station, Vector3 destination, bool announce = true)
         {
             Model model = definition.Model;
             if (!model.IsValid)
@@ -82,7 +85,8 @@ namespace LSFD.Apparatus
             apparatus.Add(unit);
             Spawned?.Invoke(unit);
 
-            Notify.Dispatch("~b~Unit responding", $"~y~{definition.Name}~s~ from {station.Name} is en route to the scene.");
+            if (announce)
+                Notify.Dispatch("~b~Unit responding", $"~y~{definition.Name}~s~ from {station.Name} is en route to the scene.");
             return unit;
         }
 

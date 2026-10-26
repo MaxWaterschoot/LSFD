@@ -61,9 +61,16 @@ namespace LSFD.API
         /// <summary>A random position on a street around the player, handy for <see cref="Callout.CalloutPosition"/>.</summary>
         public static Vector3 GetRandomCalloutLocation(float minDistance = 300f, float maxDistance = 900f)
         {
+            // An incident the player comes across: the spot ahead of the player was picked already.
+            if (AmbientLocation.HasValue)
+                return AmbientLocation.Value;
+
             Vector3 around = Game.LocalPlayer.Character.Position.Around2D(minDistance, maxDistance);
             return World.GetNextPositionOnStreet(around);
         }
+
+        /// <summary>Set while an ambient incident is being set up; see <see cref="CalloutInfoAttribute.AllowAmbient"/>.</summary>
+        internal static Vector3? AmbientLocation { get; set; }
 
         internal static void RaiseDutyStateChanged(bool onDuty) => Events.Raise(OnDutyStateChanged, nameof(OnDutyStateChanged), onDuty);
     }
