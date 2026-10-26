@@ -1,3 +1,4 @@
+using LSFD.API;
 using LSFD.Apparatus;
 using LSFD.Core;
 using LSFD.Firefighting;
@@ -142,6 +143,14 @@ namespace LSFD.Water
             if (Game.IsKeyDown(Settings.NozzlePatternKey))
                 Nozzle.TogglePattern();
 
+            if (Game.IsKeyDown(Settings.FoamKey))
+            {
+                if (Source.Definition.FoamCapacity <= 0f)
+                    Game.DisplaySubtitle($"~o~The {Source.Definition.Name} carries no foam.", 2500);
+                else
+                    Nozzle.Agent = Nozzle.IsFoam ? ExtinguishingAgent.Water : ExtinguishingAgent.Foam;
+            }
+
             int wheel = Game.GetMouseWheelDelta();
             if (Game.IsKeyDown(Settings.PressureUpKey) || wheel > 0)
                 Nozzle.ChangePressure(1);
@@ -161,6 +170,12 @@ namespace LSFD.Water
             Nozzle.PumpPressure = Source.PumpPressure;
             float needed = Source.Definition.PumpRate * Nozzle.FlowFactor * Nozzle.EffectivePressure * Game.FrameTime;
             IsTankEmpty = Source.DrawWater(needed) <= 0f;
+
+            if (Nozzle.IsFoam && Source.DrawFoam(Nozzle.FoamUse * Game.FrameTime) <= 0f)
+            {
+                Nozzle.Agent = ExtinguishingAgent.Water;
+                Notify.Warning($"The {Source.Definition.Name} is ~o~out of foam~s~, back to water.");
+            }
             if (IsTankEmpty)
             {
                 StopSpraying();

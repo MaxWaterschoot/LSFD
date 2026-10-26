@@ -26,6 +26,14 @@ namespace LSFD.Apparatus
         SCBA,
         /// <summary>Thermal imaging camera to find victims and hotspots in the smoke.</summary>
         ThermalCamera,
+        /// <summary>Positive pressure ventilation fan to blow the smoke out of a building.</summary>
+        PPVFan,
+        /// <summary>Multi-gas detector for CO alarms and gas leaks.</summary>
+        GasDetector,
+        /// <summary>Absorbent granules for fuel and oil spills.</summary>
+        Absorbent,
+        /// <summary>Traffic cones to cordon off a scene.</summary>
+        TrafficCones,
     }
 
     public static class EquipmentTypeExtensions
@@ -49,7 +57,8 @@ namespace LSFD.Apparatus
         {
             return type == EquipmentType.WindowPunch || type == EquipmentType.Cribbing
                 || type == EquipmentType.HydraulicSpreader || type == EquipmentType.HydraulicCutter
-                || type == EquipmentType.AED;
+                || type == EquipmentType.AED || type == EquipmentType.GasDetector || type == EquipmentType.Absorbent
+                || type == EquipmentType.TrafficCones;
         }
 
         public static string ToDisplayName(this EquipmentType type)
@@ -70,6 +79,10 @@ namespace LSFD.Apparatus
                 case EquipmentType.AED: return "AED";
                 case EquipmentType.SCBA: return "SCBA cylinders";
                 case EquipmentType.ThermalCamera: return "Thermal imaging camera";
+                case EquipmentType.PPVFan: return "PPV fan";
+                case EquipmentType.GasDetector: return "Gas detector";
+                case EquipmentType.Absorbent: return "Absorbent";
+                case EquipmentType.TrafficCones: return "Traffic cones";
                 default: return type.ToString();
             }
         }

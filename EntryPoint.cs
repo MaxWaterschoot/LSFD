@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using LSFD.API;
 using LSFD.Buildings;
@@ -79,6 +79,13 @@ namespace LSFD
             bool dispatched = string.IsNullOrEmpty(name) ? Lsfd.Callouts.DispatchRandom() : Functions.StartCallout(name);
             if (!dispatched)
                 Game.LogTrivial($"Could not dispatch a call. Registered calls: {string.Join(", ", Functions.GetRegisteredCallouts())}");
+        }
+
+        [ConsoleCommand("Reloads the XML calls in Plugins/LSFD/Callouts/ after you edited them.")]
+        private static void LSFD_ReloadXmlCallouts()
+        {
+            int count = Lsfd.Registry.ReloadXmlCallouts();
+            Game.LogTrivial($"Loaded {count} XML call(s). See above for any that were skipped.");
         }
 
         [ConsoleCommand("Lists all registered calls.")]

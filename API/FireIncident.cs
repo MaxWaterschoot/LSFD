@@ -21,6 +21,28 @@ namespace LSFD.API
         Out,
     }
 
+    /// <summary>What is burning, which decides what puts it out.</summary>
+    public enum FireClass
+    {
+        /// <summary>Wood, paper, furniture: water works best.</summary>
+        Ordinary,
+        /// <summary>Fuel, oil and gas: water barely works, foam does.</summary>
+        Flammable,
+        /// <summary>Live electrics: no water or foam until the power is isolated; an extinguisher (CO2) is safe.</summary>
+        Electrical,
+        /// <summary>A lithium battery (EV) in thermal runaway: only lots of water cools it, and it keeps rekindling.</summary>
+        Battery,
+    }
+
+    /// <summary>What a firefighter puts on the fire.</summary>
+    public enum ExtinguishingAgent
+    {
+        Water,
+        Foam,
+        /// <summary>Hand-held extinguisher (CO2 / powder).</summary>
+        Extinguisher,
+    }
+
     /// <summary>Settings for a fire started with <see cref="Callout.StartFireIncident"/>.</summary>
     public class FireIncidentOptions
     {
@@ -56,6 +78,14 @@ namespace LSFD.API
 
         /// <summary>Meters above the origin where the smoke column rises from, e.g. the roof of the building.</summary>
         public float SmokeColumnHeight { get; set; } = 1f;
+
+        public FireClass Class { get; set; } = FireClass.Ordinary;
+
+        /// <summary>
+        /// For <see cref="FireClass.Electrical"/> fires: where the electrical panel is. Firefighters hold the interact key
+        /// there to isolate the power, after which water is safe. Null means the power can't be isolated.
+        /// </summary>
+        public Vector3? PowerPanel { get; set; }
     }
 
     /// <summary>
@@ -99,6 +129,37 @@ namespace LSFD.API
         public int Hotspots => Points.Count(p => p.State == FirePointState.Smoldering);
 
         public bool IsOut => Status == FireStatus.Out;
+
+        /// <summary>A PPV fan blows into the building: less smoke inside, but the fire grows a little faster.</summary>
+        public bool IsVentilated { get; internal set; }
+
+        /// <summary>For electrical fires: whether the power has been cut, so water can be used.</summary>
+        public bool IsPowerIsolated { get; internal set; }
+
+        /// <summary>Whether water on this fire electrocutes the firefighter.</summary>
+        public bool IsEnergized => Options.Class == FireClass.Electrical && !IsPowerIsolated;
+
+        /// <summary>Cuts the power of an electrical fire (as if a firefighter did it at the panel).</summary>
+        public void IsolatePower()
+        {
+            IsPowerIsolated = true;
+        }
+
+        /// <summary>How well <paramref name="agent"/> works on this fire: 1 is normal, 0 does nothing.</summary>
+        public float GetEffectiveness(ExtinguishingAgent agent)
+        {
+            switch (Options.Class)
+            {
+                case FireClass.Flammable:
+                    return agent == ExtinguishingAgent.Foam ? 1.6f : agent == ExtinguishingAgent.Water ? 0.3f : 0.8f;
+                case FireClass.Electrical when IsEnergized:
+                    return agent == ExtinguishingAgent.Extinguisher ? 1.2f : 0f;
+                case FireClass.Battery:
+                    return agent == ExtinguishingAgent.Water ? 0.35f : agent == ExtinguishingAgent.Foam ? 0.2f : 0.05f;
+                default:
+                    return 1f;
+            }
+        }
 
         /// <summary>Game time (ms) the incident started.</summary>
         public uint StartedAt { get; }

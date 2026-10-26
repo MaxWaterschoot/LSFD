@@ -25,6 +25,7 @@ namespace LSFD.UI
         private readonly BarTimerBar tankBar = new BarTimerBar("TANK") { BackgroundColor = Theme.BarBackground };
         private readonly TextTimerBar supplyBar = new TextTimerBar("WATER", "");
         private readonly TextTimerBar nozzleBar = new TextTimerBar("NOZZLE", "");
+        private readonly TextTimerBar foamBar = new TextTimerBar("FOAM", "");
         private readonly BarTimerBar pressureBar = new BarTimerBar("PRESSURE") { ForegroundColor = Theme.Highlight, BackgroundColor = Theme.BarBackground };
         private readonly TextTimerBar toolBar = new TextTimerBar("TOOL", "");
         private readonly TextTimerBar fireBar = new TextTimerBar("FIRE", "");
@@ -41,6 +42,7 @@ namespace LSFD.UI
         {
             hoseButtons.Buttons.Add(new InstructionalButton(GameControl.Attack, "Spray"));
             hoseButtons.Buttons.Add(new InstructionalButtonGroup("Pattern", Theme.ButtonFor(Settings.NozzlePatternKey)));
+            hoseButtons.Buttons.Add(new InstructionalButtonGroup("Water/foam", Theme.ButtonFor(Settings.FoamKey)));
             hoseButtons.Buttons.Add(new InstructionalButtonGroup("Pressure", Theme.ButtonFor(Settings.PressureDownKey), Theme.ButtonFor(Settings.PressureUpKey)));
             hoseButtons.Update();
         }
@@ -88,9 +90,14 @@ namespace LSFD.UI
 
             if (hose.IsHolding)
             {
-                nozzleBar.Text = hose.Nozzle.IsStraight ? "STRAIGHT" : "FOG";
+                nozzleBar.Text = (hose.Nozzle.IsStraight ? "STRAIGHT" : "FOG") + (hose.Nozzle.IsFoam ? " · ~w~FOAM" : "");
                 pressureBar.Percentage = hose.Nozzle.EffectivePressure;
                 bars.Add(nozzleBar);
+                if (hose.Source.Definition.FoamCapacity > 0f)
+                {
+                    foamBar.Text = $"{hose.Source.Foam:N0} L";
+                    bars.Add(foamBar);
+                }
                 bars.Add(pressureBar);
             }
 
@@ -117,6 +124,11 @@ namespace LSFD.UI
         public void ShowCalloutCompleted(Callout callout)
         {
             bigMessage.MessageInstance.ShowColoredShard("CALL COMPLETED", callout.CalloutMessage ?? callout.FriendlyName, HudColor.Red, HudColor.Black, 5000);
+        }
+
+        public void ShowPromotion(string rank)
+        {
+            bigMessage.MessageInstance.ShowColoredShard("PROMOTED", rank, HudColor.Gold, HudColor.Black, 5000);
         }
 
         public void ShowDutyChanged(bool onDuty)

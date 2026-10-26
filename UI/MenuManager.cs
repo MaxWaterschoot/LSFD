@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using LSFD.Apparatus;
 using LSFD.Core;
+using LSFD.Firefighting;
+using LSFD.Profiles;
 using LSFD.Safety;
 using LSFD.Stations;
 using LSFD.VehicleRescue;
@@ -22,11 +24,14 @@ namespace LSFD.UI
         private readonly ToolManager tools;
         private readonly BreathingApparatus scba;
         private readonly ThermalCamera thermalCamera;
+        private readonly Ventilation ventilation;
 
         private readonly MenuPool pool = new MenuPool();
 
         private readonly UIMenu stationMenu = Theme.CreateMenu("Fire station");
         private readonly UIMenu requestApparatusMenu = Theme.CreateMenu("Request apparatus");
+        private readonly UIMenu lockerMenu = Theme.CreateMenu("Locker room");
+        private readonly ProfileManager profiles;
         private readonly UIMenu compartmentMenu = Theme.CreateMenu("Compartments");
 
         // Menu items are rebuilt every time a menu opens; these map them back to what they do.
@@ -35,8 +40,10 @@ namespace LSFD.UI
         private FireStation currentStation;
 
         public MenuManager(DutyManager duty, ApparatusManager apparatus, HoseManager hose, HydrantManager hydrants, ToolManager tools,
-            BreathingApparatus scba, ThermalCamera thermalCamera)
+            BreathingApparatus scba, ThermalCamera thermalCamera, Ventilation ventilation, ProfileManager profiles)
         {
+            this.profiles = profiles;
+            this.ventilation = ventilation;
             this.scba = scba;
             this.thermalCamera = thermalCamera;
             this.duty = duty;
@@ -45,7 +52,7 @@ namespace LSFD.UI
             this.hydrants = hydrants;
             this.tools = tools;
 
-            foreach (UIMenu menu in new[] { stationMenu, requestApparatusMenu, compartmentMenu })
+            foreach (UIMenu menu in new[] { stationMenu, requestApparatusMenu, compartmentMenu, lockerMenu })
             {
                 // Checkboxes are handled by OnCheckboxChange only, so their action doesn't run twice.
                 menu.OnItemSelect += (sender, item, index) =>
@@ -103,6 +110,10 @@ namespace LSFD.UI
             stationMenu.BindMenuToItem(requestApparatusMenu, requestItem);
             BuildRequestApparatusMenu();
 
+            UIMenuItem lockerItem = Add(stationMenu, new UIMenuItem("Locker room", "Choose the outfit you wear on duty (EUP outfits too)."), null);
+            stationMenu.BindMenuToItem(lockerMenu, lockerItem);
+            BuildLockerMenu();
+
             Add(stationMenu, new UIMenuItem("Restock personal gear", "A full SCBA cylinder, your health and a flashlight."), () =>
             {
                 duty.RestockPersonalGear();
@@ -124,6 +135,15 @@ namespace LSFD.UI
                 {
                     Skipped = true,
                     RightLabel = source.IsSupplied ? "~b~On hydrant" : $"{source.Water:N0} / {definition.WaterCapacity:N0} L",
+                });
+            }
+
+            if (definition.FoamCapacity > 0f)
+            {
+                compartmentMenu.AddItem(new UIMenuItem("Foam tank", $"Switch the nozzle to foam with {Settings.FoamKey} for fuel and vehicle fires.")
+                {
+                    Skipped = true,
+                    RightLabel = $"{source.Foam:N0} / {definition.FoamCapacity:N0} L",
                 });
             }
 
@@ -193,6 +213,20 @@ namespace LSFD.UI
                 });
             }
 
+            if (definition.Carries(EquipmentType.PPVFan))
+            {
+                bool taken = ventilation.Source == source;
+                Add(compartmentMenu, new UIMenuItem(taken ? "Put PPV fan back" : "Take PPV fan",
+                    "Blows the smoke out of a building: set it up in the doorway, facing in. The fresh air also feeds the fire."), () =>
+                {
+                    if (taken)
+                        ventilation.Stow();
+                    else
+                        ventilation.Take(source);
+                    pool.CloseAllMenus();
+                });
+            }
+
             if (definition.Carries(EquipmentType.ThermalCamera))
             {
                 bool carryingThis = thermalCamera.Source == source;
@@ -256,6 +290,45 @@ namespace LSFD.UI
                         apparatus.StowEquipment(source, tool);
                 });
             }
+        }
+
+        private void BuildLockerMenu()
+        {
+            Rebuild(lockerMenu, "Locker room");
+            Outfit selected = profiles.SelectedOutfit;
+
+            Add(lockerMenu, new UIMenuItem("Standard turnout gear", "The default LSFD firefighter.")
+            {
+                RightLabel = selected == null ? "~g~Wearing" : "",
+            }, () => ChangeOutfit(null));
+
+            if (profiles.Outfits.Outfits.Count > 0)
+                lockerMenu.AddItem(Theme.CreateHeader("Outfits.xml"));
+            foreach (Outfit outfit in profiles.Outfits.Outfits)
+            {
+                Outfit choice = outfit;
+                Add(lockerMenu, new UIMenuItem(outfit.Name, $"Model {outfit.Model}. Rename or edit it in Plugins/LSFD/Profiles/Outfits.xml.")
+                {
+                    RightLabel = selected == outfit ? "~g~Wearing" : "",
+                }, () => ChangeOutfit(choice));
+            }
+
+            lockerMenu.AddItem(Theme.CreateHeader("EUP"));
+            Add(lockerMenu, new UIMenuItem("Save what I'm wearing", "Dress up with the EUP menu (or any outfit tool) first, then save it here as your duty outfit."), () =>
+            {
+                Outfit saved = profiles.SaveCurrentOutfit();
+                Notify.Info($"Saved as ~y~{saved.Name}~s~ and selected. Rename it in Profiles/Outfits.xml.");
+                pool.CloseAllMenus();
+            });
+
+            lockerMenu.RefreshIndex();
+        }
+
+        private void ChangeOutfit(Outfit outfit)
+        {
+            pool.CloseAllMenus();
+            duty.ChangeOutfit(outfit);
+            Notify.Info(outfit == null ? "Wearing the ~y~standard turnout gear~s~." : $"Wearing ~y~{outfit.Name}~s~.");
         }
 
         private void BuildRequestApparatusMenu()

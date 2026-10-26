@@ -70,6 +70,14 @@ namespace LSFD.Callouts
             return ped;
         }
 
+        /// <summary>Someone who got out by themselves with minor injuries (green).</summary>
+        protected Ped WalkingWounded(Vector3 position)
+        {
+            Ped ped = Scene.Track(Patients.SpawnWalkingWounded(position));
+            PatientsOnScene.Add(ped);
+            return ped;
+        }
+
         protected Ped Patient(Vector3 position, PatientCondition condition)
         {
             Ped ped = Scene.Track(Patients.Spawn(position, condition));
@@ -187,6 +195,21 @@ namespace LSFD.Callouts
             return base.OnBeforeCalloutDisplayed();
         }
 
+        // A mass casualty incident: more ambulances on the first call.
+        public override bool OnCalloutAccepted()
+        {
+            Functions.RequestBackup(LSFD.Apparatus.ApparatusType.Ambulance, CalloutPosition);
+            Functions.RequestBackup(LSFD.Apparatus.ApparatusType.Ambulance, CalloutPosition);
+            return true;
+        }
+
+        public override void Process()
+        {
+            // The call isn't over before every patient has been triaged.
+            if (Patients.AreAllTriaged(PatientsOnScene.ToArray()))
+                base.Process();
+        }
+
         protected override void BuildScene(float heading)
         {
             Vehicle first = Wreck(CalloutPosition, heading, new Vector3(0f, 1f, 0f), 0.6f, 1f);
@@ -199,10 +222,15 @@ namespace LSFD.Callouts
             Patient(third.GetOffsetPositionRight(3f), PatientCondition.Injured);
             Patient(fourth.GetOffsetPositionRight(-3f), SeriousCondition());
 
+            int walking = MathHelper.GetRandomInteger(2, 4);
+            for (int i = 0; i < walking; i++)
+                WalkingWounded(CalloutPosition.Around2D(8f, 12f));
+
             if (vehicleOnFire)
                 Fires.SetOnFire(fourth);
 
-            Game.DisplayHelp("Triage the patients: CPR first, then the ~r~trapped~s~ occupants. Use your crew and the extra units.");
+            Game.DisplayHelp("~o~Mass casualty incident~s~: ~y~triage~s~ every patient first (hold E), then treat ~r~red~s~, ~y~yellow~s~ and ~g~green~s~ in that order. " +
+                "Black means expectant: CPR only once the others are cared for.");
         }
     }
 }

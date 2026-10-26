@@ -30,6 +30,9 @@ namespace LSFD.VehicleRescue
                 new ToolDefinition { Type = EquipmentType.Cribbing, UseSeconds = 5f, AnimName = "fixing_a_ped" },
                 new ToolDefinition { Type = EquipmentType.HydraulicSpreader, UseSeconds = 6f },
                 new ToolDefinition { Type = EquipmentType.HydraulicCutter, Prop = "prop_tool_consaw", OffsetX = 0.1f, OffsetY = 0.05f, UseSeconds = 8f },
+                new ToolDefinition { Type = EquipmentType.GasDetector, Prop = "prop_cs_hand_radio", UseSeconds = 4f, AnimDictionary = "", AnimName = "" },
+                new ToolDefinition { Type = EquipmentType.Absorbent, UseSeconds = 4f, AnimName = "fixing_a_ped" },
+                new ToolDefinition { Type = EquipmentType.TrafficCones, Prop = "prop_roadcone02a", OffsetX = 0.15f, Pitch = 90f, UseSeconds = 1.5f, AnimName = "fixing_a_ped" },
                 new ToolDefinition
                 {
                     Type = EquipmentType.AED, UseSeconds = 5f,

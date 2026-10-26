@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using LSFD.Core;
 using LSFD.UI;
@@ -9,6 +9,24 @@ namespace LSFD.API
     /// <summary>Entry point for other plugins and callout packs to interact with LSFD.</summary>
     public static class Functions
     {
+        /// <summary>
+        /// The LSFD API version this DLL was compiled against. It is a constant, so it is baked into your DLL when you
+        /// build: return it from <see cref="CalloutPack.ApiVersion"/> and LSFD knows which API your pack expects.
+        /// Use <see cref="InstalledApiVersion"/> for the version of the LSFD that is actually running.
+        /// </summary>
+        /// <remarks>
+        /// 1: the first public API. 2: <see cref="Events"/>, <see cref="CalloutPack.ApiVersion"/> and XML callouts.
+        /// A new version only adds to the API; LSFD keeps loading packs built for any version from
+        /// <see cref="OldestSupportedApiVersion"/> up.
+        /// </remarks>
+        public const int ApiVersion = 2;
+
+        /// <summary>Packs built for an older API than this are not loaded.</summary>
+        public const int OldestSupportedApiVersion = 1;
+
+        /// <summary>The API version of the running LSFD (unlike <see cref="ApiVersion"/>, not baked into your DLL).</summary>
+        public static int InstalledApiVersion => ApiVersion;
+
         public delegate void DutyStateChangedEventHandler(bool onDuty);
 
         /// <summary>Raised when the player goes on or off duty.</summary>
@@ -18,6 +36,12 @@ namespace LSFD.API
         public static bool RegisterCallout(Type calloutType) => Lsfd.Registry.Register(calloutType);
 
         public static string[] GetRegisteredCallouts() => Lsfd.Registry.Names.ToArray();
+
+        /// <summary>Whether the player carries this equipment right now (hand tool, weapon or thermal camera).</summary>
+        public static bool IsPlayerCarrying(LSFD.Apparatus.EquipmentType type) => Lsfd.SceneActions.IsCarrying(type);
+
+        /// <summary>Sends an AI unit (e.g. an extra ambulance) from the nearest station to <paramref name="destination"/>.</summary>
+        public static bool RequestBackup(LSFD.Apparatus.ApparatusType type, Vector3 destination) => Lsfd.RequestBackup(type, destination);
 
         public static bool IsPlayerOnDuty() => Lsfd.Duty != null && Lsfd.Duty.IsOnDuty;
 
@@ -41,23 +65,6 @@ namespace LSFD.API
             return World.GetNextPositionOnStreet(around);
         }
 
-        internal static void RaiseDutyStateChanged(bool onDuty)
-        {
-            if (OnDutyStateChanged == null)
-                return;
-
-            // One faulty subscriber shouldn't break the others or LSFD itself.
-            foreach (DutyStateChangedEventHandler handler in OnDutyStateChanged.GetInvocationList())
-            {
-                try
-                {
-                    handler(onDuty);
-                }
-                catch (Exception e)
-                {
-                    Game.LogTrivial($"LSFD: OnDutyStateChanged handler {handler.Method.DeclaringType} threw: {e}");
-                }
-            }
-        }
+        internal static void RaiseDutyStateChanged(bool onDuty) => Events.Raise(OnDutyStateChanged, nameof(OnDutyStateChanged), onDuty);
     }
 }

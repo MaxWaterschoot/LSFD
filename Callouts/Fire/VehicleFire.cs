@@ -39,7 +39,7 @@ namespace LSFD.Callouts
             Fires.StartFire(vehicle.GetOffsetPositionFront(2.5f), 10);
 
             if (driverBurned)
-                driver = scene.Track(Patients.Spawn(vehicle.GetOffsetPositionRight(5f), PatientCondition.Injured));
+                driver = scene.Track(Patients.Spawn(vehicle.GetOffsetPositionRight(5f), PatientCondition.Injured, 0f, InjuryType.Burns));
             else
                 driver = scene.SpawnBystander(vehicle.GetOffsetPositionRight(6f));
 

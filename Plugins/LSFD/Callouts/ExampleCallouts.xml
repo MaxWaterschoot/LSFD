@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Data-driven callouts: no programming needed. Every .xml file in this folder is loaded when LSFD starts.
+  Copy this file, rename it and change the calls; see docs/XML-CALLOUTS.md for every option.
+  Check RagePluginHook.log when a call doesn't show up: LSFD writes there why it skipped it.
+  After editing, reload with the console command LSFD_ReloadXmlCallouts, then test with:  LSFD_Dispatch "Kitchen Fire"
+-->
+<Callouts>
+
+  <!-- A fire with a burned occupant; the fire grows while you respond. -->
+  <Callout Name="Kitchen Fire" Probability="Low" Category="Fire" Priority="Priority1">
+    <Message>Kitchen Fire</Message>
+    <Advisory>Pan fire spreading to the cabinets, the occupant tried to put it out.</Advisory>
+    <ArrivalHelp>Put out the ~r~fire~s~ and treat the ~r~occupant~s~.</ArrivalHelp>
+    <CompletedMessage>Fire out and the occupant is being cared for.</CompletedMessage>
+    <Location MinDistance="300" MaxDistance="900" AreaRadius="30" />
+    <Alarm Level="1" />
+    <Fire Points="2" Intensity="0.5" SpreadRadius="8" SpreadSeconds="45" Class="Flammable" />
+    <Patient Condition="Injured" Injury="Burns" Distance="10" />
+    <Bystander Count="2" />
+  </Callout>
+
+  <!-- A gas smell: no fire, just a toxic atmosphere and two tasks. -->
+  <Callout Name="Gas Smell In Garage" Probability="Low" Category="Hazmat" Priority="Priority2">
+    <Message>Gas Smell</Message>
+    <Advisory>Caller smells gas in their garage, a resident feels dizzy.</Advisory>
+    <ArrivalHelp>Wear your ~b~SCBA~s~, take the ~y~gas detector~s~, find the leak and ventilate.</ArrivalHelp>
+    <Location MinDistance="250" MaxDistance="800" AreaRadius="25" />
+    <ToxicAtmosphere Radius="10" Strength="0.7" />
+    <Patient Condition="Injured" Injury="SmokeInhalation" Distance="14" />
+    <Task Text="measure with the ~y~gas detector" Seconds="3" Equipment="GasDetector" OffsetX="3" OffsetY="2"
+          DoneMessage="~o~High gas reading~s~ near the boiler." />
+    <Task Text="close the ~y~gas valve~s~ and ventilate" Seconds="5" OffsetX="-2" OffsetY="4"
+          DoneMessage="Gas ~g~off~s~, the garage is airing out." ClearsToxicAtmosphere="true" />
+  </Callout>
+
+  <!-- A crash: a trapped driver, a walking wounded passenger and an extra ambulance. -->
+  <Callout Name="Car Into Pole" Probability="Low" Category="Traffic" Priority="Priority1">
+    <Message>Vehicle Into Pole</Message>
+    <Advisory>Car hit a pole, driver ~r~trapped~s~, the passenger got out.</Advisory>
+    <ArrivalHelp>Stabilize the car, extricate the ~r~driver~s~ and check the ~y~passenger~s~.</ArrivalHelp>
+    <Location MinDistance="300" MaxDistance="900" AreaRadius="20" />
+    <Vehicle Model="random" Crash="0.8" TrapDriver="true" />
+    <Patient Minor="true" Distance="5" />
+    <Backup Type="Ambulance" />
+  </Callout>
+
+</Callouts>

@@ -1,4 +1,4 @@
-# Making your own LSFD callouts
+﻿# Making your own LSFD callouts
 
 LSFD loads callouts from any DLL in `GTA V/Plugins/LSFD/Callouts/`, the same way LSPDFR loads callout packs.
 A working example lives in [`Examples/ExampleCallouts`](../Examples/ExampleCallouts).
@@ -147,6 +147,32 @@ LSFD removes the incident when the callout ends. What it does on its own:
 | `PointsPerAlarm` / `MaxAlarmLevel` | 6 / 3 | Escalation, see above. |
 | `IsIndoor` / `IsGasFire` | false | |
 | `SmokeColumnHeight` | 1 | Meters above the origin. |
+| `Class` | `Ordinary` | `Flammable` (foam works, water barely), `Electrical` (water shocks until the power is isolated), `Battery` (EV: lots of water, keeps rekindling). |
+| `PowerPanel` | null | For `Electrical`: where the player isolates the power. |
+
+## Scene actions
+
+Things the player does at a spot by holding the interact key, shown with a yellow arrow:
+
+```csharp
+AddSceneAction(new SceneAction(valvePosition, "close the ~y~gas valve~s~", () => valveClosed = true)
+{
+    RequiredEquipment = EquipmentType.Crowbar,   // optional: hand tool or weapon from an engine
+    HoldSeconds = 6f,
+    ProgressLabel = "CLOSING VALVE",
+});
+```
+
+`CanUse` and `RequirementHint` add your own condition; `Repeatable` keeps the action after it was done. Actions added
+with `AddSceneAction` are removed when the callout ends.
+
+## Hazards and doors
+
+| Member | What it does |
+| --- | --- |
+| `Hazards.AddToxicAtmosphere(position, radius, strength)` | Invisible gas (e.g. CO) that hurts without an SCBA. Lower `Strength` as it is ventilated, `Remove()` when clear. |
+| `Interiors.LockDoors(position, radius, chance)` | Locks doors around a building; they must be forced with a halligan or axe. Unlocked when the call ends. |
+| `Functions.IsPlayerCarrying(equipment)` | Whether the player has a tool, weapon or the thermal camera. |
 
 ## Vehicle rescue
 
@@ -181,8 +207,18 @@ Patients.Release(patient);
 Patients.Release(victim);
 ```
 
-Conditions are `Injured`, `Unconscious`, `CardiacArrest`, `Stable` and `Deceased`. A cardiac arrest without CPR dies
-after about four minutes; a victim left in a burning building goes into cardiac arrest after about five. The player and
+Conditions are `Injured`, `Unconscious`, `CardiacArrest`, `Stable` and `Deceased`. Without care a patient gets worse:
+injured → unconscious after 5-7 minutes → cardiac arrest after 4-6 more → deceased 4 minutes later without CPR. Smoke and
+heat around the patient (from LSFD fire incidents) speed this up and cause smoke inhalation and burns.
+
+Pass an `InjuryType` (`Medical`, `Trauma`, `Burns`, `SmokeInhalation`) to `Patients.Spawn`; burns take longer to treat.
+`Patients.SpawnWalkingWounded(position)` adds a green patient with minor injuries that doesn't get worse.
+
+With three or more patients close together it is a **mass casualty incident**: patients are triaged (START: red,
+yellow, green, black) by the player or the crew, the crew and the ambulances then go red first.
+`Patients.AreAllTriaged(...)` and `Patients.GetTriage(ped)` let your callout wait for that. Stable patients are taken to
+hospital by an AI ambulance before `Patients.AreAllHandled` is true; `Functions.RequestBackup(ApparatusType.Ambulance, position)`
+sends extra ambulances. The player and
 the AI crew treat, resuscitate and carry patients; `Patients.OnConditionChanged` tells you when something changes.
 Extricated vehicle occupants become `Injured` patients automatically.
 
@@ -209,10 +245,68 @@ inherits from `CalloutPack`:
 ```csharp
 public class MyPack : CalloutPack
 {
-    public override void Initialize() => Functions.OnDutyStateChanged += onDuty => { /* ... */ };
-    public override void Finally() { }
+    // Baked in at compile time: tells LSFD which API version this DLL was built against.
+    public override int ApiVersion => Functions.ApiVersion;
+
+    public override void Initialize()
+    {
+        Functions.OnDutyStateChanged += OnDutyStateChanged;
+        Events.OnCalloutEnded += OnCalloutEnded;
+    }
+
+    // Unsubscribe here, or your handlers keep running after a ReloadPlugin.
+    public override void Finally()
+    {
+        Functions.OnDutyStateChanged -= OnDutyStateChanged;
+        Events.OnCalloutEnded -= OnCalloutEnded;
+    }
+
+    private static void OnDutyStateChanged(bool onDuty) { /* ... */ }
+    private static void OnCalloutEnded(Callout callout) { /* callout.IsCompleted: handled or cancelled */ }
 }
 ```
+
+### API version
+
+`Functions.ApiVersion` is a constant, so its value is baked into your DLL when you compile. Return it from `ApiVersion` and LSFD knows which API your pack expects.
+
+When LSFD loads your DLL:
+- **Your pack is built for the same or an older API:** it is loaded. New LSFD versions only add to the API; they don't remove or change what is there, so a pack keeps working after an LSFD update.
+- **Your pack needs a newer API than the installed LSFD:** it is not loaded. None of its callouts are registered, and the player gets a message that LSFD needs an update. Without this check, the pack would crash halfway with a `MissingMethodException`.
+- **No `ApiVersion` override:** the pack counts as version 1.
+- **No pack at all:** the callouts are loaded as before.
+
+Two more checks keep a broken pack from taking LSFD down:
+- **Callout fails to start:** a callout that can't be created (e.g. built against an incompatible LSFD) is taken out of the rotation, with the reason in `RagePluginHook.log`.
+- **Event handler throws:** an exception in one of your event handlers is logged and doesn't affect LSFD or other packs.
+
+To check at runtime, `Functions.InstalledApiVersion` gives the version of the running LSFD.
+
+| Version | Added |
+|---|---|
+| 1 | The first public API. |
+| 2 | `Events`, `CalloutPack.ApiVersion`, XML callouts. |
+
+### Events
+
+The events are in the static class `Events`. They run on LSFD's game fiber, so you can call RPH and natives from them directly.
+
+| Event | Arguments | When |
+|---|---|---|
+| `Functions.OnDutyStateChanged` | `bool onDuty` | The player goes on or off duty. |
+| `Events.OnCalloutAccepted` | `Callout` | The player accepted a call; its `OnCalloutAccepted` has run. |
+| `Events.OnCalloutEnded` | `Callout` | An accepted call ended. `callout.IsCompleted` tells handled from cancelled. |
+| `Events.OnFireExtinguished` | `FireIncident` | A fire incident is completely out, hotspots included (any incident, also from other packs). |
+| `Events.OnPatientRescued` | `Ped` | A victim was carried out of a building to safety. |
+| `Events.OnPatientStabilized` | `Ped` | A patient became stable, by treatment or successful CPR. |
+| `Events.OnPatientTransported` | `Ped` | An ambulance handed a patient over at a hospital; the ped is deleted right after. |
+| `Events.OnApparatusSpawned` | `Vehicle, ApparatusType, bool isAiUnit` | An apparatus was spawned at a station, for the player or as an AI unit. |
+
+Other events: `Patients.OnConditionChanged`, `Rescue.OnPatientExtricated` and `FireIncident.StatusChanged`.
+
+## No programming: XML callouts
+
+Simple calls (a fire, patients, vehicles, a few tasks) can also be made without C#, in an XML file. See [XML-CALLOUTS.md](XML-CALLOUTS.md).
 
 ## Testing
 

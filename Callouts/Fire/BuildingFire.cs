@@ -63,6 +63,8 @@ namespace LSFD.Callouts
         protected override void OnArrival()
         {
             Interiors.PrepareInterior(building.Position);
+            // Closed doors between the street and the fire have to be forced.
+            Interiors.LockDoors(building.Position, 20f, 0.6f);
 
             for (int i = 0; i < trappedCount; i++)
             {

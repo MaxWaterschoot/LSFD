@@ -44,6 +44,9 @@ namespace LSFD.Apparatus
                     PumpRate = 30f,
                     HoseLength = 30f,
                     SupplyLineLength = 35f,
+                    AttackLines = 2,
+                    FoamCapacity = 200f,
+                    HasDeckGun = true,
                     MinCrew = 2,
                     MaxCrew = 4,
                     Equipment =
@@ -52,6 +55,7 @@ namespace LSFD.Apparatus
                         EquipmentType.Axe, EquipmentType.Crowbar, EquipmentType.Flashlight,
                         EquipmentType.WindowPunch, EquipmentType.Cribbing, EquipmentType.HydraulicSpreader, EquipmentType.HydraulicCutter,
                         EquipmentType.AED, EquipmentType.SCBA, EquipmentType.ThermalCamera,
+                        EquipmentType.PPVFan, EquipmentType.GasDetector, EquipmentType.Absorbent, EquipmentType.TrafficCones,
                     },
                 },
                 new ApparatusDefinition
@@ -59,8 +63,10 @@ namespace LSFD.Apparatus
                     Name = "Ambulance",
                     Model = "ambulance",
                     Type = ApparatusType.Ambulance,
+                    // A driver and a second paramedic, who rides in the back with the patient.
                     MinCrew = 1,
                     MaxCrew = 1,
+                    CrewModel = "s_m_m_paramedic_01",
                     Equipment = { EquipmentType.FireExtinguisher, EquipmentType.Flashlight, EquipmentType.AED },
                 },
                 new ApparatusDefinition

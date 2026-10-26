@@ -36,11 +36,23 @@ namespace LSFD.Apparatus
         [XmlAttribute] public float PumpRate { get; set; } = 25f;
 
         [XmlAttribute] public float HoseLength { get; set; } = 30f;
+
+        /// <summary>Attack lines that can be stretched at the same time (the player's and the crew's).</summary>
+        [XmlAttribute] public int AttackLines { get; set; } = 2;
+
+        /// <summary>Foam concentrate in liters, 0 for none. Switch the nozzle to foam for fuel and vehicle fires.</summary>
+        [XmlAttribute] public float FoamCapacity { get; set; }
+
+        /// <summary>Whether the vehicle has a roof-mounted water cannon (deck gun) that cools LSFD fires.</summary>
+        [XmlAttribute] public bool HasDeckGun { get; set; }
         [XmlAttribute] public float SupplyLineLength { get; set; } = 30f;
 
         /// <summary>AI firefighters riding along; a random number between these is spawned with the vehicle.</summary>
         [XmlAttribute] public int MinCrew { get; set; }
         [XmlAttribute] public int MaxCrew { get; set; }
+
+        /// <summary>Ped model of the crew, e.g. paramedics on an ambulance. Empty means firefighters.</summary>
+        [XmlAttribute] public string CrewModel { get; set; }
 
         /// <summary>Livery index to apply, -1 keeps the default.</summary>
         [XmlAttribute] public int Livery { get; set; } = -1;

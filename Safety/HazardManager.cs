@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using LSFD.API;
 using LSFD.Core;
 using LSFD.Firefighting;
 using LSFD.Water;
@@ -20,6 +23,8 @@ namespace LSFD.Safety
         // A fog pattern puts a wall of water between the firefighter and the fire.
         private const float FogHeatShield = 0.5f;
         private const float HeatOverlayStart = 0.3f;
+        private const float ShockDamagePerSecond = 25f;
+        private const uint ShockWindow = 300;
 
         private const int SmokeAlpha = 215;
         private const int SmokeAlphaWithCamera = 70;
@@ -34,6 +39,7 @@ namespace LSFD.Safety
         private readonly ThermalCamera camera;
         private readonly HoseManager hose;
 
+        private readonly List<ToxicAtmosphere> toxicAtmospheres = new List<ToxicAtmosphere>();
         private float pendingDamage;
         private uint nextWarningAt;
         private uint nextCoughAt;
@@ -46,6 +52,14 @@ namespace LSFD.Safety
             this.camera = camera;
             this.hose = hose;
         }
+
+        public void AddToxicAtmosphere(ToxicAtmosphere zone)
+        {
+            toxicAtmospheres.Add(zone);
+        }
+
+        /// <summary>Toxic gas (like CO) around the player, 0 to 1; invisible, unlike smoke.</summary>
+        public float Toxic { get; private set; }
 
         /// <summary>Smoke around the player, 0 to 1.</summary>
         public float Smoke { get; private set; }
@@ -80,7 +94,10 @@ namespace LSFD.Safety
                 heat *= FogHeatShield;
             Heat = heat;
 
-            IsBreathingSmoke = Smoke >= SmokeThreshold && !scba.IsSupplying;
+            toxicAtmospheres.RemoveAll(z => z.IsRemoved);
+            Toxic = toxicAtmospheres.Where(z => z.Position.DistanceTo(player.Position) <= z.Radius).Select(z => z.Strength).DefaultIfEmpty(0f).Max();
+
+            IsBreathingSmoke = Math.Max(Smoke, Toxic) >= SmokeThreshold && !scba.IsSupplying;
 
             if (Settings.SmokeAndHeatDamage)
                 ApplyDamage(player);
@@ -108,11 +125,19 @@ namespace LSFD.Safety
 
             if (IsBreathingSmoke)
             {
-                pendingDamage += SmokeDamagePerSecond * Smoke * delta;
+                pendingDamage += SmokeDamagePerSecond * Math.Max(Smoke, Toxic) * delta;
                 Warn(scba.IsMaskOn
                     ? "~r~Your cylinder is empty!~s~ Get out of the smoke."
                     : $"~r~You are breathing smoke!~s~ Put your face piece on with ~b~{Settings.MaskKey}~s~.");
                 Cough(player);
+            }
+
+            // Water conducts: spraying a fire with live electrics shocks whoever holds the nozzle.
+            if (hose.IsSpraying && Game.GameTime - fire.LastEnergizedHitAt < ShockWindow)
+            {
+                pendingDamage += ShockDamagePerSecond * delta;
+                Warn("~r~Electric shock!~s~ Isolate the power first, or use an extinguisher.");
+                NativeFunction.CallByName<uint>("SHAKE_GAMEPLAY_CAM", "SMALL_EXPLOSION_SHAKE", 0.05f);
             }
 
             if (IsInDangerousHeat)

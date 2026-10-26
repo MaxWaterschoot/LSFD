@@ -17,6 +17,8 @@ namespace LSFD.Callouts
         /// <summary>Read once per call, so it may be random.</summary>
         protected abstract PatientCondition InitialCondition { get; }
 
+        protected virtual InjuryType Injury => InjuryType.Medical;
+
         public override bool OnBeforeCalloutDisplayed()
         {
             // Off the road a bit, so the patient isn't lying in traffic.
@@ -32,7 +34,7 @@ namespace LSFD.Callouts
         protected override void OnArrival()
         {
             Vector3 position = CalloutPosition.Around2D(3f, 5f);
-            patient = scene.Track(Patients.Spawn(position, condition));
+            patient = scene.Track(Patients.Spawn(position, condition, 0f, Injury));
             scene.SpawnBystander(position.Around2D(1.5f, 2.5f));
             Game.DisplayHelp(condition == PatientCondition.CardiacArrest
                 ? "The patient has ~r~no pulse~s~: start ~r~CPR~s~ right away and use an ~y~AED~s~ if you have one."
@@ -45,14 +47,16 @@ namespace LSFD.Callouts
                 return;
 
             PatientCondition? current = Patients.GetCondition(patient);
-            if (current == PatientCondition.Stable)
+            if (current == PatientCondition.Deceased)
             {
-                Complete();
-            }
-            else if (current == PatientCondition.Deceased && !deathReported)
-            {
+                if (deathReported)
+                    return;
                 deathReported = true;
                 Functions.DisplayNotification("~r~Patient deceased", "The patient could not be saved. Clear the call when you are ready.");
+            }
+            else if (Patients.AreAllHandled(patient))
+            {
+                Complete();
             }
         }
 
@@ -94,5 +98,6 @@ namespace LSFD.Callouts
         protected override string Title => "Injured Person";
         protected override string Advisory => Reasons[MathHelper.GetRandomInteger(Reasons.Length)];
         protected override PatientCondition InitialCondition => PatientCondition.Injured;
+        protected override InjuryType Injury => InjuryType.Trauma;
     }
 }

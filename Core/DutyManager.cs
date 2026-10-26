@@ -1,5 +1,6 @@
 using System;
 using LSFD.API;
+using LSFD.Profiles;
 using LSFD.Safety;
 using LSFD.Stations;
 using LSFD.UI;
@@ -13,11 +14,33 @@ namespace LSFD.Core
         private const int FadeMilliseconds = 600;
 
         private readonly BreathingApparatus scba;
+        private readonly ProfileManager profiles;
         private Model? originalModel;
 
-        public DutyManager(BreathingApparatus scba)
+        // The player's own clothes, put back on when going off duty in the same model.
+        private Outfit ownClothes;
+
+        public DutyManager(BreathingApparatus scba, ProfileManager profiles)
         {
             this.scba = scba;
+            this.profiles = profiles;
+        }
+
+        /// <summary>Changes into an outfit right away, e.g. from the locker room; null is the default firefighter.</summary>
+        public void ChangeOutfit(Outfit outfit)
+        {
+            profiles.SelectOutfit(outfit);
+            if (IsOnDuty)
+                ChangeClothes(SuitUp);
+        }
+
+        private void SuitUp()
+        {
+            Outfit outfit = profiles.SelectedOutfit;
+            if (outfit != null)
+                outfit.ApplyToPlayer();
+            else if (Settings.ChangeModelOnDuty)
+                Game.LocalPlayer.Model = FirefighterModel;
         }
 
         public bool IsOnDuty { get; private set; }
@@ -33,11 +56,9 @@ namespace LSFD.Core
             // Like walking into the locker room: fade out, suit up, fade back in.
             ChangeClothes(() =>
             {
-                if (Settings.ChangeModelOnDuty)
-                {
-                    originalModel = Game.LocalPlayer.Model;
-                    Game.LocalPlayer.Model = FirefighterModel;
-                }
+                originalModel = Game.LocalPlayer.Model;
+                ownClothes = Outfit.Capture(Game.LocalPlayer.Character, "Own clothes");
+                SuitUp();
                 RestockPersonalGear();
             });
 
@@ -56,11 +77,12 @@ namespace LSFD.Core
 
             ChangeClothes(() =>
             {
-                if (originalModel.HasValue)
-                {
+                if (ownClothes != null)
+                    ownClothes.ApplyToPlayer();
+                else if (originalModel.HasValue)
                     Game.LocalPlayer.Model = originalModel.Value;
-                    originalModel = null;
-                }
+                originalModel = null;
+                ownClothes = null;
             });
 
             IsOnDuty = false;

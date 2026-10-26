@@ -7,6 +7,7 @@ using LSFD.Core;
 using LSFD.Crew;
 using LSFD.Firefighting;
 using LSFD.Medical;
+using LSFD.Profiles;
 using LSFD.Stations;
 using RAGENativeUI;
 using RAGENativeUI.Elements;
@@ -36,6 +37,8 @@ namespace LSFD.UI
         private readonly TabInteractiveListItem vehicleTab = new TabInteractiveListItem("Vehicle Control", new List<UIMenuItem>());
         private readonly TabInteractiveListItem sceneTab = new TabInteractiveListItem("Scene Management", new List<UIMenuItem>());
         private readonly TabInteractiveListItem stationsTab = new TabInteractiveListItem("Fire Stations", new List<UIMenuItem>());
+        private readonly TabInteractiveListItem profileTab = new TabInteractiveListItem("Profile", new List<UIMenuItem>());
+        private readonly ProfileManager profiles;
 
         // Items are rebuilt on every refresh; these map them back to what they do.
         private readonly Dictionary<UIMenuItem, Action> actions = new Dictionary<UIMenuItem, Action>();
@@ -43,9 +46,10 @@ namespace LSFD.UI
         public bool IsOpen => view.Visible;
 
         public Tablet(DutyManager duty, CalloutManager callouts, ApparatusManager apparatus, CrewManager crew,
-            FireStationManager stations, PatientManager patients, FireSystem fire, Action<FireApparatus> returnApparatus,
+            FireStationManager stations, PatientManager patients, FireSystem fire, ProfileManager profiles, Action<FireApparatus> returnApparatus,
             Func<ApparatusType, Vector3, bool> requestBackup)
         {
+            this.profiles = profiles;
             this.fire = fire;
             this.patients = patients;
             this.requestBackup = requestBackup;
@@ -56,7 +60,7 @@ namespace LSFD.UI
             this.stations = stations;
             this.returnApparatus = returnApparatus;
 
-            foreach (TabInteractiveListItem tab in new[] { dispatchTab, vehicleTab, sceneTab, stationsTab })
+            foreach (TabInteractiveListItem tab in new[] { dispatchTab, vehicleTab, sceneTab, stationsTab, profileTab })
             {
                 view.AddTab(tab);
                 tab.BackingMenu.OnItemSelect += (sender, item, index) =>
@@ -112,6 +116,7 @@ namespace LSFD.UI
             SetItems(vehicleTab, BuildVehicleTab());
             SetItems(sceneTab, BuildSceneTab());
             SetItems(stationsTab, BuildStationsTab());
+            SetItems(profileTab, BuildProfileTab());
         }
 
         private List<UIMenuItem> BuildDispatchTab()
@@ -232,6 +237,13 @@ namespace LSFD.UI
                 items.Add(Info("  Hotspots", "Knocked down, but they rekindle unless you overhaul them with water. The thermal camera shows them.",
                     incident.Hotspots == 0 ? "~g~0" : $"~o~{incident.Hotspots}"));
                 items.Add(Info("  Time since dispatch", "", $"{minutes} min"));
+                if (incident.Options.Class != FireClass.Ordinary)
+                    items.Add(Info("  Fire class", "Flammable: use foam. Electrical: isolate the power first. Battery: lots of water, keeps rekindling.",
+                        incident.Options.Class.ToString()));
+                if (incident.Options.Class == FireClass.Electrical)
+                    items.Add(Info("  Power", "Isolate it at the panel (yellow arrow) before using water.", incident.IsPowerIsolated ? "~g~Isolated" : "~r~LIVE"));
+                if (incident.Options.IsIndoor)
+                    items.Add(Info("  Ventilation", "A PPV fan in the doorway pushes the smoke out, but feeds the fire.", incident.IsVentilated ? "~b~PPV running" : "None"));
             }
             else
             {
@@ -245,7 +257,8 @@ namespace LSFD.UI
                 int trapped = onScene.Count(p => p.NeedsRescue);
                 int critical = onScene.Count(p => p.Condition == PatientCondition.CardiacArrest);
                 int waiting = onScene.Count(p => p.NeedsCare) - critical;
-                int stable = onScene.Count(p => p.Condition == PatientCondition.Stable);
+                int stable = onScene.Count(p => p.Condition == PatientCondition.Stable && p.Transport == TransportState.None);
+                int transported = onScene.Count(p => p.Transport != TransportState.None);
                 int deceased = onScene.Count(p => p.Condition == PatientCondition.Deceased);
 
                 items.Add(Info("Patients", "Patients within the scene area.", $"{onScene.Count}"));
@@ -256,9 +269,23 @@ namespace LSFD.UI
                 if (waiting > 0)
                     items.Add(Info("  Awaiting treatment", "Injured or unconscious.", $"~o~{waiting}"));
                 if (stable > 0)
-                    items.Add(Info("  Stable", "Ready for transport.", $"~g~{stable}"));
+                    items.Add(Info("  Stable", "Waiting for an ambulance to take them to hospital.", $"~g~{stable}"));
+                if (transported > 0)
+                    items.Add(Info("  In transport", "Being loaded or in the ambulance.", $"~b~{transported}"));
                 if (deceased > 0)
                     items.Add(Info("  Deceased", "", $"{deceased}"));
+
+                if (patients.IsMassCasualty(player))
+                {
+                    int untagged = onScene.Count(p => p.NeedsTriage);
+                    items.Add(Theme.CreateHeader("Mass casualty incident: triage"));
+                    items.Add(Info("  Red (immediate)", "", $"~r~{onScene.Count(p => p.Triage == TriageTag.Red)}"));
+                    items.Add(Info("  Yellow (delayed)", "", $"~y~{onScene.Count(p => p.Triage == TriageTag.Yellow)}"));
+                    items.Add(Info("  Green (minor)", "", $"~g~{onScene.Count(p => p.Triage == TriageTag.Green)}"));
+                    items.Add(Info("  Black (expectant)", "", $"{onScene.Count(p => p.Triage == TriageTag.Black)}"));
+                    if (untagged > 0)
+                        items.Add(Info("  Not triaged yet", "Hold E at a patient, or order the crew to patient care.", $"~o~{untagged}"));
+                }
             }
 
             items.Add(Theme.CreateHeader($"Crew ({crew.Members.Count})"));
@@ -279,10 +306,47 @@ namespace LSFD.UI
             items.Add(CrewOrderItem("Work the scene", "Do what is most urgent: CPR, rescues, extrication, treatment, then the fire.", CrewOrder.WorkScene));
             items.Add(CrewOrderItem("Search and rescue", "Carry victims out of buildings and extricate trapped occupants.", CrewOrder.RescueVictims));
             items.Add(CrewOrderItem("Patient care", "CPR and first aid for every patient on scene.", CrewOrder.TreatPatients));
-            items.Add(CrewOrderItem("Extinguish nearby fires", "Grab extinguishers and attack the closest fires.", CrewOrder.Extinguish));
+            items.Add(CrewOrderItem("Attack the fire", "Stretch hose lines from the engines (extinguishers when none are left) and attack the closest fires.", CrewOrder.Extinguish));
+            items.Add(Action(new UIMenuItem("Operate the deck gun", "One firefighter per engine works the roof-mounted water cannon."), () => crew.CommandDeckGun()));
             items.Add(CrewOrderItem("Follow me", "Walk with you.", CrewOrder.FollowPlayer));
             items.Add(CrewOrderItem("Hold position", "Stay where they are.", CrewOrder.HoldPosition));
             items.Add(CrewOrderItem("Return to apparatus", "Get back in the vehicles.", CrewOrder.ReturnToApparatus));
+
+            return items;
+        }
+
+        private List<UIMenuItem> BuildProfileTab()
+        {
+            Profile profile = profiles.Profile;
+            int points = profile.Points;
+            int? next = Ranks.NextAt(points);
+
+            var items = new List<UIMenuItem>
+            {
+                Theme.CreateHeader(profile.Name),
+                Info("Rank", next.HasValue ? $"{next.Value - points} points to the next rank." : "The top of the department.", $"~y~{profiles.Rank}"),
+                Info("Points", "Calls, fires, rescues and patients all count.", $"{points}"),
+                Info("Hours on duty", "", $"{profile.HoursOnDuty:0.0}"),
+                Theme.CreateHeader("Statistics"),
+                Info("Calls completed", "", $"{profile.CallsCompleted} / {profile.CallsAttended}"),
+                Info("Fires put out", "", $"{profile.FiresExtinguished}"),
+                Info("People rescued", "Carried out of burning buildings.", $"{profile.PeopleRescued}"),
+                Info("Patients treated", "", $"{profile.PatientsTreated}"),
+                Info("Patients resuscitated", "", $"{profile.PatientsResuscitated}"),
+                Info("Patients transported", "", $"{profile.PatientsTransported}"),
+                Theme.CreateHeader("Recent calls"),
+            };
+
+            if (profile.History.Count == 0)
+                items.Add(Info("No calls yet", "Accepted calls are logged here."));
+
+            foreach (CallRecord call in profile.History.Take(15))
+            {
+                string alarm = CalloutPriorityExtensions.AlarmToDisplay(call.AlarmLevel);
+                items.Add(Info($"{call.Date:dd/MM HH:mm}  {call.Name}",
+                    $"{call.Category}{(alarm != "" ? " · " + alarm : "")} · {call.Location} · {call.Minutes} min",
+                    call.Completed ? "~g~Completed" : "~o~Cancelled"));
+            }
 
             return items;
         }

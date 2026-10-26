@@ -29,6 +29,7 @@ namespace LSFD.Water
         private readonly Dictionary<uint, float> entityCooling = new Dictionary<uint, float>();
         private readonly List<Vector3> path = new List<Vector3>();
         private uint lastImpactPush;
+        private bool isFoamEffect;
 
         public WaterStream(FireSystem fire)
         {
@@ -99,10 +100,19 @@ namespace LSFD.Water
         {
             Rotator rotation = direction.ToRotator();
 
-            if (!particle.IsActive || particle.EffectName != nozzle.EffectName || Math.Abs(particle.Scale - nozzle.EffectScale) > 0.01f)
+            if (!particle.IsActive || particle.EffectName != nozzle.EffectName || Math.Abs(particle.Scale - nozzle.EffectScale) > 0.01f
+                || isFoamEffect != nozzle.IsFoam)
+            {
                 particle.Start(nozzle.EffectName, nozzlePosition, rotation, nozzle.EffectScale);
+                // Foam is the same stream, only white and thicker looking.
+                if (nozzle.IsFoam)
+                    particle.SetColor(2f, 2f, 2f);
+                isFoamEffect = nozzle.IsFoam;
+            }
             else
+            {
                 particle.Move(nozzlePosition, rotation);
+            }
         }
 
         private void CoolFires(Vector3 origin, Vector3 direction, Vector3 impact, Nozzle nozzle)
@@ -110,7 +120,7 @@ namespace LSFD.Water
             float cooling = nozzle.CoolingPerSecond * Game.FrameTime;
 
             // The incident's own fire points; the GTA flames below are only what they look like.
-            this.fire.ApplyWater(position => IsInStream(position, origin, direction, impact, nozzle), cooling);
+            this.fire.ApplyWater(position => IsInStream(position, origin, direction, impact, nozzle), cooling, nozzle.Agent);
 
             foreach (Fire fire in World.GetAllFires())
             {
@@ -135,7 +145,8 @@ namespace LSFD.Water
 
         private void CoolBurningEntities(Vector3 impact, Nozzle nozzle)
         {
-            float cooling = nozzle.CoolingPerSecond * Game.FrameTime;
+            // Foam smothers burning fuel, which is most of a vehicle fire.
+            float cooling = nozzle.CoolingPerSecond * Game.FrameTime * (nozzle.IsFoam ? 2f : 1f);
             var flags = GetEntitiesFlags.ConsiderAllPeds | GetEntitiesFlags.ConsiderAllVehicles | GetEntitiesFlags.ConsiderAllObjects;
 
             foreach (Entity entity in World.GetEntities(impact, nozzle.ImpactRadius + 1f, flags).Where(e => e.Exists() && e.IsOnFire))

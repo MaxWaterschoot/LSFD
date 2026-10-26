@@ -29,6 +29,12 @@ namespace LSFD.API
     public static class Interiors
     {
         /// <summary>
+        /// Locks doors around <paramref name="position"/> (each with <paramref name="chance"/>), so firefighters have to force
+        /// them with a halligan bar or axe. They are unlocked when the callout ends. Returns how many were locked.
+        /// </summary>
+        public static int LockDoors(Vector3 position, float radius, float chance = 0.7f) => Lsfd.Entry.LockDoorsNear(position, radius, chance);
+
+        /// <summary>
         /// Whether the Enable All Interiors mod is installed (or forced on in LSFD.ini), so normally locked buildings can be entered.
         /// Callouts with <see cref="CalloutInfoAttribute.RequiresOpenInteriors"/> are only dispatched when this is true.
         /// </summary>

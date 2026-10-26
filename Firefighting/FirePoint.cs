@@ -38,6 +38,9 @@ namespace LSFD.Firefighting
         /// <summary>Heat left after knockdown; overhaul (more water) brings it to 0.</summary>
         public float Heat { get; set; }
 
+        /// <summary>Heat a spot keeps after its flames are knocked down.</summary>
+        public float HeatAfterKnockdown { get; set; } = 1f;
+
         public uint LastWaterAt { get; set; }
 
         /// <summary>When a smoldering spot gets its next chance to rekindle.</summary>

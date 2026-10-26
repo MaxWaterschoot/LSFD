@@ -23,16 +23,41 @@ namespace LSFD.API
         }
 
         /// <summary>Spawns a civilian at <paramref name="position"/> and makes them a patient.</summary>
-        public static Ped Spawn(Vector3 position, PatientCondition condition, float heading = 0f)
+        /// <remarks>Without care, patients get worse: injured → unconscious → cardiac arrest → deceased; smoke and heat speed that up.</remarks>
+        public static Ped Spawn(Vector3 position, PatientCondition condition, float heading = 0f, InjuryType injury = InjuryType.Trauma)
         {
             Model model = CivilianModels[MathHelper.GetRandomInteger(CivilianModels.Length)];
             var ped = new Ped(model, position, heading);
-            Lsfd.Patients.Register(ped, condition);
+            Lsfd.Patients.Register(ped, condition, injury: injury);
+            return ped;
+        }
+
+        /// <summary>A walking wounded patient (green): minor injuries that don't get worse, sitting at the side.</summary>
+        public static Ped SpawnWalkingWounded(Vector3 position)
+        {
+            Model model = CivilianModels[MathHelper.GetRandomInteger(CivilianModels.Length)];
+            var ped = new Ped(model, position, MathHelper.GetRandomSingle(0f, 360f));
+            Lsfd.Patients.Register(ped, PatientCondition.Injured, minor: true);
             return ped;
         }
 
         /// <summary>Makes an existing ped a patient that the player (or AI crew) has to take care of.</summary>
-        public static void MakePatient(Ped ped, PatientCondition condition) => Lsfd.Patients.Register(ped, condition);
+        public static void MakePatient(Ped ped, PatientCondition condition, InjuryType injury = InjuryType.Trauma) =>
+            Lsfd.Patients.Register(ped, condition, injury: injury);
+
+        public static void SetInjury(Ped ped, InjuryType injury)
+        {
+            Patient patient = Lsfd.Patients.Find(ped);
+            if (patient != null)
+                patient.Injury = injury;
+        }
+
+        public static TriageTag GetTriage(Ped ped) => Lsfd.Patients.Find(ped)?.Triage ?? TriageTag.None;
+
+        /// <summary>Whether every one of these patients has a triage tag (or isn't a patient anymore).</summary>
+        public static bool AreAllTriaged(params Ped[] peds) => peds.All(p => Lsfd.Patients.Find(p) is Patient patient
+            ? patient.Triage != TriageTag.None || patient.Transport != TransportState.None
+            : true);
 
         /// <summary>
         /// Spawns a victim inside a burning building. They have to be carried out to <paramref name="safePosition"/>
@@ -42,7 +67,7 @@ namespace LSFD.API
         {
             Model model = CivilianModels[MathHelper.GetRandomInteger(CivilianModels.Length)];
             var ped = new Ped(model, position, MathHelper.GetRandomSingle(0f, 360f));
-            Lsfd.Patients.Register(ped, condition, true, safePosition);
+            Lsfd.Patients.Register(ped, condition, true, safePosition, InjuryType.SmokeInhalation);
             return ped;
         }
 

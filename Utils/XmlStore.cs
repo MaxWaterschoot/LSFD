@@ -10,14 +10,15 @@ namespace LSFD.Utils
     {
         public static readonly string DataFolder = ModFolder.Data;
 
-        public static T Load<T>(string fileName, Func<T> createDefault)
+        /// <summary>Loads <paramref name="fileName"/> from <paramref name="folder"/> (the Data folder when null), creating it from <paramref name="createDefault"/> when missing.</summary>
+        public static T Load<T>(string fileName, Func<T> createDefault, string folder = null)
         {
-            string path = Path.Combine(DataFolder, fileName);
+            string path = Path.Combine(folder ?? DataFolder, fileName);
 
             if (!File.Exists(path))
             {
                 T defaults = createDefault();
-                Save(fileName, defaults);
+                Save(fileName, defaults, folder);
                 Game.LogTrivial($"Created {path} with default values.");
                 return defaults;
             }
@@ -34,10 +35,11 @@ namespace LSFD.Utils
             }
         }
 
-        public static void Save<T>(string fileName, T value)
+        public static void Save<T>(string fileName, T value, string folder = null)
         {
-            Directory.CreateDirectory(DataFolder);
-            using (var stream = File.Create(Path.Combine(DataFolder, fileName)))
+            folder = folder ?? DataFolder;
+            Directory.CreateDirectory(folder);
+            using (var stream = File.Create(Path.Combine(folder, fileName)))
                 new XmlSerializer(typeof(T)).Serialize(stream, value);
         }
     }

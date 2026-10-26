@@ -23,6 +23,15 @@ namespace LSFD.Apparatus
         /// <summary>Where an AI unit is responding to, or null once it has arrived.</summary>
         public Vector3? ResponseDestination { get; set; }
 
+        /// <summary>Liters of foam concentrate left.</summary>
+        public float Foam { get; private set; }
+
+        /// <summary>Attack lines the AI crew has stretched from this apparatus.</summary>
+        public int CrewLinesOut { get; set; }
+
+        /// <summary>Lines still in the hose bed, counting the player's hose.</summary>
+        public int FreeAttackLines => Definition.AttackLines - CrewLinesOut - (IsTaken(EquipmentType.AttackHose) ? 1 : 0);
+
         /// <summary>Whether the pump feeds the attack hose; set from the tablet.</summary>
         public bool PumpEngaged { get; set; } = true;
 
@@ -44,6 +53,20 @@ namespace LSFD.Apparatus
             Vehicle = vehicle;
             Definition = definition;
             Water = definition.WaterCapacity;
+            Foam = definition.FoamCapacity;
+        }
+
+        /// <summary>Takes up to <paramref name="liters"/> of foam and returns how much was delivered.</summary>
+        public float DrawFoam(float liters)
+        {
+            float delivered = Math.Min(liters, Foam);
+            Foam -= delivered;
+            return delivered;
+        }
+
+        public void RefillFoam()
+        {
+            Foam = Definition.FoamCapacity;
         }
 
         public bool IsTaken(EquipmentType type) => takenEquipment.Contains(type);

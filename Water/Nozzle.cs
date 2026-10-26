@@ -1,4 +1,5 @@
 using System;
+using LSFD.API;
 
 namespace LSFD.Water
 {
@@ -29,6 +30,14 @@ namespace LSFD.Water
         public float EffectivePressure => Pressure * PumpPressure;
 
         public bool IsStraight => Pattern == NozzlePattern.Straight;
+
+        /// <summary>Water, or foam when the apparatus has foam concentrate.</summary>
+        public ExtinguishingAgent Agent { get; set; } = ExtinguishingAgent.Water;
+
+        public bool IsFoam => Agent == ExtinguishingAgent.Foam;
+
+        /// <summary>Liters of foam concentrate per second at full pressure.</summary>
+        public float FoamUse => 1.5f * EffectivePressure;
 
         /// <summary>Speed the water leaves the nozzle with, in m/s.</summary>
         public float LaunchSpeed => IsStraight ? 8f + 20f * EffectivePressure : 4f + 6f * EffectivePressure;

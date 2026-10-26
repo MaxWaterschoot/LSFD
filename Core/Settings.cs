@@ -23,6 +23,7 @@ namespace LSFD.Core
         public static Keys PressureUpKey { get; private set; } = Keys.PageUp;
         public static Keys PressureDownKey { get; private set; } = Keys.PageDown;
         public static Keys MaskKey { get; private set; } = Keys.K;
+        public static Keys FoamKey { get; private set; } = Keys.H;
         public static Keys ThermalCameraKey { get; private set; } = Keys.T;
 
         public static bool ChangeModelOnDuty { get; private set; } = true;
@@ -41,6 +42,15 @@ namespace LSFD.Core
         public static bool TurnoutGearFireProof { get; private set; } = true;
         public static bool SmokeAndHeatDamage { get; private set; } = true;
         public static bool SmokeScreenEffect { get; private set; } = true;
+
+        public static string FanModel { get; private set; } = "prop_ld_fan_01";
+        public static float FanHeading { get; private set; }
+        public static bool PatientTransport { get; private set; } = true;
+        public static bool StationApparatus { get; private set; } = true;
+        public static bool StationAlarm { get; private set; } = true;
+        public static string StretcherModel { get; private set; } = "v_med_emptybed";
+        public static float StretcherHeading { get; private set; }
+        public static float PatientOnStretcherHeight { get; private set; }
 
         public static InteriorModMode EnableAllInteriors { get; private set; } = InteriorModMode.Auto;
 
@@ -67,6 +77,7 @@ namespace LSFD.Core
             PressureUpKey = keys.ReadEnum("Keys", "PressureUpKey", PressureUpKey);
             PressureDownKey = keys.ReadEnum("Keys", "PressureDownKey", PressureDownKey);
             MaskKey = keys.ReadEnum("Keys", "MaskKey", MaskKey);
+            FoamKey = keys.ReadEnum("Keys", "FoamKey", FoamKey);
             ThermalCameraKey = keys.ReadEnum("Keys", "ThermalCameraKey", ThermalCameraKey);
 
             var ini = new InitializationFile(ModFolder.SettingsFile);
@@ -87,6 +98,15 @@ namespace LSFD.Core
             TurnoutGearFireProof = ini.ReadBoolean("Safety", "TurnoutGearFireProof", TurnoutGearFireProof);
             SmokeAndHeatDamage = ini.ReadBoolean("Safety", "SmokeAndHeatDamage", SmokeAndHeatDamage);
             SmokeScreenEffect = ini.ReadBoolean("Safety", "SmokeScreenEffect", SmokeScreenEffect);
+
+            FanModel = ini.ReadString("Ventilation", "FanModel", FanModel);
+            FanHeading = ini.ReadSingle("Ventilation", "FanHeading", FanHeading);
+            StationApparatus = ini.ReadBoolean("Station", "FirstDueEngine", StationApparatus);
+            StationAlarm = ini.ReadBoolean("Station", "StationAlarm", StationAlarm);
+            PatientTransport = ini.ReadBoolean("Medical", "PatientTransport", PatientTransport);
+            StretcherModel = ini.ReadString("Medical", "StretcherModel", StretcherModel);
+            StretcherHeading = ini.ReadSingle("Medical", "StretcherHeading", StretcherHeading);
+            PatientOnStretcherHeight = ini.ReadSingle("Medical", "PatientOnStretcherHeight", PatientOnStretcherHeight);
 
             EnableAllInteriors = ini.ReadEnum("Interiors", "EnableAllInteriors", EnableAllInteriors);
 

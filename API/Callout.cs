@@ -27,6 +27,7 @@ namespace LSFD.API
         private static readonly Color AreaColor = Color.FromArgb(150, 230, 70, 30);
 
         private readonly List<FireIncident> fireIncidents = new List<FireIncident>();
+        private readonly List<SceneAction> sceneActions = new List<SceneAction>();
         private Blip areaBlip;
         private Blip routeBlip;
 
@@ -137,6 +138,13 @@ namespace LSFD.API
             return incident;
         }
 
+        /// <summary>Adds a <see cref="SceneAction"/> that is removed when the callout ends.</summary>
+        protected SceneAction AddSceneAction(SceneAction action)
+        {
+            sceneActions.Add(action);
+            return SceneActions.Add(action);
+        }
+
         internal void RaiseAlarmLevel(int level)
         {
             if (level > AlarmLevel)
@@ -205,6 +213,9 @@ namespace LSFD.API
             foreach (FireIncident incident in fireIncidents)
                 incident.Remove();
             fireIncidents.Clear();
+            foreach (SceneAction action in sceneActions)
+                action.Remove();
+            sceneActions.Clear();
         }
 
         private void DeleteBlips()

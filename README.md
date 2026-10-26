@@ -1,4 +1,4 @@
-# LSFD
+﻿# LSFD
 
 A Los Santos Fire Department plugin for GTA V, built on RAGE Plugin Hook and RAGENativeUI.
 I'll be working on this with a friend.
@@ -14,11 +14,20 @@ I'll be working on this with a friend.
 - **Attack hose**: a physics rope from the back of the apparatus to the nozzle in your hand, straight/fog pattern and adjustable pressure, using water from the tank; it snaps loose when you walk too far
 - **Fire behavior**: fires grow and spread over time, escalate to a higher alarm (with extra engines) when you are late, report *under control*, *knockdown* and *fire out*, and rekindle from hotspots you didn't overhaul; a smoke column shows the fire from far away
 - **Smoke, heat and SCBA**: smoke blinds you and hurts without your face piece, heat near the flames hurts through your turnout gear, and your air cylinder runs out (low-air alarm, swap cylinders at an engine)
+- **Fire classes and foam**: foam for fuel fires, electrical fires where water shocks you until the power is isolated, EV battery fires that keep rekindling; the engine's deck gun cools fires too
+- **Forcible entry and ventilation**: locked doors at building fires to force with a halligan or axe, and a PPV fan that blows the smoke out (but feeds the fire)
+- **Crew hose lines**: the AI crew stretches attack lines from the engines (two per engine by default), forces doors and can man the deck gun
+- **Patient care under time pressure**: untreated patients get worse (faster in smoke and heat), victims of fires get smoke inhalation and burns, and mass casualty incidents need START triage (red, yellow, green, black) first
+- **Ambulance transport**: an AI ambulance with two paramedics gets the stretcher out, loads the stable patient, drives them to the nearest hospital and hands them over; one is called automatically when a patient is waiting
+- **Profiles and ranks**: statistics, call history and ranks from Probationary Firefighter to Fire Chief on the tablet, saved in `Profiles/`
+- **EUP outfits**: dress up with the EUP menu and save it as your duty outfit in the station locker room
+- **Station life**: the first-due engine waits in quarters with its crew; calls sound the station alarm and time your turnout
 - **Thermal imaging camera**: see through the smoke, find victims and the hotspots left to overhaul
 - **Hydrants**: run a supply line (also a rope) to a fire hydrant to refill and supply the tank
 - **Vehicle rescue**: window punch, cribbing, hydraulic spreader and cutter; extricate trapped patients from wrecks
 - **Tablet (MDT)**: Active Dispatch, Vehicle Control (pump, pressure, lights), Scene Management (crew orders) and Fire Stations
-- **Callouts**: 17 call types with a real-world priority (P1-P3), category and alarm level (see below), plus your own callouts from DLLs in `Plugins/LSFD/Callouts/` (see [docs/CALLOUTS.md](docs/CALLOUTS.md))
+- **Callouts**: 24 call types with a real-world priority (P1-P3), category and alarm level (see below), plus your own callouts from DLLs in `Plugins/LSFD/Callouts/` (see [docs/CALLOUTS.md](docs/CALLOUTS.md)) or from XML files, without programming (see [docs/XML-CALLOUTS.md](docs/XML-CALLOUTS.md))
+- **API for add-ons**: events (calls accepted and ended, fire out, patients rescued, stabilized and transported, apparatus spawned) and a versioned API, so packs built for an older LSFD keep working after an update
 - **Enable All Interiors**: detected automatically; callouts that need locked interiors only run when it is installed
 - **Add-on content**: vehicles and tool props are set in XML, so add-on models work (see [docs/ADDON-CONTENT.md](docs/ADDON-CONTENT.md))
 
@@ -38,6 +47,13 @@ fire with more people trapped, and brings one extra AI engine company per alarm.
 | Fire | Brush Fire | P2 | Vegetation fire, can go to multiple alarms |
 | Fire | Vehicle Fire | P2 | Sometimes with a burned driver |
 | Fire | Rubbish Fire | P3 | Dumpster and trash fire |
+| Fire | Electrical Fire | P1 | Live electrics: isolate the power before using water |
+| Fire | Electric Vehicle Fire | P2 | Battery fire: lots of water, keeps rekindling |
+| Fire | Automatic Fire Alarm | P2 | Mostly a faulty detector or burnt food, sometimes a real fire |
+| Fire | Smell of Smoke | P2 | Search the building; may be wiring smoldering behind a wall |
+| Hazmat | Gas Leak | P1 | Cordon, close the valve with a halligan, measure; can ignite |
+| Hazmat | Fuel Spill | P2 | Cordon and absorbent; foam if it ignites |
+| Hazmat | Carbon Monoxide Alarm | P2 | Invisible gas: SCBA, gas detector, ventilate, rescue occupants |
 | Traffic | Head-on Collision | P1 | One occupant trapped |
 | Traffic | Vehicle Rollover | P1 | Driver trapped in a car on its roof |
 | Traffic | Motorcycle Accident | P1 | Rider may be in cardiac arrest |
@@ -66,7 +82,7 @@ Plugins/
   LSFD/
     Audio/          dispatch and radio audio, sirens, alarms (Dispatch/, Radio/, Sirens/, Alarms/)
     Data/           Stations.xml, Apparatus.xml, Tools.xml, FireLocations.xml
-    Callouts/       callout DLLs
+    Callouts/       callout DLLs and XML calls (ExampleCallouts.xml)
     Profiles/       player profiles
     LSFD.ini        settings
     Keys.ini        key bindings
@@ -137,7 +153,8 @@ Apparatus/      Vehicle definitions, tanks and equipment
 Buildings/      Enable All Interiors support and structure fire locations
 Callouts/       Built-in calls, per category (written against the public API)
 Core/           Plugin loop, settings, duty, interactions and callout management
-Firefighting/   Fire incidents: growth, spread, escalation, overhaul and smoke columns
+Firefighting/   Fire incidents (growth, spread, escalation, overhaul, smoke), forcible entry and PPV ventilation
+Profiles/       Player profile, statistics, ranks and outfits (EUP)
 Safety/         SCBA, thermal imaging camera, smoke and heat exposure
 Crew/           AI firefighters, their orders and AI units driving to calls
 Medical/        Patients, CPR, treatment and carrying victims

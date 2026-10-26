@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using LSFD.API;
 using LSFD.Core;
+using LSFD.UI;
 using LSFD.Utils;
 using Rage;
 using Rage.Native;
@@ -15,8 +16,12 @@ namespace LSFD.Firefighting
     /// escalate the alarm when left alone and leave hotspots that rekindle unless overhauled. The GTA fires are
     /// only the flames you see, relit as long as a point still burns.
     /// </summary>
-    internal class FireSystem
+    internal class FireSystem : IInteractionProvider
     {
+        private const float PanelReach = 1.6f;
+        private const float PanelMarkerDistance = 30f;
+        private const float IsolateSeconds = 4f;
+
         // Points only get flames and are only placed on the floor when the player is this close, so the area is streamed in.
         private const float StreamDistance = 250f;
 
@@ -46,6 +51,8 @@ namespace LSFD.Firefighting
         private const float GasHeatRadius = 6f;
         private const float IndoorSmokeMargin = 12f;
         private const float OutdoorSmokeRadius = 5f;
+        private const float VentilatedSmokeFactor = 0.35f;
+        private const float VentilatedGrowthFactor = 1.25f;
 
         private static readonly uint ExtinguisherWeapon = Game.GetHashKey("WEAPON_FIREEXTINGUISHER");
 
@@ -71,11 +78,11 @@ namespace LSFD.Firefighting
             var incident = new FireIncident(origin, options, alarmLevel, owner);
             options = incident.Options;
 
-            incident.Points.Add(new FirePoint(origin, origin, options.InitialIntensity, false));
+            AddPoint(incident, new FirePoint(origin, origin, options.InitialIntensity, false));
             for (int i = 1; i < options.InitialPoints; i++)
             {
                 Vector3 position = origin.Around2D(MinPointSpacing, Math.Max(MinPointSpacing, Math.Min(4f, options.SpreadRadius)));
-                incident.Points.Add(new FirePoint(position, origin, options.InitialIntensity, false));
+                AddPoint(incident, new FirePoint(position, origin, options.InitialIntensity, false));
             }
 
             incident.Size = incident.PeakSize = options.InitialPoints * options.InitialIntensity;
@@ -126,7 +133,31 @@ namespace LSFD.Firefighting
                 }
 
                 UpdateSmokeColumn(t, player);
+                DrawPowerPanel(incident, player);
             }
+        }
+
+        /// <summary>Isolating the power at the panel of an electrical fire.</summary>
+        public Interaction GetInteraction()
+        {
+            Ped player = Game.LocalPlayer.Character;
+            if (player.IsInAnyVehicle(false))
+                return null;
+
+            FireIncident incident = tracked.Select(t => t.Incident).FirstOrDefault(i => i.IsEnergized && i.Options.PowerPanel.HasValue
+                && i.Options.PowerPanel.Value.DistanceTo(player.Position) <= PanelReach);
+            if (incident == null)
+                return null;
+
+            return new Interaction("isolate the ~y~power~s~ at the panel", () =>
+            {
+                incident.IsolatePower();
+                Notify.Info("Power ~g~isolated~s~. Water is safe to use now.");
+            }, IsolateSeconds, "ISOLATING")
+            {
+                AnimationDictionary = "mini@repair",
+                AnimationName = "fixing_a_player",
+            };
         }
 
         /// <summary>Removes every incident, e.g. when LSFD unloads.</summary>
@@ -198,6 +229,8 @@ namespace LSFD.Firefighting
                     float density = incident.Status == FireStatus.Knockdown
                         ? 0.2f
                         : 0.3f + incident.Size / Math.Max(1f, incident.Options.PointsPerAlarm);
+                    if (incident.IsVentilated)
+                        density *= VentilatedSmokeFactor;
                     smoke = Math.Max(smoke, Math.Min(1f, density));
                 }
                 else
@@ -214,17 +247,32 @@ namespace LSFD.Firefighting
         }
 
         /// <summary>Cools every spot <paramref name="isHit"/> returns true for. Called every frame by the hose stream.</summary>
-        public void ApplyWater(Func<Vector3, bool> isHit, float cooling)
+        public void ApplyWater(Func<Vector3, bool> isHit, float cooling, ExtinguishingAgent agent = ExtinguishingAgent.Water)
         {
-            foreach (FirePoint point in HotPoints().Where(p => p.IsPlaced && isHit(p.Position)).ToList())
-                Cool(point, cooling * WaterCoolingFactor);
+            foreach (TrackedIncident t in tracked.Where(t => !t.Incident.IsOut))
+            {
+                FireIncident incident = t.Incident;
+                foreach (FirePoint point in incident.Points.Where(p => p.IsHot && p.IsPlaced && isHit(p.Position)).ToList())
+                {
+                    if (incident.IsEnergized && agent != ExtinguishingAgent.Extinguisher)
+                        LastEnergizedHitAt = Game.GameTime;
+                    Cool(point, cooling * WaterCoolingFactor * incident.GetEffectiveness(agent));
+                }
+            }
         }
 
+        /// <summary>When water or foam last hit a fire with live electrics, so the firefighter gets a shock.</summary>
+        public uint LastEnergizedHitAt { get; private set; }
+
         /// <summary>Cools every spot within <paramref name="radius"/>, e.g. for AI firefighters with an extinguisher.</summary>
-        public void ApplyCooling(Vector3 position, float radius, float cooling)
+        public void ApplyCooling(Vector3 position, float radius, float cooling, ExtinguishingAgent agent = ExtinguishingAgent.Extinguisher)
         {
-            foreach (FirePoint point in HotPoints().Where(p => p.IsPlaced && p.Position.DistanceTo(position) <= radius).ToList())
-                Cool(point, cooling);
+            foreach (TrackedIncident t in tracked.Where(t => !t.Incident.IsOut))
+            {
+                float effectiveness = t.Incident.GetEffectiveness(agent);
+                foreach (FirePoint point in t.Incident.Points.Where(p => p.IsHot && p.IsPlaced && p.Position.DistanceTo(position) <= radius).ToList())
+                    Cool(point, cooling * effectiveness);
+            }
         }
 
         private void ApplyExtinguisher(Ped ped, float delta)
@@ -235,18 +283,15 @@ namespace LSFD.Firefighting
 
             Vector3 origin = ped.Position;
             Vector3 forward = ped.Direction;
-            foreach (FirePoint point in HotPoints().Where(p => p.IsPlaced).ToList())
+            ApplyWater(position =>
             {
-                Vector3 toPoint = point.Position - origin;
+                Vector3 toPoint = position - origin;
                 float distance = toPoint.Length();
                 if (distance > ExtinguisherReach)
-                    continue;
-
-                float angle = distance < 1f ? 0f
-                    : MathHelper.ConvertRadiansToDegrees((float)Math.Acos(Vector3.Dot(Vector3.Normalize(toPoint), forward)));
-                if (angle <= ExtinguisherConeAngle)
-                    Cool(point, ExtinguisherCoolingPerSecond * delta);
-            }
+                    return false;
+                return distance < 1f
+                    || MathHelper.ConvertRadiansToDegrees((float)Math.Acos(Vector3.Dot(Vector3.Normalize(toPoint), forward))) <= ExtinguisherConeAngle;
+            }, ExtinguisherCoolingPerSecond * delta / WaterCoolingFactor, ExtinguishingAgent.Extinguisher);
         }
 
         private IEnumerable<FirePoint> HotPoints()
@@ -294,7 +339,9 @@ namespace LSFD.Firefighting
                 case FirePointState.Smoldering:
                     if (now >= point.RekindleCheckAt)
                     {
-                        if (MathHelper.GetRandomSingle(0f, 1f) < Settings.RekindleChance)
+                        // A battery in thermal runaway keeps reigniting.
+                        float chance = incident.Options.Class == FireClass.Battery ? Math.Min(1f, Settings.RekindleChance * 2f) : Settings.RekindleChance;
+                        if (MathHelper.GetRandomSingle(0f, 1f) < chance)
                         {
                             Rekindle(point);
                             Rekindled?.Invoke(incident);
@@ -347,7 +394,7 @@ namespace LSFD.Firefighting
         {
             point.State = FirePointState.Smoldering;
             point.Intensity = 0f;
-            point.Heat = 1f;
+            point.Heat = point.HeatAfterKnockdown;
             point.RekindleCheckAt = Game.GameTime + RekindleDelay();
             RemoveFlames(point);
             NativeFunction.CallByName<uint>("STOP_FIRE_IN_RANGE", point.Position.X, point.Position.Y, point.Position.Z, 1.2f);
@@ -400,17 +447,24 @@ namespace LSFD.Firefighting
 
                 if (!streamed)
                 {
-                    incident.Points.Add(new FirePoint(candidate, from.Position, NewPointIntensity, false));
+                    AddPoint(incident, new FirePoint(candidate, from.Position, NewPointIntensity, false));
                     return;
                 }
 
                 Vector3? floor = FindFloor(candidate, incident.Options.IsIndoor);
                 if (floor.HasValue && (!incident.Options.IsIndoor || HasLineOfSight(from.Position, floor.Value)))
                 {
-                    incident.Points.Add(new FirePoint(floor.Value, from.Position, NewPointIntensity, true));
+                    AddPoint(incident, new FirePoint(floor.Value, from.Position, NewPointIntensity, true));
                     return;
                 }
             }
+        }
+
+        private static void AddPoint(FireIncident incident, FirePoint point)
+        {
+            // A battery pack holds far more heat than a pile of wood.
+            point.HeatAfterKnockdown = incident.Options.Class == FireClass.Battery ? 3f : 1f;
+            incident.Points.Add(point);
         }
 
         /// <summary>Puts a point that was made while the area wasn't streamed in on the floor, not inside a wall.</summary>
@@ -516,6 +570,19 @@ namespace LSFD.Firefighting
             Escalated?.Invoke(incident);
         }
 
+        private static void DrawPowerPanel(FireIncident incident, Vector3 player)
+        {
+            if (!incident.IsEnergized || !incident.Options.PowerPanel.HasValue)
+                return;
+
+            Vector3 panel = incident.Options.PowerPanel.Value;
+            if (panel.DistanceTo(player) > PanelMarkerDistance)
+                return;
+
+            NativeFunction.CallByName<uint>("DRAW_MARKER", 2, panel.X, panel.Y, panel.Z + 0.3f, 0f, 0f, 0f, 180f, 0f, 0f,
+                0.3f, 0.3f, 0.3f, 255, 210, 0, 200, true, true, 2, false, 0, 0, false);
+        }
+
         private static void UpdateSmokeColumn(TrackedIncident t, Vector3 player)
         {
             FireIncident incident = t.Incident;
@@ -570,7 +637,8 @@ namespace LSFD.Firefighting
 
         private static float GrowthRate(FireIncident incident)
         {
-            return BaseGrowthPerSecond * Settings.FireGrowthMultiplier * (incident.Options.IsGasFire ? GasGrowthFactor : 1f);
+            return BaseGrowthPerSecond * Settings.FireGrowthMultiplier * (incident.Options.IsGasFire ? GasGrowthFactor : 1f)
+                * (incident.IsVentilated ? VentilatedGrowthFactor : 1f);
         }
 
         private static uint SpreadDelay(FireIncident incident)

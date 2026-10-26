@@ -1,21 +1,28 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using LSFD.API;
 using LSFD.Buildings;
+using LSFD.Callouts.Xml;
+using LSFD.UI;
 using LSFD.Utils;
 using Rage;
 
 namespace LSFD.Core
 {
-    /// <summary>Keeps the available callouts, including the ones from callout DLLs in Plugins/LSFD/Callouts/.</summary>
+    /// <summary>
+    /// Keeps the available callouts: the built-in ones, the ones from callout DLLs in Plugins/LSFD/Callouts/ and
+    /// the data-driven ones from the XML files in that folder.
+    /// </summary>
     internal class CalloutRegistry
     {
         private class Entry
         {
-            public Type Type;
+            public Func<Callout> Factory;
+            public string Source;
+            public bool IsXml;
             public string Name;
             public CalloutProbability Probability;
             public bool RequiresOpenInteriors;
@@ -47,21 +54,81 @@ namespace LSFD.Core
                 return false;
             }
 
-            entries.Add(new Entry { Type = type, Name = info.Name, Probability = info.Probability, RequiresOpenInteriors = info.RequiresOpenInteriors,
+            Add(new Entry { Factory = () => (Callout)Activator.CreateInstance(type), Source = $"{type.FullName} ({type.Assembly.GetName().Name})",
+                Name = info.Name, Probability = info.Probability, RequiresOpenInteriors = info.RequiresOpenInteriors,
                 Category = info.Category, Priority = info.Priority });
-            Game.LogTrivial($"LSFD: registered callout '{info.Name}' ({type.Assembly.GetName().Name}).");
+            return true;
+        }
+
+        /// <summary>Registers a callout defined in an XML file.</summary>
+        public bool Register(XmlCalloutDefinition definition, string file)
+        {
+            string problem =
+                string.IsNullOrWhiteSpace(definition.Name) ? "it has no Name" :
+                entries.Any(e => e.Name.Equals(definition.Name, StringComparison.OrdinalIgnoreCase)) ? $"a callout named '{definition.Name}' already exists" :
+                definition.Validate();
+
+            if (problem != null)
+            {
+                Game.LogTrivial($"LSFD: could not register callout '{definition.Name}' from {file}: {problem}.");
+                return false;
+            }
+
+            Add(new Entry { Factory = () => new XmlCallout(definition), Source = file, IsXml = true, Name = definition.Name, Probability = definition.Probability,
+                RequiresOpenInteriors = false, Category = definition.Category, Priority = definition.Priority });
             return true;
         }
 
         public void RegisterFromAssembly(Assembly assembly)
         {
-            foreach (Type type in GetLoadableTypes(assembly).Where(t => !t.IsAbstract))
+            List<Type> types = GetLoadableTypes(assembly).Where(t => !t.IsAbstract).ToList();
+
+            // Packs first: when the DLL needs a different LSFD, none of it is loaded, rather than half of it crashing later.
+            var assemblyPacks = new List<CalloutPack>();
+            foreach (Type type in types.Where(t => typeof(CalloutPack).IsAssignableFrom(t)))
             {
-                if (type.GetCustomAttribute<CalloutInfoAttribute>() != null)
-                    Register(type);
-                else if (typeof(CalloutPack).IsAssignableFrom(type))
-                    StartPack(type);
+                CalloutPack pack = CreatePack(type);
+                if (pack == null)
+                    continue;
+                if (!IsSupported(pack, assembly))
+                    return;
+                assemblyPacks.Add(pack);
             }
+
+            foreach (Type type in types.Where(t => t.GetCustomAttribute<CalloutInfoAttribute>() != null))
+                Register(type);
+
+            foreach (CalloutPack pack in assemblyPacks)
+                StartPack(pack);
+        }
+
+        /// <summary>Loads the callouts from the XML files in Plugins/LSFD/Callouts/; returns how many were registered.</summary>
+        public int LoadXmlCallouts()
+        {
+            int registered = 0;
+            if (!Directory.Exists(ModFolder.Callouts))
+                return registered;
+
+            foreach (string path in Directory.GetFiles(ModFolder.Callouts, "*.xml"))
+            {
+                string file = Path.GetFileName(path);
+                XmlCalloutFile callouts = XmlCalloutFile.Load(path);
+                if (callouts == null)
+                {
+                    Notify.Warning($"Could not read the callouts in ~y~{file}~s~, see RagePluginHook.log.");
+                    continue;
+                }
+
+                registered += callouts.Callouts.Count(definition => Register(definition, file));
+            }
+            return registered;
+        }
+
+        /// <summary>Forgets the XML callouts and loads the files again, e.g. after editing them.</summary>
+        public int ReloadXmlCallouts()
+        {
+            entries.RemoveAll(e => e.IsXml);
+            return LoadXmlCallouts();
         }
 
         /// <summary>Loads every DLL in Plugins/LSFD/Callouts/ and registers the callouts in it.</summary>
@@ -88,7 +155,7 @@ namespace LSFD.Core
 
         public Callout CreateRandom()
         {
-            var available = entries.Where(e => e.IsAvailable).ToList();
+            var available = entries.Where(e => e.IsAvailable && e.Probability != CalloutProbability.Never).ToList();
             int total = available.Sum(e => (int)e.Probability);
             if (total == 0)
                 return null;
@@ -131,25 +198,81 @@ namespace LSFD.Core
             AppDomain.CurrentDomain.AssemblyResolve -= ResolveLsfd;
         }
 
-        private static Callout Create(Entry entry)
+        private void Add(Entry entry)
         {
-            var callout = (Callout)Activator.CreateInstance(entry.Type);
-            callout.Initialize(entry.Name, entry.Category, entry.Priority);
-            return callout;
+            entries.Add(entry);
+            Game.LogTrivial($"LSFD: registered callout '{entry.Name}' ({entry.Source}).");
         }
 
-        private void StartPack(Type type)
+        private Callout Create(Entry entry)
         {
             try
             {
-                var pack = (CalloutPack)Activator.CreateInstance(type);
-                pack.Initialize();
-                packs.Add(pack);
-                Game.LogTrivial($"LSFD: started callout pack {type.FullName}.");
+                Callout callout = entry.Factory();
+                callout.Initialize(entry.Name, entry.Category, entry.Priority);
+                return callout;
             }
             catch (Exception e)
             {
-                Game.LogTrivial($"LSFD: could not start callout pack {type.FullName}: {e}");
+                // Usually a DLL built against an LSFD API that has changed (MissingMethodException, TypeLoadException):
+                // take it out of the rotation instead of failing every time it is picked.
+                entries.Remove(entry);
+                Game.LogTrivial($"LSFD: callout '{entry.Name}' ({entry.Source}) could not be created and was disabled: {e}");
+                return null;
+            }
+        }
+
+        private static CalloutPack CreatePack(Type type)
+        {
+            try
+            {
+                return (CalloutPack)Activator.CreateInstance(type);
+            }
+            catch (Exception e)
+            {
+                Game.LogTrivial($"LSFD: could not create callout pack {type.FullName}: {e}");
+                return null;
+            }
+        }
+
+        private static bool IsSupported(CalloutPack pack, Assembly assembly)
+        {
+            int version;
+            try
+            {
+                version = pack.ApiVersion;
+            }
+            catch (Exception e)
+            {
+                Game.LogTrivial($"LSFD: could not read the API version of {pack.GetType().FullName}: {e.Message}");
+                return false;
+            }
+
+            string name = assembly.GetName().Name;
+            string problem =
+                version > Functions.InstalledApiVersion ? $"needs a newer LSFD (API version {version}, this LSFD has {Functions.InstalledApiVersion}). Update LSFD." :
+                version < Functions.OldestSupportedApiVersion ? $"was made for API version {version}, which this LSFD no longer supports. Ask its author for an update." :
+                null;
+
+            if (problem == null)
+                return true;
+
+            Game.LogTrivial($"LSFD: callout pack {name} was not loaded: it {problem}");
+            Notify.Warning($"Callout pack ~y~{name}~s~ was not loaded: it {problem}");
+            return false;
+        }
+
+        private void StartPack(CalloutPack pack)
+        {
+            try
+            {
+                pack.Initialize();
+                packs.Add(pack);
+                Game.LogTrivial($"LSFD: started callout pack {pack.GetType().FullName} (API version {pack.ApiVersion}).");
+            }
+            catch (Exception e)
+            {
+                Game.LogTrivial($"LSFD: could not start callout pack {pack.GetType().FullName}: {e}");
             }
         }
 

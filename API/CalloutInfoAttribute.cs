@@ -20,6 +20,8 @@ namespace LSFD.API
         Traffic,
         Medical,
         Rescue,
+        /// <summary>Gas leaks, fuel spills and other hazardous materials.</summary>
+        Hazmat,
     }
 
     /// <summary>Response priority, as dispatch centers use it.</summary>

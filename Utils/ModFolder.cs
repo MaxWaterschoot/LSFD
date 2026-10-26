@@ -10,7 +10,7 @@ namespace LSFD.Utils
     /// Plugins/LSFD/
     ///   Audio/       dispatch and radio audio, sirens, alarms
     ///   Data/        Stations.xml, Apparatus.xml, Tools.xml, FireLocations.xml
-    ///   Callouts/    callout DLLs
+    ///   Callouts/    callout DLLs and XML callouts
     ///   Profiles/    player profiles
     ///   LSFD.ini
     ///   Keys.ini

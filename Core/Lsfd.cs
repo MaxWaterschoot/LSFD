@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using LSFD.API;
 using LSFD.Apparatus;
@@ -6,6 +6,7 @@ using LSFD.Buildings;
 using LSFD.Crew;
 using LSFD.Firefighting;
 using LSFD.Medical;
+using LSFD.Profiles;
 using LSFD.Safety;
 using LSFD.Stations;
 using LSFD.UI;
@@ -18,7 +19,11 @@ namespace LSFD.Core
     /// <summary>Creates all systems, wires them together and runs them every tick.</summary>
     internal static class Lsfd
     {
+        public static ProfileManager Profiles { get; private set; }
         public static FireSystem Fire { get; private set; }
+        public static ForcibleEntry Entry { get; private set; }
+        public static Ventilation Ventilation { get; private set; }
+        public static DeckGun DeckGun { get; private set; }
         public static BreathingApparatus Scba { get; private set; }
         public static ThermalCamera ThermalCamera { get; private set; }
         public static HazardManager Hazards { get; private set; }
@@ -31,13 +36,16 @@ namespace LSFD.Core
         public static ToolManager Tools { get; private set; }
         public static ExtricationManager Extrication { get; private set; }
         public static PatientManager Patients { get; private set; }
+        public static AmbulanceTransport Transport { get; private set; }
         public static FireLocationRepository FireLocations { get; private set; }
         public static CalloutRegistry Registry { get; private set; }
         public static CalloutManager Callouts { get; private set; }
         public static InteractionRunner Interactions { get; private set; }
+        public static SceneActionManager SceneActions { get; private set; }
         public static MenuManager Menus { get; private set; }
         public static Tablet Tablet { get; private set; }
         public static Hud Hud { get; private set; }
+        public static StationLife StationLife { get; private set; }
 
         // AI units sent to the current call; they go back to quarters when it ends.
         private static readonly List<FireApparatus> sceneUnits = new List<FireApparatus>();
@@ -45,19 +53,25 @@ namespace LSFD.Core
         public static void Initialize()
         {
             Settings.Load();
+            Profiles = new ProfileManager();
 
             Stations = new FireStationManager();
             Stations.LoadFireStations();
             Fire = new FireSystem();
+            Entry = new ForcibleEntry();
+            Ventilation = new Ventilation(Fire);
             Scba = new BreathingApparatus();
-            Duty = new DutyManager(Scba);
+            Duty = new DutyManager(Scba, Profiles);
             Apparatus = new ApparatusManager();
             Hose = new HoseManager(Fire);
+            DeckGun = new DeckGun(Fire, Apparatus);
             Hydrants = new HydrantManager(Apparatus);
             Tools = new ToolManager();
             Extrication = new ExtricationManager(Tools, Apparatus);
-            Patients = new PatientManager(Tools);
-            Crew = new CrewManager(Patients, Extrication, Fire);
+            Patients = new PatientManager(Tools, Fire);
+            Crew = new CrewManager(Patients, Extrication, Fire, Entry, Apparatus);
+            Transport = new AmbulanceTransport(Crew, Apparatus, Patients, ReturnApparatus, RequestBackup);
+            Patients.TransportRequired = Settings.PatientTransport && Apparatus.FindDefinition(ApparatusType.Ambulance) != null;
             ThermalCamera = new ThermalCamera(Fire, Patients);
             Hazards = new HazardManager(Fire, Scba, ThermalCamera, Hose);
             FireLocations = new FireLocationRepository();
@@ -65,13 +79,15 @@ namespace LSFD.Core
             Registry = new CalloutRegistry();
             Registry.RegisterFromAssembly(typeof(Lsfd).Assembly);
             Registry.LoadCalloutAssemblies();
+            Registry.LoadXmlCallouts();
             Callouts = new CalloutManager(Registry, Duty);
 
             // In order of priority: the first one with something to offer gets the interact key.
-            Interactions = new InteractionRunner(Patients, Hydrants, Extrication, Apparatus, Stations);
+            SceneActions = new SceneActionManager(Tools);
+            Interactions = new InteractionRunner(Patients, SceneActions, Fire, Entry, Ventilation, Hydrants, Extrication, Apparatus, Stations);
 
-            Menus = new MenuManager(Duty, Apparatus, Hose, Hydrants, Tools, Scba, ThermalCamera);
-            Tablet = new Tablet(Duty, Callouts, Apparatus, Crew, Stations, Patients, Fire, ReturnApparatus, RequestBackup);
+            Menus = new MenuManager(Duty, Apparatus, Hose, Hydrants, Tools, Scba, ThermalCamera, Ventilation, Profiles);
+            Tablet = new Tablet(Duty, Callouts, Apparatus, Crew, Stations, Patients, Fire, Profiles, ReturnApparatus, RequestBackup);
             Hud = new Hud();
 
             Stations.StationMenuRequested += Menus.OpenStationMenu;
@@ -82,9 +98,25 @@ namespace LSFD.Core
             Callouts.CalloutEnded += OnCalloutEnded;
             Duty.DutyStateChanged += OnDutyStateChanged;
             Extrication.PatientExtricated += ped => Patients.Register(ped, PatientCondition.Injured);
+            StationLife = new StationLife(Apparatus, Crew, Duty);
+            Duty.DutyStateChanged += StationLife.OnDutyStateChanged;
+            Callouts.CalloutAccepted += StationLife.OnCalloutAccepted;
+            Callouts.CalloutAccepted += Profiles.OnCalloutAccepted;
+            Callouts.CalloutEnded += Profiles.OnCalloutEnded;
+            Patients.Milestone += OnPatientMilestone;
             Fire.Escalated += OnFireEscalated;
             Fire.StatusChanged += OnFireStatusChanged;
             Fire.Rekindled += OnFireRekindled;
+
+            // The public events for add-ons.
+            Callouts.CalloutAccepted += Events.RaiseCalloutAccepted;
+            Callouts.CalloutEnded += Events.RaiseCalloutEnded;
+            Apparatus.Spawned += unit => Events.RaiseApparatusSpawned(unit.Vehicle, unit.Definition.Type, unit.IsAiUnit);
+            Fire.StatusChanged += (incident, status) =>
+            {
+                if (status == FireStatus.Out)
+                    Events.RaiseFireExtinguished(incident);
+            };
         }
 
         public static void Tick()
@@ -98,16 +130,22 @@ namespace LSFD.Core
             Stations.Process(canOpenMenu: !uiOpen);
             Apparatus.Process();
             Crew.Process();
+            Transport.Process(Duty.IsOnDuty);
             Hose.Process();
+            DeckGun.Process();
             Fire.Process(ExtinguisherUsers());
+            Ventilation.Process();
             Hydrants.Process();
             Tools.Process();
             Extrication.Process();
             Patients.Process();
             Callouts.Process();
+            SceneActions.Process();
             Scba.Process(Duty.IsOnDuty);
             ThermalCamera.Process(Duty.IsOnDuty);
             Hazards.Process(Duty.IsOnDuty, uiOpen);
+            Profiles.Process(Duty.IsOnDuty);
+            StationLife.Process();
 
             if (!uiOpen)
                 Interactions.Process();
@@ -120,12 +158,16 @@ namespace LSFD.Core
             Menus?.CloseAll();
             Tablet?.Close();
             Callouts?.EndCurrent(null);
+            Transport?.Shutdown();
             Duty?.GoOffDuty();
             ReturnAllApparatus();
             Fire?.RemoveAll();
+            Entry?.ReleaseAll();
+            Ventilation?.Stow();
             ThermalCamera?.Stow();
             Hazards?.Reset();
             Stations?.CleanupFireStations();
+            Profiles?.Save();
             Registry?.Shutdown();
         }
 
@@ -141,6 +183,8 @@ namespace LSFD.Core
                 Tools.StowTool();
             if (ThermalCamera.Source == apparatus)
                 ThermalCamera.Stow();
+            if (Ventilation.Source == apparatus)
+                Ventilation.Stow();
 
             Crew.Dismiss(apparatus);
             Apparatus.Dismiss(apparatus);
@@ -209,6 +253,30 @@ namespace LSFD.Core
                     break;
                 case FireStatus.Out:
                     Notify.Dispatch("~g~Fire out", "All hotspots are overhauled, the fire is out.");
+                    Profiles.OnFireOut();
+                    break;
+            }
+        }
+
+        private static void OnPatientMilestone(PatientMilestone milestone, Ped patient)
+        {
+            switch (milestone)
+            {
+                case PatientMilestone.Rescued:
+                    Profiles.OnPersonRescued();
+                    Events.RaisePatientRescued(patient);
+                    break;
+                case PatientMilestone.Treated:
+                    Profiles.OnPatientTreated();
+                    Events.RaisePatientStabilized(patient);
+                    break;
+                case PatientMilestone.Resuscitated:
+                    Profiles.OnPatientResuscitated();
+                    Events.RaisePatientStabilized(patient);
+                    break;
+                case PatientMilestone.Transported:
+                    Profiles.OnPatientTransported();
+                    Events.RaisePatientTransported(patient);
                     break;
             }
         }
@@ -222,8 +290,16 @@ namespace LSFD.Core
 
         private static void OnCalloutEnded(Callout callout)
         {
+            Entry.ReleaseAll();
+
             foreach (FireApparatus unit in sceneUnits.Where(u => Apparatus.All.Contains(u)).ToList())
-                ReturnApparatus(unit);
+            {
+                // An ambulance on its way to hospital finishes the transport first.
+                if (Transport.IsBusy(unit))
+                    Transport.ReturnWhenDone(unit);
+                else
+                    ReturnApparatus(unit);
+            }
             sceneUnits.Clear();
         }
 
@@ -247,6 +323,7 @@ namespace LSFD.Core
             else
             {
                 Interactions.Cancel();
+                Transport.Shutdown();
                 ReturnAllApparatus();
                 ThermalCamera.Stow();
                 Scba.SetMask(false);
