@@ -1,16 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="build\RagePluginHook.props" />
+
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <AssemblyName>LSFD</AssemblyName>
+    <RootNamespace>LSFD</RootNamespace>
+    <Version>0.3.0</Version>
+    <!-- Ships LSFD.xml so callout authors get IntelliSense for the LSFD.API namespace. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="RAGENativeUI" Version="1.9.2" />
-    <PackageReference Include="RagePluginHook" Version="1.98.0" />
-    <PackageReference Include="ScriptHookVDotNet3" Version="3.6.0" />
+    <Compile Remove="Examples\**" />
+    <None Remove="Examples\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Installed in the GTA V folder by the user, so don't copy it to the output. -->
+    <PackageReference Include="RAGENativeUI" Version="1.9.3" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LSFD.ini" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Outside this repository, reference RagePluginHookSDK.dll and LSFD.dll directly instead. -->
+  <Import Project="..\..\build\RagePluginHook.props" />
+
+  <PropertyGroup>
+    <AssemblyName>ExampleCallouts</AssemblyName>
+    <RootNamespace>ExampleCallouts</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- LSFD.dll is already installed in GTA V/Plugins, so it is not copied. -->
+    <ProjectReference Include="..\..\LSFD.csproj" Private="false" />
+  </ItemGroup>
+
+</Project>

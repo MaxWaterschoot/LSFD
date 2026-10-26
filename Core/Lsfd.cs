@@ -1,0 +1,184 @@
+using System.Collections.Generic;
+using System.Linq;
+using LSFD.API;
+using LSFD.Apparatus;
+using LSFD.Buildings;
+using LSFD.Crew;
+using LSFD.Medical;
+using LSFD.Stations;
+using LSFD.UI;
+using LSFD.VehicleRescue;
+using LSFD.Water;
+using Rage;
+
+namespace LSFD.Core
+{
+    /// <summary>Creates all systems, wires them together and runs them every tick.</summary>
+    internal static class Lsfd
+    {
+        public static FireStationManager Stations { get; private set; }
+        public static DutyManager Duty { get; private set; }
+        public static ApparatusManager Apparatus { get; private set; }
+        public static CrewManager Crew { get; private set; }
+        public static HoseManager Hose { get; private set; }
+        public static HydrantManager Hydrants { get; private set; }
+        public static ToolManager Tools { get; private set; }
+        public static ExtricationManager Extrication { get; private set; }
+        public static PatientManager Patients { get; private set; }
+        public static FireLocationRepository FireLocations { get; private set; }
+        public static CalloutRegistry Registry { get; private set; }
+        public static CalloutManager Callouts { get; private set; }
+        public static InteractionRunner Interactions { get; private set; }
+        public static MenuManager Menus { get; private set; }
+        public static Tablet Tablet { get; private set; }
+        public static Hud Hud { get; private set; }
+
+        // AI units sent to the current call; they go back to quarters when it ends.
+        private static readonly List<FireApparatus> sceneUnits = new List<FireApparatus>();
+
+        public static void Initialize()
+        {
+            Settings.Load();
+
+            Stations = new FireStationManager();
+            Stations.LoadFireStations();
+            Duty = new DutyManager();
+            Apparatus = new ApparatusManager();
+            Hose = new HoseManager();
+            Hydrants = new HydrantManager(Apparatus);
+            Tools = new ToolManager();
+            Extrication = new ExtricationManager(Tools, Apparatus);
+            Patients = new PatientManager(Tools);
+            Crew = new CrewManager(Patients, Extrication);
+            FireLocations = new FireLocationRepository();
+
+            Registry = new CalloutRegistry();
+            Registry.RegisterFromAssembly(typeof(Lsfd).Assembly);
+            Registry.LoadCalloutAssemblies();
+            Callouts = new CalloutManager(Registry, Duty);
+
+            // In order of priority: the first one with something to offer gets the interact key.
+            Interactions = new InteractionRunner(Patients, Hydrants, Extrication, Apparatus, Stations);
+
+            Menus = new MenuManager(Duty, Apparatus, Hose, Hydrants, Tools);
+            Tablet = new Tablet(Duty, Callouts, Apparatus, Crew, Stations, Patients, ReturnApparatus, RequestBackup);
+            Hud = new Hud();
+
+            Stations.StationMenuRequested += Menus.OpenStationMenu;
+            Apparatus.CompartmentMenuRequested += Menus.OpenCompartmentMenu;
+            Apparatus.Spawned += Crew.SpawnCrew;
+            Callouts.CalloutCompleted += Hud.ShowCalloutCompleted;
+            Callouts.CalloutAccepted += OnCalloutAccepted;
+            Callouts.CalloutEnded += OnCalloutEnded;
+            Duty.DutyStateChanged += OnDutyStateChanged;
+            Extrication.PatientExtricated += ped => Patients.Register(ped, PatientCondition.Injured);
+        }
+
+        public static void Tick()
+        {
+            bool uiOpen = Menus.IsAnyMenuOpen || Tablet.IsOpen;
+
+            Menus.Process();
+            if (!Menus.IsAnyMenuOpen)
+                Tablet.Process();
+
+            Stations.Process(canOpenMenu: !uiOpen);
+            Apparatus.Process();
+            Crew.Process();
+            Hose.Process();
+            Hydrants.Process();
+            Tools.Process();
+            Extrication.Process();
+            Patients.Process();
+            Callouts.Process();
+
+            if (!uiOpen)
+                Interactions.Process();
+
+            Hud.Process(Hose, Hydrants, Apparatus, Tools, Interactions);
+        }
+
+        public static void Shutdown()
+        {
+            Menus?.CloseAll();
+            Tablet?.Close();
+            Callouts?.EndCurrent(null);
+            Duty?.GoOffDuty();
+            ReturnAllApparatus();
+            Stations?.CleanupFireStations();
+            Registry?.Shutdown();
+        }
+
+        /// <summary>Sends an apparatus back to quarters, stowing everything that is connected to it.</summary>
+        public static void ReturnApparatus(FireApparatus apparatus)
+        {
+            if (Hose.Source == apparatus)
+                Hose.StowHose();
+            if (Hydrants.CarryingFrom == apparatus)
+                Hydrants.ReturnSupplyLine();
+            Hydrants.Disconnect(apparatus, false);
+            if (Tools.HeldFrom == apparatus)
+                Tools.StowTool();
+
+            Crew.Dismiss(apparatus);
+            Apparatus.Dismiss(apparatus);
+        }
+
+        /// <summary>Sends an AI unit of the given type from the nearest station to <paramref name="destination"/>.</summary>
+        public static bool RequestBackup(ApparatusType type, Vector3 destination)
+        {
+            ApparatusDefinition definition = Apparatus.FindDefinition(type);
+            FireStation station = Stations.GetNearestStation(destination);
+            if (definition == null || station == null)
+            {
+                Notify.Dispatch("~o~No units", $"There is no {type} available in Apparatus.xml.");
+                return false;
+            }
+
+            FireApparatus unit = Apparatus.SpawnResponding(definition, station, destination);
+            if (unit != null)
+                sceneUnits.Add(unit);
+            return unit != null;
+        }
+
+        // Like real dispatch: every alarm above the first brings another engine company, and calls with
+        // patients get an ambulance.
+        private static void OnCalloutAccepted(Callout callout)
+        {
+            Vector3 scene = callout.StagingPosition;
+
+            for (int i = 1; i < callout.AlarmLevel; i++)
+                RequestBackup(ApparatusType.Engine, scene);
+
+            if (callout.Category == CalloutCategory.Medical || callout.Category == CalloutCategory.Traffic)
+                RequestBackup(ApparatusType.Ambulance, scene);
+        }
+
+        private static void OnCalloutEnded(Callout callout)
+        {
+            foreach (FireApparatus unit in sceneUnits.Where(u => Apparatus.All.Contains(u)).ToList())
+                ReturnApparatus(unit);
+            sceneUnits.Clear();
+        }
+
+        private static void ReturnAllApparatus()
+        {
+            if (Apparatus == null)
+                return;
+
+            foreach (FireApparatus apparatus in Apparatus.All.ToList())
+                ReturnApparatus(apparatus);
+        }
+
+        private static void OnDutyStateChanged(bool onDuty)
+        {
+            Hud.ShowDutyChanged(onDuty);
+
+            if (!onDuty)
+            {
+                Interactions.Cancel();
+                ReturnAllApparatus();
+            }
+        }
+    }
+}

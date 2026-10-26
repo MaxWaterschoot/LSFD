@@ -1,0 +1,36 @@
+<Project>
+
+  <!--
+    Shared RAGE Plugin Hook setup for LSFD and callout projects that build against it.
+    Prefers the official SDK from the RAGE Plugin Hook download (lib/RagePluginHookSDK.dll), falls back to NuGet.
+  -->
+
+  <PropertyGroup>
+    <!-- RAGE Plugin Hook only loads .NET Framework assemblies, and GTA V is 64-bit only. -->
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+
+    <RphSdkPath>$(MSBuildThisFileDirectory)..\lib\RagePluginHookSDK.dll</RphSdkPath>
+    <UseLocalRphSdk Condition="Exists('$(RphSdkPath)')">true</UseLocalRphSdk>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(UseLocalRphSdk)' == 'true'">
+    <Reference Include="RagePluginHook">
+      <HintPath>$(RphSdkPath)</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- Keeps RAGENativeUI from pulling in the NuGet copy of the SDK next to the local one. -->
+    <PackageReference Include="RagePluginHook" Version="1.124.0" ExcludeAssets="all" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseLocalRphSdk)' != 'true'">
+    <PackageReference Include="RagePluginHook" Version="1.124.0" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Lets the project build without the .NET Framework targeting pack installed (e.g. on macOS/CI). -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
