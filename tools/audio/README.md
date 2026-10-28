@@ -18,6 +18,8 @@ A call gets its own announcement when you add a row for it to the CSV and genera
 | --- | --- |
 | `dispatch_fragments.csv` | Every dispatch voice fragment: `category`, `key` (the value in code), `file` (under `Plugins/LSFD/Audio/Dispatch/`) and the `text` that is spoken |
 | `generate_voices.py` | Generates the voice fragments with [Piper TTS](https://github.com/rhasspy/piper) and adds the radio effect |
+| `sfx_prompts.csv` | Every sound effect: `file` (under `Plugins/LSFD/Audio/`), `duration`, `loop` and the English `prompt` |
+| `generate_sfx.py` | Generates the sound effects with the ElevenLabs Sound Effects API |
 | `generate_tones.py` | Generates the synthetic sounds: dispatch tones, radio clicks/static, alarms and the CPR metronome |
 
 ## Voices
@@ -34,6 +36,29 @@ python generate_voices.py --voice path/to/en-us-ryan-high.onnx --csv dispatch_fr
 
 Only missing files are generated: add rows to the CSV and run it again, or use `--force` to redo everything
 (e.g. with another voice or `--speed`). The clean TTS output goes to `raw/` (not in Git).
+
+### With ElevenLabs
+
+Needs an API key (elevenlabs.io → Developers → API keys) and the voice ID of the voice you pick. No pip packages.
+
+```
+export ELEVENLABS_API_KEY=...          # Windows: set ELEVENLABS_API_KEY=...
+python generate_voices.py --engine elevenlabs --voice <voice id> --csv dispatch_fragments.csv --out ../../Plugins/LSFD/Audio/Dispatch --force
+```
+
+Every fragment gets the same voice settings and seed, so they sound like one dispatcher. Generate them clean (no
+effects in ElevenLabs): the script adds the same radio filter as for Piper. `--only Units/ENGINE.wav` redoes one file.
+Try a few first with `--only` before spending credits on all of them.
+
+## Sound effects
+
+```
+python generate_sfx.py --csv sfx_prompts.csv --out ../../Plugins/LSFD/Audio
+```
+
+Rows with `loop` 1 are generated to loop seamlessly. Files that already exist (like the synthetic alarms) are skipped;
+add `--force --only Alarms/PASS_ALARM.wav` to replace one. `--takes 3` keeps three versions in `raw/SFX/` to pick the
+best by ear. Check the ElevenLabs terms for your plan before releasing the generated sounds.
 
 ## Synthetic sounds
 
